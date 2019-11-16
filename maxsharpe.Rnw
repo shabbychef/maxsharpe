@@ -372,7 +372,11 @@ RUNTIME_PARAM <- max(1,as.numeric(Sys.getenv('RUNTIME_PARAM')),na.rm=TRUE)
 
 %\title{Conditional estimation on the \txtSNR of the asset with maximum \txtSR}
 \title{Conditional inference on the asset with maximum Sharpe ratio}
-\author{Steven E. Pav \thanks{\email{steven@gilgamath.com}}}
+\author{Steven E. Pav \thanks{\email{steven@gilgamath.com}.
+The source code to build this document is available at
+\href{http://www.github.com/shabbychef/maxsharpe}{\normalfont\texttt{www.github.com/shabbychef/maxsharpe}}.
+This revision was built from commit \texttt{\gitHash} of that repo.
+}}
 %The code to build this document is available at
 %\href{http://www.github.com/shabbychef/qbound}{\normalfont\texttt{www.github.com/shabbychef/qbound}}.
 %\date{\today, \currenttime}

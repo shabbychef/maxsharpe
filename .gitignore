@@ -1,0 +1,7 @@
+maxsharpe.pdf
+maxsharpe.tex
+cache/
+figure/
+maxsharpe.R
+output/
+*.fls

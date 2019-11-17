@@ -61,6 +61,15 @@ ASPELL_FLAGS =
 ARXIV_VERSION  			 = v5
 ARXIV_TAG 					 = $(PROJECT)_$(ARXIV_VERSION)
 
+# for running in docker this gets passed to the knit
+# and controls speed of build. larger is faster.
+RUNTIME_PARAM 		?= 1
+
+export RUNTIME_PARAM:=$(RUNTIME_PARAM)
+
+fooz :
+	env
+
 ############## DEFAULT ##############
 
 default : all

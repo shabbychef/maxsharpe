@@ -1220,11 +1220,11 @@ ks_sim <- function(rho,nday,nlatf,max_zeta,estimate_parms=FALSE,ret_dist='gaussi
 
 \subsubsection{Gaussian returns, infeasible estimator}
 
-<<'motherload_sims_run',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs')>>=
+<<'motherload_sims_run',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs','runtime')>>=
 suppressMessages({
   library(doFuture)
 })
-nsim <- 100000
+nsim <- ceiling(1e5/max(1,RUNTIME_PARAM))
 ope <- 252
 nyr <- 5
 nday <- round(nyr*ope)
@@ -1401,7 +1401,7 @@ print(ph)
 
 % many sims with K-S stat?%FOLDUP
 
-<<'many_sims',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs')>>=
+<<'many_sims',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs','runtime')>>=
 # 5b3a9d41-2751-45b6-b6af-a4e43db1f298 
 
 suppressMessages({
@@ -1413,7 +1413,7 @@ params <- tidyr::crossing(tibble::tribble(~rho,0,0.4,0.8),
                           tibble::tribble(~nlatf,50,100,200),
                           tibble::tribble(~max_zeta,0.1))
 
-ks_nsim <- 50000
+ks_nsim <- ceiling(5e4/max(1,RUNTIME_PARAM))
 
 registerDoFuture()
 plan(multiprocess)
@@ -1481,9 +1481,9 @@ resu %>%
 
 \subsubsection{$\tstat{}$ returns, feasible estimator}
 %FOLDUP
-<<'causal_tfive_sims',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs')>>=
+<<'causal_tfive_sims',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs','runtime')>>=
 # 981f1d81-9dba-42e4-82c5-eac0baf80699 
-nsim <- 1e4
+nsim <- ceiling(1e4/max(1,RUNTIME_PARAM))
 registerDoFuture()
 plan(multiprocess)
 set.seed(4321)
@@ -1607,7 +1607,7 @@ mhtsim <- function(alpha=0.05,...) {
 #mhtsim(nday=252*4,nlatf=200,one_zeta=0,nsim=200,rho=0.999,mutype='equal')
 @
 
-<<'sims_vs_mht',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('mht_test_functions')>>=
+<<'sims_vs_mht',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('mht_test_functions','runtime')>>=
 suppressMessages({
   library(tidyr)
 })
@@ -1616,7 +1616,7 @@ suppressMessages({
 params <- data_frame(one_zeta=seq(0,0.15,length.out=13)) %>%
   tidyr::crossing(data_frame(mutype=c('onegood','halfgood','equal'))) 
 
-mht_nsim <- 10000
+mht_nsim <- ceiling(1e4/max(1,RUNTIME_PARAM))
 mht_nday <- 4*252
 mht_nlatf <- 100
 
@@ -1793,7 +1793,7 @@ mhtsim <- function(alpha=0.05,...) {
 params <- data_frame(rho=seq(0,0.9,by=0.1)) 
 
 options(future.globals.maxSize=1e9)
-mht_null_nsim <- 5000
+mht_null_nsim <- ceiling(5e3/max(1,RUNTIME_PARAM))
 mht_nday <- 4*252
 mht_nlatf <- 100
 

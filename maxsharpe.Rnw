@@ -116,19 +116,7 @@ compile.time <- Sys.time()
 # from the environment
 
 # only recompute if FORCE_RECOMPUTE=True w/out case match.
-FORCE_RECOMPUTE <- 
-	(toupper(Sys.getenv('FORCE_RECOMPUTE',unset='False')) == "TRUE")
-
-
-library(quantmod)
-options("getSymbols.warning4.0"=FALSE)
-
-library(SharpeR)
-
-gen_norm <- rnorm
-lseq <- function(from,to,length.out) { 
-	exp(seq(log(from),log(to),length.out = length.out))
-}
+FORCE_RECOMPUTE <- (toupper(Sys.getenv('FORCE_RECOMPUTE',unset='False')) == "TRUE")
 @
 %UNFOLD
 
@@ -143,6 +131,39 @@ lseq <- function(from,to,length.out) {
 # or 1 if missing.
 
 RUNTIME_PARAM <- max(1,as.numeric(Sys.getenv('RUNTIME_PARAM')),na.rm=TRUE)
+@
+<<'plot_funcs',include=FALSE>>=
+suppressMessages({
+	library(dplyr)
+  library(ggplot2)
+})
+
+modqq <- function(sample,qnt_func=qnorm,dens_func=dnorm,k=9,ppp=ppoints(k)) {
+  require(dplyr,quietly=TRUE)
+  nnn <- length(sample)
+  xi_true <- qnt_func(ppp)
+  xi_hat  <- quantile(sample,ppp)
+  sigma2  <- ppp * (1-ppp) / (dens_func(xi_true)^2)
+  serr <- sqrt(sigma2 / nnn)
+  retv <- data_frame(ppp=ppp,xi=xi_true,xi_hat=xi_hat,serr=serr) %>%
+    mutate(delta = xi_hat - xi) %>%
+    arrange(ppp) %>%
+    mutate(iii=seq_len(n()))
+  attr(retv,'nnn') <- nnn
+  retv
+}
+
+# this it the log of U which is uniform on [min,max]
+dlogunif <- function(x,min=0,max=1) {
+  diffy <- max - min
+  dens <- rep(0,length(x))
+  inrange <- (log(min) <= x) & (x <= log(max))
+  dens[inrange] <- 1 / (diffy * x[inrange])
+  dens
+}
+qlogunif <- function(p,min=0,max=1,lower.tail=TRUE,log.p=FALSE) { 
+  log(qunif(p,min=min,max=max,lower.tail=lower.tail,log.p=log.p))
+}
 @
     
 % SYMPY preamble%FOLDUP
@@ -1274,7 +1295,7 @@ the whole we believe this plot indicates that our p-values are
 uniform in their tails as well.
 
 
-<<'motherload_sims_hidden_plotz',dependson=c('motherload_sims_run'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=paste0('The computed p-values from the conditional estimation procedure over ',nsim,' simulations are plotted against a uniform law, visually confirming that the p-values are nearly uniform.  Simulations use the exact \\RMAT and \\pvsnr to compute the covariance matrix. To reduce plot size, we only plot every ',nevery,'th point. At this sampling rate, as with no subsampling, the points show no deviation from the $y=x$ line.')>>=
+<<'motherload_sims_hidden_plotz',dependson=c('motherload_sims_run','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 # 7e9fddf8-92e1-45d3-8da4-ae4dab5e2ee8 
 # cdf & qtile, max of np independent SRs, SNR=zeta
 pmaxsr <- function(q,df,np,zeta=0,ope=1) {
@@ -1285,6 +1306,15 @@ qmaxsr <- function(p,df,np,zeta=0,ope=1) {
 	pv <- qbeta(p,shape1=np,shape2=1)
 	SharpeR::qsr(pv,df=df,zeta=zeta,ope=ope)
 }
+
+fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',nsim,
+                  ' simulations are compared to a uniform law. ',
+                  'Given the large sample size, a Q-Q plot is visually hard to interpret. ',
+                  'Instead we plot the deviance of sample quantiles from the theoretical quantiles, ',
+                  "with error bars around the $x$ axis, as suggested by V{\\'e}lez and Correa Morales. \\cite{velez2015modified} ",
+                  'Simulations use the exact \\RMAT and \\pvsnr to compute the covariance matrix. ',
+                  'The plot supports uniformity of the putative p-values. ')
+
 suppressMessages({
 	library(dplyr)
 	library(ggplot2)
@@ -1303,24 +1333,41 @@ suppressMessages({
 	#facet_grid(.~procedure)
 
   #scale_x_log10() + scale_y_log10() + 
-nevery <- 100
-ph <- sim %>%
-  arrange(pvals) %>%
-  mutate(rown=seq_len(n())) %>%
-  filter((rown %% nevery) == 0) %>%
-	ggplot(aes(sample=pvals)) + 
-	stat_qq(distribution=qunif,alpha=0.15) +
-  geom_abline(intercept=0,slope=1,color='red') + 
-  labs(title='P-P plot of p-values from conditional estimation procedure')
+#nevery <- 100
+#ph <- sim %>%
+  #arrange(pvals) %>%
+  #mutate(rown=seq_len(n())) %>%
+  #filter((rown %% nevery) == 0) %>%
+	#ggplot(aes(sample=pvals)) + 
+	#stat_qq(distribution=qunif,alpha=0.15) +
+  #geom_abline(intercept=0,slope=1,color='red') + 
+  #labs(title='P-P plot of p-values from conditional estimation procedure')
+
+
+alpha <- 0.05
+zalp <- qnorm(alpha/2,lower.tail=FALSE)
+ph <- modqq(sim$pvals,qnt_func=qunif,dens_func=dunif,k=19) %>%
+  mutate(ymin=-zalp * serr,ymax=zalp * serr) %>%
+  ggplot(aes(iii,delta,ymin=ymin,ymax=ymax)) + 
+  geom_point() + 
+  geom_errorbar(width=0.5) + 
+  geom_hline(yintercept=0,linetype=2,alpha=0.5) + 
+  labs(x='vigintile',y=expression(Delta),
+       title='Large sample P-P plot, p-values from conditional estimation procedure')
 print(ph)
 @
-<<'motherload_sims_log_plotz',dependson=c('motherload_sims_run'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap='We repeat the P-P plot of \\figref{motherload_sims_hidden_plotz}, but in log-log space.  To check uniformity in both tails we compute and plot $p_{*}=2\\min\\wrapParens{p,1-p}$ versus a uniform distribution.  To reduce plot size, we zoom in on the lower left corner of the P-P plot.'>>=
+<<'motherload_sims_log_plotz',dependson=c('motherload_sims_run'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 # fba5ce14-4639-4cf6-aa20-ba27d9b98041 
 suppressMessages({
 	library(dplyr)
 	library(ggplot2)
 })
-limsy <- c(1e-6,5e-3)
+
+fig_cap <- paste0('We repeat the P-P plot of \\figref{motherload_sims_hidden_plotz}, but in log-log space.  ',
+                  'To check uniformity in both tails we compute and plot $p_{*}=2\\min\\wrapParens{p,1-p}$ versus a uniform distribution.  ',
+                  'To reduce plot size, we zoom in on the lower left corner of the P-P plot.')
+
+#limsy <- c(1e-6,5e-3)
 #ph <- sim %>%
 #  mutate(transp=2*pmin(pvals,1-pvals)) %>%
 #  arrange(transp) %>%
@@ -1332,14 +1379,29 @@ limsy <- c(1e-6,5e-3)
 #  geom_abline(intercept=0,slope=1,color='red') + 
 #  labs(title='P-P plot of transformed p-values from conditional estimation procedure',
 #       x='theoretical',y='sample')
+#ph <- sim %>%
+  #mutate(transp=2*pmin(pvals,1-pvals)) %>%
+  #ggplot(aes(sample=transp)) + 
+  #stat_qq(distribution=qunif,alpha=0.25) +
+  #scale_x_log10(limits=limsy) + scale_y_log10(limits=limsy) + 
+  #geom_abline(intercept=0,slope=1,color='red') + 
+  #labs(title='P-P plot of transformed p-values from conditional estimation procedure',
+       #x='theoretical',y='sample')
+
+alpha <- 0.05
+zalp <- qnorm(alpha/2,lower.tail=FALSE)
+
 ph <- sim %>%
-  mutate(transp=2*pmin(pvals,1-pvals)) %>%
-  ggplot(aes(sample=transp)) + 
-  stat_qq(distribution=qunif,alpha=0.25) +
-  scale_x_log10(limits=limsy) + scale_y_log10(limits=limsy) + 
-  geom_abline(intercept=0,slope=1,color='red') + 
-  labs(title='P-P plot of transformed p-values from conditional estimation procedure',
-       x='theoretical',y='sample')
+  mutate(logtransp=log(2*pmin(pvals,1-pvals))) %>%
+  pull(logtransp) %>%
+  modqq(qnt_func=qlogunif,dens_func=dlogunif,k=19) %>%
+  mutate(ymin=-zalp * serr,ymax=zalp * serr) %>%
+  ggplot(aes(iii,delta,ymin=ymin,ymax=ymax)) + 
+  geom_point() + 
+  geom_errorbar(width=0.5) + 
+  geom_hline(yintercept=0,linetype=2,alpha=0.5) + 
+  labs(x='vigintile',y=expression(Delta),
+       title='Large sample P-P plot, transformed p-values from conditional estimation procedure')
 print(ph)
 @
 %UNFOLD
@@ -1377,19 +1439,34 @@ only requires us to estimate the standard error of the \txtSR of the
 asset with maximum \txtSR, and so does not greatly rely on the $\nlatf^2$
 elements of the estimate of \RMAT.
 
-<<'causal_sims_log_plotz',dependson=c('causal_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap='P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \\RMAT, and the vector of \\txtSNRs, \\pvsnr. P values $p$ were transformed to $p_{*}=2\\min\\wrapParens{p,1-p}$, then the $p_{*}$ are P-P plotted against uniformity.  Once again we zoom in on the lower left corner to save plot size.'>>=
+<<'causal_sims_log_plotz',dependson=c('causal_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+
 # b6aa6d8c-2872-4496-a704-a7e090645a7d 
+fig_cap <- paste0('P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \\RMAT, and the vector of \\txtSNRs, \\pvsnr. P values $p$ were transformed to $p_{*}=2\\min\\wrapParens{p,1-p}$, then the $p_{*}$ are P-P plotted against uniformity.  Once again we zoom in on the lower left corner to save plot size.')
 suppressMessages({
 	library(dplyr)
 	library(ggplot2)
 })
-limsy <- c(1e-6,5e-3)
+#limsy <- c(1e-6,5e-3)
+#ph <- causim %>%
+	#ggplot(aes(sample=2*pmin(pvals,1-pvals))) +
+	#stat_qq(distribution=qunif,alpha=0.25) +
+  #scale_x_log10(limits=limsy) + scale_y_log10(limits=limsy) + 
+  #geom_abline(intercept=0,slope=1,color='red') + 
+  #labs(title='P-P plot of transformed p-values from conditional estimation procedure, feasible estimates')
+alpha <- 0.05
+zalp <- qnorm(alpha/2,lower.tail=FALSE)
 ph <- causim %>%
-	ggplot(aes(sample=2*pmin(pvals,1-pvals))) +
-	stat_qq(distribution=qunif,alpha=0.25) +
-  scale_x_log10(limits=limsy) + scale_y_log10(limits=limsy) + 
-  geom_abline(intercept=0,slope=1,color='red') + 
-  labs(title='P-P plot of transformed p-values from conditional estimation procedure, feasible estimates')
+  mutate(logtransp=log(2*pmin(pvals,1-pvals))) %>%
+  pull(logtransp) %>%
+  modqq(qnt_func=qlogunif,dens_func=dlogunif,k=19) %>%
+  mutate(ymin=-zalp * serr,ymax=zalp * serr) %>%
+  ggplot(aes(iii,delta,ymin=ymin,ymax=ymax)) + 
+  geom_point() + 
+  geom_errorbar(width=0.5) + 
+  geom_hline(yintercept=0,linetype=2,alpha=0.5) + 
+  labs(x='vigintile',y=expression(Delta),
+       title='Large sample P-P plot, transformed p-values from conditional estimation procedure, feasible estimates')
 print(ph)
 @
 %UNFOLD
@@ -1512,25 +1589,52 @@ on the transformed p-values under the two methods of estimating
 the covariance of \svsr.
 There is little difference in the performance of the two sets of simulations. 
 We remain cautiously optimistic that for large \ssiz, one need correct
-\eqnref{apx_srdist_gaussian} to account for non-normal returns.
+\eqnref{apx_srdist_gaussian} to account for non-normal returns.\todo{fix this description...}
 
 
-<<'causal_tfive_sims_plotz',dependson=c('causal_tfive_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=paste0('The computed p-values from the conditional estimation procedure over ',nsim,' simulations are plotted against a uniform law.  Returns are drawn from a $\\tstat{}\\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \\svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Once again we focus on the lower left corner of the plots to trim the plot size.')>>=
+<<'causal_tfive_sims_plotz',dependson=c('causal_tfive_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+
+#2FIX: fix this description
+fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',nsim,
+                  ' simulations are plotted against a uniform law.  Returns are drawn from a $\\tstat{}\\wrapParens{5}$ distribution.  ',
+                  'Sample estimates are used to construct the variance-covariance matrix of \\svsr.  ',
+                  'The experiments are performed twice: first assuming that returns are Gaussian; ',
+                  'then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  ',
+                  'Both procedures give near-uniform p values. ',
+                  'Once again we focus on the lower left corner of the plots to trim the plot size.')
+
 # 155290d7-d763-4034-b068-0d68e6d874db 
 suppressMessages({
 	library(dplyr)
 	library(ggplot2)
 })
-limsy <- c(1e-5,5e-2)
+#limsy <- c(1e-5,5e-2)
+#ph <- rbind(ok_tsim %>% mutate(higher_order=TRUE),
+            #badtsim %>% mutate(higher_order=FALSE)) %>%
+  #mutate(quasi_p=2*pmin(pvals,1-pvals)) %>%
+	#ggplot(aes(sample=quasi_p)) + 
+	#stat_qq(distribution=qunif,alpha=0.25) +
+  #geom_abline(intercept=0,slope=1,color='red') + 
+  #scale_x_log10(limits=limsy) + scale_y_log10(limits=limsy) + 
+  #facet_grid(.~higher_order,labeller=label_both) + 
+  #labs(title='P-P plot of p-values from conditional estimation procedure')
+alpha <- 0.05
+zalp <- qnorm(alpha/2,lower.tail=FALSE)
 ph <- rbind(ok_tsim %>% mutate(higher_order=TRUE),
             badtsim %>% mutate(higher_order=FALSE)) %>%
-  mutate(quasi_p=2*pmin(pvals,1-pvals)) %>%
-	ggplot(aes(sample=quasi_p)) + 
-	stat_qq(distribution=qunif,alpha=0.25) +
-  geom_abline(intercept=0,slope=1,color='red') + 
-  scale_x_log10(limits=limsy) + scale_y_log10(limits=limsy) + 
+  mutate(logtransp=log(2*pmin(pvals,1-pvals))) %>%
+  group_by(higher_order) %>%
+    summarize(fooret=list(modqq(logtransp,qnt_func=qlogunif,dens_func=dlogunif,k=19))) %>%
+  ungroup() %>%
+  tidyr::unnest() %>%
+  mutate(ymin=-zalp * serr,ymax=zalp * serr) %>%
+  ggplot(aes(iii,delta,ymin=ymin,ymax=ymax)) + 
+  geom_point() + 
+  geom_errorbar(width=0.5) + 
+  geom_hline(yintercept=0,linetype=2,alpha=0.5) + 
   facet_grid(.~higher_order,labeller=label_both) + 
-  labs(title='P-P plot of p-values from conditional estimation procedure')
+  labs(x='vigintile',y=expression(Delta),
+       title='Large sample P-P plot, transformed p-values from conditional estimation procedure')
 print(ph)
 @
 %UNFOLD

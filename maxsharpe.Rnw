@@ -1,12 +1,6 @@
 \documentclass[10pt,a4paper,english]{article}
 
-% now ignored, I think:
-%\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{Asymptotic Distribution of the Markowitz Portfolio}
-%\VignetteKeyword{Finance}
-%\VignetteKeyword{Markowitz}
-%\VignettePackage{MarkowitzR}
-
+% be quiet
 \batchmode
 
 % front matter%FOLDUP
@@ -1672,6 +1666,9 @@ bot_rawsim <- function(nday,nlatf,one_zeta,nsim=100,rho=0,
                           rep(-one_zeta,ceiling(nlatf/2))),
                spread=seq(-one_zeta,one_zeta,length.out=nlatf))
   sim <- parsim(nsim=nsim,nday=nday,R=R,mu=mu,testmu=rep(0,nlatf))
+  # note that the MHT/bonferroni correction here is only valid
+  # for rho==0.
+  # see below for the proper version
   mhtpvals <- replicate(nsim,{
     if (rho == 0) {
       x <- SharpeR::rsr(n=nlatf,df=nday-1,zeta=mu,ope=1)

@@ -1669,6 +1669,12 @@ bot_rawsim <- function(nday,nlatf,one_zeta,nsim=100,rho=0,
   # note that the MHT/bonferroni correction here is only valid
   # for rho==0.
   # see below for the proper version
+  stopifnot(rho==0)
+
+  # weights from chi-bar square distro
+  cwts <- exp(lchoose(nlatf,0:nlatf) - nlatf * log(2))
+
+  # MHT and chibarsquare
   mhtpvals <- replicate(nsim,{
     if (rho == 0) {
       x <- SharpeR::rsr(n=nlatf,df=nday-1,zeta=mu,ope=1)
@@ -1678,12 +1684,20 @@ bot_rawsim <- function(nday,nlatf,one_zeta,nsim=100,rho=0,
     }
     xm <- which.max(x)
     pval <- SharpeR::psr(max(x),df=nday-1,zeta=0,ope=1,lower.tail=FALSE) 
-    c(pval,mu[xm])
+
+    # chibarsquare test, assuming rho=0
+    chibs <- (nday) * sum(pmax(x,0)^2)
+    chibp <- sum(cwts * pchisq(chibs,df=0:nlatf,lower.tail=FALSE))
+
+    c(pval,chibp,mu[xm])
   })
   rbind(sim %>% select(-simvals) %>% mutate(pvals=1-pvals) %>% mutate(method='condest'),
         data_frame(pvals=nlatf * as.numeric(mhtpvals[1,]),
-                   popvals=as.numeric(mhtpvals[2,]),
-                   method='mht'))
+                   popvals=as.numeric(mhtpvals[3,]),
+                   method='mht'),
+        data_frame(pvals=nlatf * as.numeric(mhtpvals[2,]),
+                   popvals=as.numeric(mhtpvals[3,]),
+                   method='chibs'))
 }
 mhtsim <- function(alpha=0.05,...) {
   bot_rawsim(...) %>%
@@ -1790,6 +1804,7 @@ library(ggplot2)
 ph <- resu %>%
   mutate(method=gsub('^condest$','cond. est.',method)) %>%
   mutate(method=gsub('^mht$','MHT',method)) %>%
+  mutate(method=gsub('^chibs$','chi-bar^2',method)) %>%
   ggplot(aes(popvals,rej_rate,color=method))  +
   geom_line() + geom_point() +
   facet_grid(.~mutype) + 

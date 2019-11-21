@@ -375,6 +375,8 @@ qlogunif <- function(p,min=0,max=1,lower.tail=TRUE,log.p=FALSE) {
 \providecommand{\tncdf}[5]{\funcit{F}{{#1};{#2},{#3},{#4},{#5}}}
 \providecommand{\makerho}[3][{\vone}]{{#2}\wrapParens{\ogram{#1}} + {#3}\,\eye}
 \providecommand{\pmone}[1][{}]{\vectUL{w}{}{#1}}
+\providecommand{\posp}[1]{\mathUL{{#1}}{}{+}}
+\providecommand{\pospsq}[1]{\mathUL{{#1}}{2}{+}}
 
 
 \providecommand{\xxx}[1][{}]{\vectUL{x}{}{#1}}
@@ -919,8 +921,7 @@ Then under the null hypothesis that $\pvsnr=\pvsnr[0]$, one observes
 \end{equation}
 where $\ichol{\RMAT}$ is the inverse of the (symmetric) square root of $\RMAT$.
 
-Under the assumed form for \RMAT given in \eqnref{simple_RMAT}, it is simple to
-confirm that
+Under the assumed form for \RMAT given in \eqnref{simple_RMAT}, it is simple to confirm that
 \begin{equation}
   \label{eqn:simple_RMAT_ichol}
   \ichol{\RMAT} = \makerho{\oneby{\nlatf}\wrapParens{\oneby{\sqrt{1-\rho+\nlatf\rho}} - \oneby{\sqrt{1-\rho}}}}{\wrapParens{1-\rho}^{-1/2}}.
@@ -1057,10 +1058,66 @@ would be via Hotelling's $T^2$ test.  \cite{anderson2003introduction,press2012ap
 However, we are mostly not interested in the case where some of
 the $\psnr[i]$ are less than $c$. 
 One-sided multivariate tests were designed for this task.
-However, they often require that one construct a statistic like Hotelling's $T^2$,
-which in our case would involve inverting the covariance of $\svsr$.
-This will not scale well computationally to allow testing with large \nlatf.
+%However, they often require that one construct a statistic like Hotelling's $T^2$,
+%which in our case would involve inverting the covariance of $\svsr$.
+%This will not scale well computationally to allow testing with large \nlatf.
 
+One-sided tests will not scale well to the case of large \nlatf, except perhaps
+under simple models for correlation.
+Consider testing the following null
+\begin{equation*}
+\Hyp[0] : \forall_i \psnr[i]=\psnr[0]\quad\mbox{versus}\quad \Hyp[1] :  \exists_i \psnr[i] > \psnr[0],
+\end{equation*}
+subject to the simple model of \eqnref{simple_RMAT} with $\rho \ge 0$.
+Again, assume the approximation of \eqnref{apx_srdist_simple},
+\begin{equation*}
+\svsr \approx \normlaw{\pvsnr,\oneby{\ssiz}\RMAT}.
+\end{equation*}
+As in \eqnref{simple_RMAT_ichol}, the inverse square root of \RMAT is monotonic and
+takes the form
+\begin{equation*}
+  \ichol{\RMAT} = \makerho{b_1}{b_2},
+\end{equation*}
+for some $b_2 > 0$, with $0 \ge b_1 > -b_2 / \nlatf$.
+
+Given that, we can transform \svsr as
+\begin{equation*}
+  \sqrt{\ssiz}\ichol{\RMAT}\svsr \approx \normlaw{\sqrt{\ssiz}\ichol{\RMAT}\pvsnr,\eye}.
+\end{equation*}
+The null hypothesis can then be expressed as
+\begin{equation*}
+\Hyp[0] : \forall_i 
+  c \psnr[i] = c \psnr[0]\quad\mbox{versus}\quad \Hyp[1] :  \exists_i 
+  c \psnr[i] > c \psnr[0],
+\end{equation*}
+for $c=\sqrt{\ssiz} \wrapParens{\nlatf b_1 + b_2} > 0$. 
+The equivalence of the alternative hypothesis follows from positivity of the $c$.
+
+We can then appeal to the simple chi-bar square test.  \cite{nla.cat-vn3800977}
+First compute the test statistic
+\begin{equation}
+  \label{eqn:chibstat}
+  \bar{x}^2 = \sum_i \ssiz \wrapParens{\nlatf b_1 + b_2}^2 \pospsq{\wrapParens{\ssr[i] - \psnr[0]}},
+\end{equation}
+where $\posp{y}$ is the positive part of $y$, \ie $\posp{y}=y$ if $y > 0$ and zero otherwise.
+Then compute the CDF of the corresponding chi-bar square distribution as
+\begin{equation}
+  \label{eqn:chibp}
+  Q = \sum_{i=0}^{\nlatf} w_i {\chisqcdf{\bar{x}^2}{i}},
+\end{equation}
+where $\chisqcdf{i}{x}$ is the cumulative distribution of the $\chi^2$ distribution
+with $i$ degrees of freedom, and $w_i$ are the chi-bar square weights.
+In this case they are defined as
+$$
+w_i = {\nlatf \choose i}{2^{-\nlatf}}.
+$$
+Reject the null hypothesis at the \typeI level if $1-Q \le \typeI$.
+
+Note that, as with the Bonferroni correction, the test statistic $\bar{x}^2$ is
+computed on all elements of \svsr, and thus the decision to reject the null
+may not be ``about'' \ssr[1].
+In testing we will see that the one-sided test is highly susceptible to distribution of the \pvsr,
+moreso than the Bonferroni correction.
 
 \subsection{Subspace approximation}%FOLDUP
 

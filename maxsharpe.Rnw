@@ -1069,35 +1069,36 @@ Consider testing the following null
 \Hyp[0] : \forall_i \psnr[i]=\psnr[0]\quad\mbox{versus}\quad \Hyp[1] :  \exists_i \psnr[i] > \psnr[0],
 \end{equation*}
 subject to the simple model of \eqnref{simple_RMAT} with $\rho \ge 0$.
-Again, assume the approximation of \eqnref{apx_srdist_simple},
+The inverse square root of \RMAT, given in \eqnref{simple_RMAT_ichol}, is monotonic.
+Moreover, 
+\begin{equation*}
+  \ichol{\RMAT} \vone = \oneby{\sqrt{1-\rho+\nlatf\rho}}.
+\end{equation*}
+
+Again assume the approximation of \eqnref{apx_srdist_simple},
 \begin{equation*}
 \svsr \approx \normlaw{\pvsnr,\oneby{\ssiz}\RMAT}.
 \end{equation*}
-As in \eqnref{simple_RMAT_ichol}, the inverse square root of \RMAT is monotonic and
-takes the form
-\begin{equation*}
-  \ichol{\RMAT} = \makerho{b_1}{b_2},
-\end{equation*}
-for some $b_2 > 0$, with $0 \ge b_1 > -b_2 / \nlatf$.
-
-Given that, we can transform \svsr as
+This can be rewritten as
 \begin{equation*}
   \sqrt{\ssiz}\ichol{\RMAT}\svsr \approx \normlaw{\sqrt{\ssiz}\ichol{\RMAT}\pvsnr,\eye}.
 \end{equation*}
-The null hypothesis can then be expressed as
+From the monotonicity and the relation on $\ichol{\RMAT}\vone$,
+the null hypothesis can then be expressed as
 \begin{equation*}
 \Hyp[0] : \forall_i 
   c \psnr[i] = c \psnr[0]\quad\mbox{versus}\quad \Hyp[1] :  \exists_i 
   c \psnr[i] > c \psnr[0],
 \end{equation*}
-for $c=\sqrt{\ssiz} \wrapParens{\nlatf b_1 + b_2} > 0$. 
+for $c=\wrapParens{1+\wrapParens{\nlatf-1}\rho}^{-\halff}$.
 The equivalence of the alternative hypothesis follows from positivity of the $c$.
+
 
 We can then appeal to the simple chi-bar square test.  \cite{nla.cat-vn3800977}
 First compute the test statistic
 \begin{equation}
   \label{eqn:chibstat}
-  \bar{x}^2 = \sum_i \ssiz \wrapParens{\nlatf b_1 + b_2}^2 \pospsq{\wrapParens{\ssr[i] - \psnr[0]}},
+  \bar{x}^2 = \sum_i \frac{\ssiz}{1+\wrapParens{\nlatf-1}\rho} \pospsq{\wrapParens{\ssr[i] - \psnr[0]}},
 \end{equation}
 where $\posp{y}$ is the positive part of $y$, \ie $\posp{y}=y$ if $y > 0$ and zero otherwise.
 Then compute the CDF of the corresponding chi-bar square distribution as
@@ -1337,9 +1338,17 @@ We repeat this experiment \Sexpr{nsim} times and collect the \Sexpr{nsim}
 p-values. 
 In \figref{motherload_sims_hidden_plotz}, we present a P-P plot of those
 P-values against the uniform law.
+P-P plots for such sample sizes are hard to interpret unless they show
+gross deviances from the uniform law. 
+Instead we present a subsampled P-P plot, as suggested by V{\\'e}lez and Correa Morales. \\cite{velez2015modified} ",
+The difference between empirical and theoretical p-values at vigintiles
+are plotted, along with the error bars around the $x$ axis based on 
+the theoretical density and sample size. 
+
 That plot suggests that the p-values are indeed uniformly distributed.
-To check the tail behavior of our computed p-values we present
-a P-P plot of $2\min\wrapParens{p,1-p}$ in log-log space in 
+To check the tail behavior of our computed p-values we transform
+the $p$ values by $p \mapsto \log{2\min\wrapParens{p,1-p}}$, and
+present a subsampled Q-Q plot against a log uniform law, in 
 \figref{motherload_sims_log_plotz}. 
 Slight deviations from uniformity are visible in that plot, but on
 the whole we believe this plot indicates that our p-values are
@@ -1362,7 +1371,7 @@ fig_cap <- paste0('The computed p-values from the conditional estimation procedu
                   ' simulations are compared to a uniform law. ',
                   'Given the large sample size, a Q-Q plot is visually hard to interpret. ',
                   'Instead we plot the deviance of sample quantiles from the theoretical quantiles, ',
-                  "with error bars around the $x$ axis, as suggested by V{\\'e}lez and Correa Morales. \\cite{velez2015modified} ",
+                  "with error bars around the $x$ axis. \\cite{velez2015modified} ",
                   'Simulations use the exact \\RMAT and \\pvsnr to compute the covariance matrix. ',
                   'The plot supports uniformity of the putative p-values. ')
 
@@ -1415,8 +1424,10 @@ suppressMessages({
 })
 
 fig_cap <- paste0('We repeat the P-P plot of \\figref{motherload_sims_hidden_plotz}, but in log-log space.  ',
-                  'To check uniformity in both tails we compute and plot $p_{*}=2\\min\\wrapParens{p,1-p}$ versus a uniform distribution.  ',
-                  'To reduce plot size, we zoom in on the lower left corner of the P-P plot.')
+                  'To check uniformity in both tails we compute $p_{*} = \\log{2\\min\\wrapParens{p,1-p}}$, and plot against a log uniform law. ',
+                  'Again, we plot the deviance of sample quantiles from the theoretical quantiles, ',
+                  "with error bars around the $x$ axis. \\cite{velez2015modified} ",
+                  'Simulations use the exact \\RMAT and \\pvsnr to compute the covariance matrix. ')
 
 #limsy <- c(1e-6,5e-3)
 #ph <- sim %>%
@@ -1493,7 +1504,10 @@ elements of the estimate of \RMAT.
 <<'causal_sims_log_plotz',dependson=c('causal_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 
 # b6aa6d8c-2872-4496-a704-a7e090645a7d 
-fig_cap <- paste0('P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \\RMAT, and the vector of \\txtSNRs, \\pvsnr. P values $p$ were transformed to $p_{*}=2\\min\\wrapParens{p,1-p}$, then the $p_{*}$ are P-P plotted against uniformity.  Once again we zoom in on the lower left corner to save plot size.')
+fig_cap <- paste0('P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \\RMAT, ',
+                  'and the vector of \\txtSNRs, \\pvsnr. ',
+                  'P values $p$ were transformed to $p_{*}=\\log{2\\min\\wrapParens{p,1-p}}$, then the $p_{*}$ are Q-Q plotted against a log uniform law, ',
+                  'using the subsampling procedure. ')
 suppressMessages({
 	library(dplyr)
 	library(ggplot2)
@@ -1592,7 +1606,9 @@ we cannot claim to have definitively established where our procedure breaks down
 but warn users that the $\nlatf \gg \ssiz$ cases are likely to be problematic
 in the sense that nominal type I rates may not be maintained.
 
-<<'many_sims_plotz',dependson=c('many_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap='Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\\ssiz$ with facets for $\\nlatf$ and $\\rho$.  Broadly we see that the test statistic is less uniform in the regime where $\\nlatf\\gg\\ssiz$, but that a large positive $\\rho$ perhaps reduces the number of assets in that relationship.'>>=
+<<'many_sims_plotz',dependson=c('many_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+fig_cap <- paste0('Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\\ssiz$ with facets for $\\nlatf$ and $\\rho$.  ',
+                  'Broadly we see that the test statistic is less uniform in the regime where $\\nlatf\\gg\\ssiz$, but that a large positive $\\rho$ perhaps reduces the number of assets in that relationship.')
 # 460af323-8484-4187-8af1-68b25eff11cb 
 resu %>%
   mutate(raty=nday/nlatf) %>%
@@ -1645,9 +1661,9 @@ We remain cautiously optimistic that for large \ssiz, one need correct
 
 <<'causal_tfive_sims_plotz',dependson=c('causal_tfive_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 
-#2FIX: fix this description
 fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',nsim,
-                  ' simulations are plotted against a uniform law.  Returns are drawn from a $\\tstat{}\\wrapParens{5}$ distribution.  ',
+                  ' simulations are transformed via $p_{*} = \\log{2\\min\\wrapParens{p,1-p}}$, then plotted against a log uniform law using the subsampling procedure. ',
+                  'Returns are drawn from a $\\tstat{}\\wrapParens{5}$ distribution.  ',
                   'Sample estimates are used to construct the variance-covariance matrix of \\svsr.  ',
                   'The experiments are performed twice: first assuming that returns are Gaussian; ',
                   'then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  ',
@@ -1669,6 +1685,8 @@ suppressMessages({
   #scale_x_log10(limits=limsy) + scale_y_log10(limits=limsy) + 
   #facet_grid(.~higher_order,labeller=label_both) + 
   #labs(title='P-P plot of p-values from conditional estimation procedure')
+
+  #facet_grid(.~higher_order,labeller=label_both) + 
 alpha <- 0.05
 zalp <- qnorm(alpha/2,lower.tail=FALSE)
 ph <- rbind(ok_tsim %>% mutate(higher_order=TRUE),
@@ -1679,11 +1697,10 @@ ph <- rbind(ok_tsim %>% mutate(higher_order=TRUE),
   ungroup() %>%
   tidyr::unnest() %>%
   mutate(ymin=-zalp * serr,ymax=zalp * serr) %>%
-  ggplot(aes(iii,delta,ymin=ymin,ymax=ymax)) + 
+  ggplot(aes(iii,delta,ymin=ymin,ymax=ymax,color=higher_order)) + 
   geom_point() + 
   geom_errorbar(width=0.5) + 
   geom_hline(yintercept=0,linetype=2,alpha=0.5) + 
-  facet_grid(.~higher_order,labeller=label_both) + 
   labs(x='vigintile',y=expression(Delta),
        title='Large sample P-P plot, transformed p-values from conditional estimation procedure')
 print(ph)
@@ -1730,6 +1747,11 @@ bot_rawsim <- function(nday,nlatf,one_zeta,nsim=100,rho=0,
 
   # weights from chi-bar square distro
   cwts <- exp(lchoose(nlatf,0:nlatf) - nlatf * log(2))
+  okwt <- (cwts > 1e-9)
+  sbdf <- which(okwt) - 1
+  sbwt <- cwts[okwt]
+  # should check that sum(sbwt) is around 1
+  stopifnot(abs(sum(sbwt) - 1) < 1e-5)
 
   # MHT and chibarsquare
   mhtpvals <- replicate(nsim,{
@@ -1744,15 +1766,15 @@ bot_rawsim <- function(nday,nlatf,one_zeta,nsim=100,rho=0,
 
     # chibarsquare test, assuming rho=0
     chibs <- (nday) * sum(pmax(x,0)^2)
-    chibp <- sum(cwts * pchisq(chibs,df=0:nlatf,lower.tail=FALSE))
+    chibp <- sum(sbwt * pchisq(chibs,df=sbdf,lower.tail=FALSE))
 
     c(pval,chibp,mu[xm])
   })
   rbind(sim %>% select(-simvals) %>% mutate(pvals=1-pvals) %>% mutate(method='condest'),
-        data_frame(pvals=nlatf * as.numeric(mhtpvals[1,]),
+        data_frame(pvals=nlatf * as.numeric(mhtpvals[1,]),  # the pvals here is a correction for mht, a hack
                    popvals=as.numeric(mhtpvals[3,]),
                    method='mht'),
-        data_frame(pvals=nlatf * as.numeric(mhtpvals[2,]),
+        data_frame(pvals=as.numeric(mhtpvals[2,]),  # no correction here for chibar square
                    popvals=as.numeric(mhtpvals[3,]),
                    method='chibs'))
 }

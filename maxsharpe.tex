@@ -1,6 +1,6 @@
 \documentclass[10pt,a4paper,english]{article}\usepackage[]{graphicx}\usepackage[]{color}
-% maxwidth is the original width if it is less than linewidth
-% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
 \makeatletter
 \def\maxwidth{ %
   \ifdim\Gin@nat@width>\linewidth
@@ -1175,7 +1175,7 @@ the covariance via \eqnref{apx_srdist_gaussian}.
 This is not, of course, how the test would be applied in practice since
 \RMAT and \pvsnr have to be estimated.
 
-We repeat this experiment 1000 times and collect the 1000
+We repeat this experiment \ensuremath{10^{5}} times and collect the \ensuremath{10^{5}}
 p-values. 
 In \figref{motherload_sims_hidden_plotz}, we present a P-P plot of those
 P-values against the uniform law.
@@ -1190,7 +1190,7 @@ uniform in their tails as well.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_hidden_plotz-1} \caption{The computed p-values from the conditional estimation procedure over 1000 simulations are compared to a uniform law. Given the large sample size, a Q-Q plot is visually hard to interpret. Instead we plot the deviance of sample quantiles from the theoretical quantiles, with error bars around the $x$ axis, as suggested by V{\'e}lez and Correa Morales. \cite{velez2015modified} Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:motherload_sims_hidden_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_hidden_plotz-1} \caption{The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law. Given the large sample size, a Q-Q plot is visually hard to interpret. Instead we plot the deviance of sample quantiles from the theoretical quantiles, with error bars around the $x$ axis, as suggested by V{\'e}lez and Correa Morales. \cite{velez2015modified} Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:motherload_sims_hidden_plotz}
 \end{figure}
 
 
@@ -1218,7 +1218,7 @@ So we repeat the experiments, but plug in the usual sample estimate of covarianc
 vector of \txtSRs into \eqnref{apx_srdist_gaussian} to estimate the covariance
 matrix of \svsr. 
 Other than this change, we repeat the previous experiment, 
-performing $1000$ simulations, 
+performing $\ensuremath{10^{5}}$ simulations, 
 setting $\nlatf=100$,
 $\RMAT=\makerho{0.7}{0.3}$.
 $\ssiz=1260\dayto{}$, \etc
@@ -1268,7 +1268,7 @@ $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$;
 we take $\pvsnr$ to be a uniform sequence from $0$ to 
 $0.1\dayto{-\halff}$.
 For each setting of the parameters in the Cartesian product we perform
-$500$ simulations, computing p values from the feasible estimator.
+$\ensuremath{5\times 10^{4}}$ simulations, computing p values from the feasible estimator.
 
 In \figref{many_sims_plotz} we plot those K-S statistics against $\ssiz$,
 with facets for $\rho$ and $\nlatf$. 
@@ -1302,7 +1302,7 @@ The simulations above were carried out assuming Gaussian returns, and using
 Gaussian returns are not a good model for real asset returns,
 so we repeat those simulations with returns drawn from a multivariate $\tstat{}$-distribution
 with $5$ degrees of freedom.  \cite{Lin1972339,kotz2004multivariate}
-Again we perform $100$ simulations with
+Again we perform $\ensuremath{10^{4}}$ simulations with
 $\nlatf=100$,
 $\RMAT=\makerho{0.7}{0.3}$,
 $\ssiz=1260\dayto{}$, \etc
@@ -1321,7 +1321,7 @@ We remain cautiously optimistic that for large \ssiz, one need correct
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 100 simulations are plotted against a uniform law]{The computed p-values from the conditional estimation procedure over 100 simulations are plotted against a uniform law.  Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Once again we focus on the lower left corner of the plots to trim the plot size.}\label{fig:causal_tfive_sims_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 10000 simulations are plotted against a uniform law]{The computed p-values from the conditional estimation procedure over 10000 simulations are plotted against a uniform law.  Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Once again we focus on the lower left corner of the plots to trim the plot size.}\label{fig:causal_tfive_sims_plotz}
 \end{figure}
 
 
@@ -1381,7 +1381,7 @@ to an `annualized' \txtSNR of around
 $2.4\yrto{-\halff}$.
 We draw Gaussian returns with diagonal covariance for
 $100$ assets, with $\ssiz=1008$.
-For each setting we perform $100$ simulations then 
+For each setting we perform $\ensuremath{10^{4}}$ simulations then 
 compute the empirical rejection rate of the test at the $0.05$ level,
 conditional on the \txtSNR of the \emph{selected} asset, which is
 to say the one with the largest \txtSR. Note that in some simulations
@@ -1423,7 +1423,7 @@ Note the odd plot in the half good facet: the MHT has greater
 than $0.05$ rejection rate for \emph{negative} \txtSNR. 
 The plot is somewhat misleading in this case, however.
 We have performed
-$100$ simulations for each setting of the `good'
+$\ensuremath{10^{4}}$ simulations for each setting of the `good'
 \txtSNR; in some very small number of them for the half good
 case, an asset with negative \txtSNR exhibits the maximum
 \txtSR. 
@@ -1435,7 +1435,7 @@ assets have zero or lower \txtSNR.
 We have not shown the probability that a `bad' asset has the
 highest \txtSR, but note that when the `good' \txtSNR
 is greater than $0.05\dayto{-\halff}$ we do not observe this
-occuring even once over the $100$ simulations performed
+occuring even once over the $\ensuremath{10^{4}}$ simulations performed
 for each setting. 
 This does indicate, however, that the simple settings of the 
 spread of \pvsnr we tested here are unlikely to have revealed 
@@ -1452,7 +1452,7 @@ To demonstrate this, we repeat the experiments above, but setting
 $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$
 and $\psnr=\vzero$.
 Again we consider $\nlatf=100$, 
-$\ssiz=1008$, and perform $50$ simulations to estimate the 
+$\ssiz=1008$, and perform $5000$ simulations to estimate the 
 empirical rejection rate.
 In \figref{rho_plotz_one}, we plot the empirical rejection rate versus $\rho$ at the nominal
 $0.05$ type I level. 
@@ -1469,7 +1469,7 @@ yielding nominal rejection rates.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for three testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for three testing procedures: the conditional estimation, vanilla Bonferroni correction, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 100 assets over 1008 days. Tests were performed at the $0.05$ level, which appears to be maintained by the conditional estimation and fixed Bonferroni procedures but not by the regular Bonferroni procedure.  Empirical rates are over 50 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for three testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for three testing procedures: the conditional estimation, vanilla Bonferroni correction, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 100 assets over 1008 days. Tests were performed at the $0.05$ level, which appears to be maintained by the conditional estimation and fixed Bonferroni procedures but not by the regular Bonferroni procedure.  Empirical rates are over 5000 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
 \end{figure}
 
 
@@ -1488,17 +1488,17 @@ We download the monthly returns of five industry portfolios
 from Ken French's data library. \cite{ind_5_def}
 %These consist of 
 We consider the 1080 months of data on five industries
-from 1927 to 2016.917.
+from Jan 1927 to Dec 2016.
 We compute the \txtSR of the returns of each, and present them
 in \tabref{mind_sr}. 
 We have reordered the industries in decreasing \txtSR.
 The industry portfolio with the highest \txtSR was
- with a \txtSR of 
+Healthcare with a \txtSR of 
 around $0.192\,\moto{-\halff}$ which is approximately
 $0.664\,\yrto{-\halff}$.
 
-% latex table generated in R 3.6.1 by xtable 1.8-4 package
-% Tue Nov 19 22:48:56 2019
+% latex table generated in R 3.4.3 by xtable 1.8-2 package
+% Fri Nov 22 05:48:23 2019
 \begin{table}[ht]
 \centering
 \begin{tabular}{r|c}
@@ -1520,17 +1520,17 @@ Healthcare & $ 0.192\,\moto{-\halff} $ \\
 
 
 We are interested in computing $95\%$ upper confidence
-intervals on the \txtSNR of the  portfolio. 
+intervals on the \txtSNR of the Healthcare portfolio. 
 We are only considering this portfolio as it is the one with maximum \txtSR
 in our sample.
 If we had been interested in testing
- 
+Healthcare 
 without our conditional selection, we would compute the confidence interval
 $\left[0.141\,\moto{-\halff}, \infty\right)$ based on inverting the non-central
 \tstat{}-distribution. \cite{pav_ssc,SharpeR-Manual}
 If instead we approximate the standard error by plugging in 
 $0.192\,\moto{-\halff}$ as the \txtSNR of 
- 
+Healthcare 
 into \eqnref{apx_srdist_gaussian},
 we estimate the standard error of the \txtSR to be
 $0.031\,\moto{-\halff}$.
@@ -1541,7 +1541,7 @@ This also gives the confidence interval
 $\left[0.141\,\moto{-\halff}, \infty\right)$.
 
 Using the simple Bonferroni correction, however, since we selected
- 
+Healthcare 
 only for having the maximum \txtSR, we should compute the 
 confidence interval by adding
 $\qnorm{0.01}=-2.326$ times the standard error.

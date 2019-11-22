@@ -1029,35 +1029,36 @@ Consider testing the following null
 \Hyp[0] : \forall_i \psnr[i]=\psnr[0]\quad\mbox{versus}\quad \Hyp[1] :  \exists_i \psnr[i] > \psnr[0],
 \end{equation*}
 subject to the simple model of \eqnref{simple_RMAT} with $\rho \ge 0$.
-Again, assume the approximation of \eqnref{apx_srdist_simple},
+The inverse square root of \RMAT, given in \eqnref{simple_RMAT_ichol}, is monotonic.
+Moreover, 
+\begin{equation*}
+  \ichol{\RMAT} \vone = \oneby{\sqrt{1-\rho+\nlatf\rho}}.
+\end{equation*}
+
+Again assume the approximation of \eqnref{apx_srdist_simple},
 \begin{equation*}
 \svsr \approx \normlaw{\pvsnr,\oneby{\ssiz}\RMAT}.
 \end{equation*}
-As in \eqnref{simple_RMAT_ichol}, the inverse square root of \RMAT is monotonic and
-takes the form
-\begin{equation*}
-  \ichol{\RMAT} = \makerho{b_1}{b_2},
-\end{equation*}
-for some $b_2 > 0$, with $0 \ge b_1 > -b_2 / \nlatf$.
-
-Given that, we can transform \svsr as
+This can be rewritten as
 \begin{equation*}
   \sqrt{\ssiz}\ichol{\RMAT}\svsr \approx \normlaw{\sqrt{\ssiz}\ichol{\RMAT}\pvsnr,\eye}.
 \end{equation*}
-The null hypothesis can then be expressed as
+From the monotonicity and the relation on $\ichol{\RMAT}\vone$,
+the null hypothesis can then be expressed as
 \begin{equation*}
 \Hyp[0] : \forall_i 
   c \psnr[i] = c \psnr[0]\quad\mbox{versus}\quad \Hyp[1] :  \exists_i 
   c \psnr[i] > c \psnr[0],
 \end{equation*}
-for $c=\sqrt{\ssiz} \wrapParens{\nlatf b_1 + b_2} > 0$. 
+for $c=\wrapParens{1+\wrapParens{\nlatf-1}\rho}^{-\halff}$.
 The equivalence of the alternative hypothesis follows from positivity of the $c$.
+
 
 We can then appeal to the simple chi-bar square test.  \cite{nla.cat-vn3800977}
 First compute the test statistic
 \begin{equation}
   \label{eqn:chibstat}
-  \bar{x}^2 = \sum_i \ssiz \wrapParens{\nlatf b_1 + b_2}^2 \pospsq{\wrapParens{\ssr[i] - \psnr[0]}},
+  \bar{x}^2 = \sum_i \frac{\ssiz}{1+\wrapParens{\nlatf-1}\rho} \pospsq{\wrapParens{\ssr[i] - \psnr[0]}},
 \end{equation}
 where $\posp{y}$ is the positive part of $y$, \ie $\posp{y}=y$ if $y > 0$ and zero otherwise.
 Then compute the CDF of the corresponding chi-bar square distribution as
@@ -1179,9 +1180,17 @@ We repeat this experiment \ensuremath{10^{5}} times and collect the \ensuremath{
 p-values. 
 In \figref{motherload_sims_hidden_plotz}, we present a P-P plot of those
 P-values against the uniform law.
+P-P plots for such sample sizes are hard to interpret unless they show
+gross deviances from the uniform law. 
+Instead we present a subsampled P-P plot, as suggested by V{\\'e}lez and Correa Morales. \\cite{velez2015modified} ",
+The difference between empirical and theoretical p-values at vigintiles
+are plotted, along with the error bars around the $x$ axis based on 
+the theoretical density and sample size. 
+
 That plot suggests that the p-values are indeed uniformly distributed.
-To check the tail behavior of our computed p-values we present
-a P-P plot of $2\min\wrapParens{p,1-p}$ in log-log space in 
+To check the tail behavior of our computed p-values we transform
+the $p$ values by $p \mapsto \log{2\min\wrapParens{p,1-p}}$, and
+present a subsampled Q-Q plot against a log uniform law, in 
 \figref{motherload_sims_log_plotz}. 
 Slight deviations from uniformity are visible in that plot, but on
 the whole we believe this plot indicates that our p-values are
@@ -1190,14 +1199,14 @@ uniform in their tails as well.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_hidden_plotz-1} \caption{The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law. Given the large sample size, a Q-Q plot is visually hard to interpret. Instead we plot the deviance of sample quantiles from the theoretical quantiles, with error bars around the $x$ axis, as suggested by V{\'e}lez and Correa Morales. \cite{velez2015modified} Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:motherload_sims_hidden_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_hidden_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law]{The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law. Given the large sample size, a Q-Q plot is visually hard to interpret. Instead we plot the deviance of sample quantiles from the theoretical quantiles, with error bars around the $x$ axis. \cite{velez2015modified} Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:motherload_sims_hidden_plotz}
 \end{figure}
 
 
 \end{knitrout}
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_log_plotz-1} \caption{We repeat the P-P plot of \figref{motherload_sims_hidden_plotz}, but in log-log space.  To check uniformity in both tails we compute and plot $p_{*}=2\min\wrapParens{p,1-p}$ versus a uniform distribution.  To reduce plot size, we zoom in on the lower left corner of the P-P plot.}\label{fig:motherload_sims_log_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_log_plotz-1} \caption{We repeat the P-P plot of \figref{motherload_sims_hidden_plotz}, but in log-log space.  To check uniformity in both tails we compute $p_{*} = \log{2\min\wrapParens{p,1-p}}$, and plot against a log uniform law. Again, we plot the deviance of sample quantiles from the theoretical quantiles, with error bars around the $x$ axis. \cite{velez2015modified} Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. }\label{fig:motherload_sims_log_plotz}
 \end{figure}
 
 
@@ -1232,7 +1241,7 @@ elements of the estimate of \RMAT.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_sims_log_plotz-1} \caption[P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr]{P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr. P values $p$ were transformed to $p_{*}=2\min\wrapParens{p,1-p}$, then the $p_{*}$ are P-P plotted against uniformity.  Once again we zoom in on the lower left corner to save plot size.}\label{fig:causal_sims_log_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_sims_log_plotz-1} \caption[P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr]{P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr. P values $p$ were transformed to $p_{*}=\log{2\min\wrapParens{p,1-p}}$, then the $p_{*}$ are Q-Q plotted against a log uniform law, using the subsampling procedure. }\label{fig:causal_sims_log_plotz}
 \end{figure}
 
 
@@ -1321,7 +1330,7 @@ We remain cautiously optimistic that for large \ssiz, one need correct
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 10000 simulations are plotted against a uniform law]{The computed p-values from the conditional estimation procedure over 10000 simulations are plotted against a uniform law.  Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Once again we focus on the lower left corner of the plots to trim the plot size.}\label{fig:causal_tfive_sims_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption{The computed p-values from the conditional estimation procedure over 10000 simulations are transformed via $p_{*} = \log{2\min\wrapParens{p,1-p}}$, then plotted against a log uniform law using the subsampling procedure. Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Once again we focus on the lower left corner of the plots to trim the plot size.}\label{fig:causal_tfive_sims_plotz}
 \end{figure}
 
 

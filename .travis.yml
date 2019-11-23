@@ -13,3 +13,6 @@ env:
 script:
 - chmod +x .travis/travis-texbuild.sh
 - ".travis/travis-texbuild.sh"
+branches:
+  except:
+    - experimental

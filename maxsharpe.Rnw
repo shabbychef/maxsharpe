@@ -81,6 +81,7 @@
 \providecommand{\stsr}[1][]{\stsrUL{}{#1}}
 \providecommand{\ssravg}[1][]{\mathUL{\bar{\prvSNR}}{}{#1}}
 \providecommand{\logof}[1]{\funcit{\operatorname{log}}{#1}}  
+\providecommand{\minof}[1]{\funcit{\operatorname{min}}{#1}}  
 
 % knitr setup%FOLDUP
 
@@ -1442,7 +1443,9 @@ fig_cap <- paste0('We repeat the P-P plot of \\figref{motherload_sims_hidden_plo
                   'To check uniformity in both tails we compute $p_{*} = \\logof{2\\min\\wrapParens{p,1-p}}$, and plot against a log uniform law. ',
                   'Again, we plot the deviance of sample quantiles from the theoretical quantiles, ',
                   "with error bars around the $x$ axis. \\cite{velez2015modified} ",
-                  'Simulations use the exact \\RMAT and \\pvsnr to compute the covariance matrix. ')
+                  'Simulations use the exact \\RMAT and \\pvsnr to compute the covariance matrix. ',
+                  'The plot indicates that the p-values reported by the procedure are slightly smaller than they theoretically should be; ',
+                  'given the log transform, one can interpret the plot as indicating the nominal p-values are around 1-2\\% smaller than they should be. ')
 
 #limsy <- c(1e-6,5e-3)
 #ph <- sim %>%
@@ -1683,7 +1686,8 @@ fig_cap <- paste0('The computed p-values from the conditional estimation procedu
                   'The experiments are performed twice: first assuming that returns are Gaussian; ',
                   'then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  ',
                   'Both procedures give near-uniform p values. ',
-                  'Once again we focus on the lower left corner of the plots to trim the plot size.')
+                  'Without correcting for higher order moments, the nominal p values are larger than uniform, on the order of 5\\% larger; ',
+                  'under the correction, however, the nominal p values are smaller than uniform, by as much as 10\\%. ')
 
 # 155290d7-d763-4034-b068-0d68e6d874db 
 suppressMessages({

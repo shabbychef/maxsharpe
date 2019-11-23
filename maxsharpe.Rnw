@@ -80,8 +80,8 @@
 \providecommand{\stsrUL}[2]{\mathUL{\hat{\altSNR}}{#1}{#2}}
 \providecommand{\stsr}[1][]{\stsrUL{}{#1}}
 \providecommand{\ssravg}[1][]{\mathUL{\bar{\prvSNR}}{}{#1}}
-\providecommand{\logof}[1]{\funcit{\operatorname{log}}{#1}}  
-\providecommand{\minof}[1]{\funcit{\operatorname{min}}{#1}}  
+%\providecommand{\logof}[1]{\funcit{\operatorname{log}}{#1}}  
+%\providecommand{\minof}[1]{\funcit{\operatorname{min}}{#1}}  
 
 % knitr setup%FOLDUP
 
@@ -1362,10 +1362,8 @@ are plotted, along with the error bars around the $x$ axis based on
 the theoretical density and sample size. 
 
 That plot suggests that the p-values are indeed uniformly distributed.
-To check the tail behavior of our computed p-values we transform
-the $p$ values by $p \mapsto \logof{2\min\wrapParens{p,1-p}}$, and
-present a subsampled Q-Q plot against a log uniform law, in 
-\figref{motherload_sims_log_plotz}. 
+As a further check, in \figref{motherload_sims_log_plotz}, we present
+a subsampled Q-Q plot or log transformed p values against a log uniform law.
 Slight deviations from uniformity are visible in that plot, but on
 the whole we believe this plot indicates that our p-values are
 uniform in their tails as well.
@@ -1439,13 +1437,12 @@ suppressMessages({
 	library(ggplot2)
 })
 
-fig_cap <- paste0('We repeat the P-P plot of \\figref{motherload_sims_hidden_plotz}, but in log-log space.  ',
-                  'To check uniformity in both tails we compute $p_{*} = \\logof{2\\min\\wrapParens{p,1-p}}$, and plot against a log uniform law. ',
+fig_cap <- paste0('We repeat the P-P plot of \\figref{motherload_sims_hidden_plotz}, but plot quantiles of the log p values against a log uniform law. ',
                   'Again, we plot the deviance of sample quantiles from the theoretical quantiles, ',
                   "with error bars around the $x$ axis. \\cite{velez2015modified} ",
                   'Simulations use the exact \\RMAT and \\pvsnr to compute the covariance matrix. ',
-                  'The plot indicates that the p-values reported by the procedure are slightly smaller than they theoretically should be; ',
-                  'given the log transform, one can interpret the plot as indicating the nominal p-values are around 1-2\\% smaller than they should be. ')
+                  'The plot indicates that the smallest p-values reported by the procedure are slightly smaller than they theoretically should be; ',
+                  'given the log transform, one can interpret the plot as indicating the nominal p-values are around 3\\% smaller than they should be. ')
 
 #limsy <- c(1e-6,5e-3)
 #ph <- sim %>%
@@ -1472,7 +1469,7 @@ alpha <- 0.05
 zalp <- qnorm(alpha/2,lower.tail=FALSE)
 
 ph <- sim %>%
-  mutate(logtransp=log(2*pmin(pvals,1-pvals))) %>%
+  mutate(logtransp=log(pvals)) %>%
   pull(logtransp) %>%
   modqq(qnt_func=qlogunif,dens_func=dlogunif,k=19) %>%
   mutate(ymin=-zalp * serr,ymax=zalp * serr) %>%
@@ -1511,8 +1508,8 @@ performing $\Sexpr{nsim}$ simulations,
 setting $\nstrat=\Sexpr{nlatf}$,
 $\RMAT=\makerho{\Sexpr{rho}}{\Sexpr{1-rho}}$.
 $\ssiz=\Sexpr{nday}\dayto{}$, \etc
-In \figref{causal_sims_log_plotz} we P-P plot the transformed p-value,
-$2\min\wrapParens{p,1-p}$ in log-log space.
+In \figref{causal_sims_log_plotz} we present a sampled P-P plot of the log p values
+against a log uniform law.
 Again the simulations appear to be uniform.
 This is not surprising, because, as noted above, the statistical test
 only requires us to estimate the standard error of the \txtSR of the
@@ -1524,8 +1521,7 @@ elements of the estimate of \RMAT.
 # b6aa6d8c-2872-4496-a704-a7e090645a7d 
 fig_cap <- paste0('P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \\RMAT, ',
                   'and the vector of \\txtSNRs, \\pvsnr. ',
-                  'P values $p$ were transformed to $p_{*}=\\logof{2\\min\\wrapParens{p,1-p}}$, then the $p_{*}$ are Q-Q plotted against a log uniform law, ',
-                  'using the subsampling procedure. ')
+                  'Differences in empirical and theoretical vigintiles of log p values are plotted. ')
 suppressMessages({
 	library(dplyr)
 	library(ggplot2)
@@ -1540,7 +1536,7 @@ suppressMessages({
 alpha <- 0.05
 zalp <- qnorm(alpha/2,lower.tail=FALSE)
 ph <- causim %>%
-  mutate(logtransp=log(2*pmin(pvals,1-pvals))) %>%
+  mutate(logtransp=log(pvals)) %>%
   pull(logtransp) %>%
   modqq(qnt_func=qlogunif,dens_func=dlogunif,k=19) %>%
   mutate(ymin=-zalp * serr,ymax=zalp * serr) %>%
@@ -1669,25 +1665,27 @@ We perform inference twice, once using
 and once using \eqnref{apx_srdist_elliptical} where we have estimated
 the kurtosis factor, \kurty, by taking the median of the sample marginal 
 kurtosises of the assets. 
-In \figref{causal_tfive_sims_plotz} we present the log-space P-P plots
-on the transformed p-values under the two methods of estimating
+In \figref{causal_tfive_sims_plotz} we present the subsampled P-P plots
+on the log-transformed p-values under the two methods of estimating
 the covariance of \svsr.
-There is little difference in the performance of the two sets of simulations. 
+There is little difference in the performance of the two sets of simulations,
+though without the correction, the smallest p-values are slightly smaller
+than nominal, while with the correction they are slightly larger.
 We remain cautiously optimistic that for large \ssiz, one need correct
-\eqnref{apx_srdist_gaussian} to account for non-normal returns.\todo{fix this description...}
+\eqnref{apx_srdist_gaussian} to account for non-normal returns.
 
 
 <<'causal_tfive_sims_plotz',dependson=c('causal_tfive_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 
 fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',nsim,
-                  ' simulations are transformed via $p_{*} = \\logof{2\\min\\wrapParens{p,1-p}}$, then plotted against a log uniform law using the subsampling procedure. ',
+                  ' simulations are logged, then plotted against a log uniform law using the subsampling procedure. ',
                   'Returns are drawn from a $\\tstat{}\\wrapParens{5}$ distribution.  ',
                   'Sample estimates are used to construct the variance-covariance matrix of \\svsr.  ',
                   'The experiments are performed twice: first assuming that returns are Gaussian; ',
                   'then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  ',
                   'Both procedures give near-uniform p values. ',
-                  'Without correcting for higher order moments, the nominal p values are larger than uniform, on the order of 5\\% larger; ',
-                  'under the correction, however, the nominal p values are smaller than uniform, by as much as 10\\%. ')
+                  'Without correcting for higher order moments, the nominal p values are smaller than uniform, on the order of 6\\% larger; ',
+                  'under the correction, however, the nominal p values are larger than uniform, by as much as 3\\%. ')
 
 # 155290d7-d763-4034-b068-0d68e6d874db 
 suppressMessages({
@@ -1710,7 +1708,7 @@ alpha <- 0.05
 zalp <- qnorm(alpha/2,lower.tail=FALSE)
 ph <- rbind(ok_tsim %>% mutate(higher_order=TRUE),
             badtsim %>% mutate(higher_order=FALSE)) %>%
-  mutate(logtransp=log(2*pmin(pvals,1-pvals))) %>%
+  mutate(logtransp=log(pvals)) %>%
   group_by(higher_order) %>%
     summarize(fooret=list(modqq(logtransp,qnt_func=qlogunif,dens_func=dlogunif,k=19))) %>%
   ungroup() %>%
@@ -1858,16 +1856,16 @@ plan(sequential)
 @
 
 We compare the power of the conditional estimation procedure to that of a
-simple MHT correction:
+simple MHT correction, and the one-sided test.
 In our experiments, we 
 draw returns from a Gaussian distribution with diagonal covariance.
 Under this assumption, one can use the distribution of the \tstat{} statistic
 to perform inference on the \txtSNR. \cite{pav_ssc}
-We then use a simple Bonferroni correction to account for the multiple tests
-performed.
+We then use the Bonferroni correction to account for the multiple tests performed.
+We also perform the one-sided test based on the chi-bar square statistic.
 
 Note that in the all equal case, since every asset has the same \txtSNR,
-whichever we select will have the same \txtSNR, and the test should have the
+whichever we select will have the same \txtSNR, and the Bonferroni-corrected test should have the
 same power as the \tstat{}-test for a single asset. 
 The conditional estimation procedure, however, may suffer in this case as
 we may condition on a \ssr[1] that is very close to being non-optimal,
@@ -1906,7 +1904,8 @@ one-good.
 For this case we see little difference in performance for 
 half-good and all equal.
 
-<<'power_plotz_one',dependspn=c('sims_vs_mht'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=paste0('The empirical power of the conditional estimation and MHT corrected tests are shown versus the \\txtSNR of the asset with maximum \\txtSR under different arrangements of the vector \\pvsnr.')>>=
+<<'power_plotz_one',dependspn=c('sims_vs_mht'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+fig_cap <- paste0('The empirical power of the conditional estimation, MHT corrected test, and one-sided test are shown versus the \\txtSNR of the asset with maximum \\txtSR under different arrangements of the vector \\pvsnr.')
 # 482b4da5-36ad-45fe-9c8f-687625aa5cc7 
 #filter(grepl('equal|onegood',mutype)) %>%
 library(ggplot2)
@@ -1927,7 +1926,7 @@ print(ph)
 @
 
 
-The power of the conditional estimation procedure for the all equal
+The power of the conditional estimation procedure for the all-equal
 case is rather disappointing. 
 For the case where all assets have a \txtSNR of
 $\Sexpr{signif(sqrt(252) * max(params$one_zeta),2)}\yrto{-\halff}$,
@@ -1936,28 +1935,38 @@ The test suffers from low power because we are conditioning on
 ``\ssr[1] is the largest \txtSR'', where we should actually
 be conditioning on ``the asset with the largest \txtSR.''
 
-Note the odd plot in the half good facet: the MHT has greater
+Note the odd plot in the half good facet: the MHT correction
+and one-sided tests have greater
 than $0.05$ rejection rate for \emph{negative} \txtSNR. 
 The plot is somewhat misleading in this case, however.
 We have performed
 $\Sexpr{mht_nsim}$ simulations for each setting of the `good'
-\txtSNR; in some very small number of them for the half good
+\txtSNR; in some very small number of them for the half-good
 case, an asset with negative \txtSNR exhibits the maximum
 \txtSR. 
-We are plotting the rejection rate for MHT in this case.
-But note that the null hypothesis that MHT is testing
+We are plotting the rejection rate for the test in this case.
+But note that the null hypothesis that MHT and one-sided test are testing
 \emph{is} violated in this case, because half the assets
-have positive \txtSNR, and the MHT tests the null that all
+have positive \txtSNR, and the alternative procedures test the null that all
 assets have zero or lower \txtSNR.
 We have not shown the probability that a `bad' asset has the
 highest \txtSR, but note that when the `good' \txtSNR
 is greater than $0.05\dayto{-\halff}$ we do not observe this
 occuring even once over the $\Sexpr{mht_nsim}$ simulations performed
 for each setting. 
-This does indicate, however, that the simple settings of the 
-spread of \pvsnr we tested here are unlikely to have revealed 
-all the relevant differences between the two tests or their
-deficiencies in certain situations.
+
+We note that the one-sided test appears to have higher power than either
+of the other tests for the all-equal and half-good populations,
+but fails to reject at all in the one-good case, except under the null.
+This is to be expected, since the chi-bar square test depends strongly
+on all the observed \txtSRs, and in this case we expect many of them
+to be negative.
+
+%In summary we 
+%This does indicate, however, that the simple settings of the 
+%spread of \pvsnr we tested here are unlikely to have revealed 
+%all the relevant differences between the tests or their
+%deficiencies in certain situations.
 
 
 \subsubsection{Simulations under the null versus with correlated returns}
@@ -2061,7 +2070,7 @@ $\ssiz=\Sexpr{mht_nday}$, and perform $\Sexpr{mht_null_nsim}$ simulations to est
 empirical rejection rate.
 In \figref{rho_plotz_one}, we plot the empirical rejection rate versus $\rho$ at the nominal
 $0.05$ type I level. 
-While the conditional estimation procedure appears to maintain the nominal rejection
+While the conditional estimation procedure and one-sided tests appear to maintain the nominal rejection
 rate, even though \RMAT is being estimated from the sample,
 the MHT test is conservative, with near zero rejection rates for large $\rho$.
 The fix for common correlation described in \subsecref{fix_bonferroni} is also tested,

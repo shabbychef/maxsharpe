@@ -1,6 +1,6 @@
 \documentclass[10pt,a4paper,english]{article}\usepackage[]{graphicx}\usepackage[]{color}
-%% maxwidth is the original width if it is less than linewidth
-%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
 \makeatletter
 \def\maxwidth{ %
   \ifdim\Gin@nat@width>\linewidth
@@ -407,7 +407,7 @@ This problem is not unique to quantitative finance, and goes
 by many names: overfitting, p-hacking, data-mining bias, \etc
 To be clear we are interested in the case where one has
 observed \ssiz independent contemporaneous observations of returns
-from \nlatf different ``assets'' (these can be trading strategy
+from \nstrat different ``assets'' (these can be trading strategy
 backtest returns, or mutual fund returns, \etc), selects
 one of those assets based on the historical performance, say
 by selecting the asset with maximum \txtSR; then one wishes
@@ -453,15 +453,15 @@ The Lee procedure was originally devised for analysis of the Lasso,
 but is applicable in general to the case of selection from a 
 normally distributed vector conditional to a linear constraint.
 We simply give an multivariate normal approximation to the
-vector of \txtSRs of \nlatf assets, then appeal to the Lee
+vector of \txtSRs of \nstrat assets, then appeal to the Lee
 \etal procedure.  
 
 Our procedure is midway between the simple MHT
 correction and the Reality Check tests, both computationally
 and in robustness. Our procedure requires one to estimate
 the correlation between returns, which would appear to require
-\bigo{\ssiz \nlatf^2} runtimes. However, only the correlation of the
-selected asset against all others is required, reducing the burden to \bigo{\ssiz\nlatf}.
+\bigo{\ssiz \nstrat^2} runtimes. However, only the correlation of the
+selected asset against all others is required, reducing the burden to \bigo{\ssiz\nstrat}.
 Unlike the bootstrap tests, our procedure is easily adapted
 to the case of producing confidence intervals on the 
 \txtSNR, instead of only supporting hypothesis testing.
@@ -474,10 +474,10 @@ to the case of producing confidence intervals on the
 
 % introduction%FOLDUP
 We consider the following problem: one has observed \ssiz \iid samples
-of some $\nlatf$-vector \vreti, representing the returns of $\nlatf$
+of some $\nstrat$-vector \vreti, representing the returns of $\nstrat$
 different ``assets,'' which could be stocks, trading strategies, \etc 
 From the sample one computes the \txtSR of each asset, resulting in 
-a $\nlatf$-vector, \svsr. One will then choose the asset with maximum
+a $\nstrat$-vector, \svsr. One will then choose the asset with maximum
 \txtSR. One then seeks to perform hypothesis tests or compute
 confidence intervals on the \txtSNR of that asset. 
 Here we define the \txtSR as the sample mean divided by sample
@@ -491,7 +491,7 @@ that the first asset has demonstrated the highest \txtSR.
 This is to avoid the cumbersome notation of $\ssr[(1)]$,
 and we instead can just write $\ssr[1]$. We note this maximum
 condition can be written in the form $\AAA\svsr \le \bbb$ for
-\bby{\nlatf-1}{\nlatf} matrix $\AAA$ defined by
+\bby{\nstrat-1}{\nstrat} matrix $\AAA$ defined by
 $$
 \AAA = \wrapBracks{\begin{array}{ccccc}
   -1 & 1 & 0 & \ldots & 0\\
@@ -507,7 +507,7 @@ $$
   %0
 %\end{array}}.
 $$
-and where $\bbb$ is the $\wrapParens{\nlatf-1}$-dimensional zero vector.
+and where $\bbb$ is the $\wrapParens{\nstrat-1}$-dimensional zero vector.
 Also note that we are interested in performing inference on $\psnr[1]$,
 which we can express as $\trAB{\etav}{\pvsnr}$ for $\etav=\basev[1]$.
 
@@ -568,17 +568,17 @@ is good enough to use the procedure of Lee \etal for testing the
 Here we derive the asymptotic distribution of \txtSR, following
 Jobson and Korkie 
 \emph{inter alia}. \cite{jobsonkorkie1981,lo2002,mertens2002comments,pav_ssc}
-Consider the case of \nlatf possibly correlated returns streams,
-with each observation denoted by the $\nlatf$-vector \vreti.
-Let \pvmu be the \nlatf-vector of population means, and let
-\pvmom[2] be the \nlatf-vector of the uncentered second moments.
+Consider the case of \nstrat possibly correlated returns streams,
+with each observation denoted by the $\nstrat$-vector \vreti.
+Let \pvmu be the \nstrat-vector of population means, and let
+\pvmom[2] be the \nstrat-vector of the uncentered second moments.
 Let \pvsnr be the vector of \txtSNRs of the assets. Let \rfr be the
 `risk free rate'. We have
 $$
 \pvsnr[i] = \frac{\pvmu[i] - \rfr}{\sqrt{\pvmom[2,i] - \pvmu[i]^2}}.
 $$
 
-Consider the $2\nlatf$ vector of \vreti, `stacked' with
+Consider the $2\nstrat$ vector of \vreti, `stacked' with
 \vreti squared elementwise, \vcat{\vreti}{\vreti^2}.
 The expected value of this vector is \vcat{\pvmu}{\pvmom[2]};
 let \pvvar be the variance of this vector, assuming it exists.
@@ -608,7 +608,7 @@ By the multivariate delta method,
 \normlaw{0,\qoform{\pvvar}{\wrapParens{\dbyd{\pvsnr}{\vcat{\pvmu}{\pvmom[2]}}}}}.
 \label{eqn:delmethod}
 \end{equation}
-Here the derivative takes the form of two \sbby{\nlatf}
+Here the derivative takes the form of two \sbby{\nstrat}
 diagonal matrices pasted together side by side:
 \begin{equation}
 \begin{split}
@@ -645,7 +645,7 @@ with powers taken elementwise.
 In practice, the population values, \pvmu, \pvmom[2], \pvvar
 are all unknown, and so the asymptotic variance has to be estimated,
 using the sample. 
-This is impractical for large $\nlatf$, so instead one may wish to impose
+This is impractical for large $\nstrat$, so instead one may wish to impose
 some distributional assumptions on \vreti.
 
 %Letting \svvar be some sample estimate of \pvvar,
@@ -715,7 +715,7 @@ marginals.  \cite{vignat2007extension}
 However, elliptically distributed returns have no skew, which makes them
 less than ideal for modeling returns series. 
 Once again note how this equation reduces to the form of the standard error
-described by Mertens in the case of $\nlatf=1$. \cite{mertens2002comments}
+described by Mertens in the case of $\nstrat=1$. \cite{mertens2002comments}
 
 %Note how in the case of scalar Gaussian returns, this reduces to \eqnref{srci_lo}.
 %Consider the case where \vreti is drawn from an elliptical distribution
@@ -792,7 +792,7 @@ covariance of the asset with maximum \txtSR against all the rest.
 %for example Mertens' equation. \cite{lo2002,mertens2002comments,baoestimation,pav_ssc}
 
 Note that \corollaryref{sr_est} has uses beyond the stated problem of performing inference on the asset with the largest \txtSR. 
-For example, suppose you observe the \txtSRs of \nlatf assets, then select the asset with the largest \emph{absolute} \txtSR,
+For example, suppose you observe the \txtSRs of \nstrat assets, then select the asset with the largest \emph{absolute} \txtSR,
 choosing whether to hold it long or short depending on the sign of the \txtSR.
 You wish to perform inference on your strategy.
 In this case, again reorder the assets such that the first asset has the highest absolute \txtSR, but also
@@ -804,14 +804,14 @@ One wishes to also use the result for more general problems wherein one will hol
 of assets, conditional on some observed properties of \svsr. For example:
 \begin{itemize}
   \item
-    Suppose you observe the \txtSRs of \nlatf assets, then select the top $k$ by \txtSR, then
+    Suppose you observe the \txtSRs of \nstrat assets, then select the top $k$ by \txtSR, then
     you choose to hold an some portfolio of those $k$ assets.
-    In this case set $\AAA$ and $\bbb$ to reflect the ``$k$ choose $\nlatf - k$'' relevant
+    In this case set $\AAA$ and $\bbb$ to reflect the ``$k$ choose $\nstrat - k$'' relevant
     inequalities to condition on.
     %Let $\etav$ be the indicator for the top $k$ assets.
     %ACK! 2FIX: you are not concerned about the linear combination of these ...
   \item
-    Suppose you observe the \txtSRs of \nlatf assets, then select all assets with \txtSR greater than
+    Suppose you observe the \txtSRs of \nstrat assets, then select all assets with \txtSR greater than
     some minimum value, \psnr[*]. Then you choose to hold some portfolio of all assets that
     pass the bar. In this case you need to modify $\AAA$ and $\bbb$ to condition on the passing
     assets having \txtSRs greater than \psnr[*] and the remaining assets having lower \txtSR.
@@ -854,8 +854,8 @@ So to test the null hypothesis
 \end{equation*}
 compute the \txtSRs, \svsr, then
 reject at the $\typeI$ level when
-$\sqrt{\ssiz} \max_i \svsr[i]$ exceeds $\nctqnt{1-\typeI/\nlatf}{\sqrt{\ssiz} c}{\ssiz-1}$,
-the $1-\typeI/\nlatf$ quantile of the 
+$\sqrt{\ssiz} \max_i \svsr[i]$ exceeds $\nctqnt{1-\typeI/\nstrat}{\sqrt{\ssiz} c}{\ssiz-1}$,
+the $1-\typeI/\nstrat$ quantile of the 
 non-central \tstat-distribution with $\ssiz - 1$
 degrees of freedom and non-centrality parameter $\sqrt{\ssiz} c$.
 
@@ -894,7 +894,7 @@ where $\ichol{\RMAT}$ is the inverse of the (symmetric) square root of $\RMAT$.
 Under the assumed form for \RMAT given in \eqnref{simple_RMAT}, it is simple to confirm that
 \begin{equation}
   \label{eqn:simple_RMAT_ichol}
-  \ichol{\RMAT} = \makerho{\oneby{\nlatf}\wrapParens{\oneby{\sqrt{1-\rho+\nlatf\rho}} - \oneby{\sqrt{1-\rho}}}}{\wrapParens{1-\rho}^{-1/2}}.
+  \ichol{\RMAT} = \makerho{\oneby{\nstrat}\wrapParens{\oneby{\sqrt{1-\rho+\nstrat\rho}} - \oneby{\sqrt{1-\rho}}}}{\wrapParens{1-\rho}^{-1/2}}.
 \end{equation}
 (This relation holds if we replace \ogram{\vone} in \RMAT with \ogram{\pmone} where
 $\pmone$ is any vector whose elements are $\pm 1$. However in this case
@@ -909,11 +909,11 @@ convention we have reordered the elements such that the first element of
 $\forall_i \psnr[i]=c$, compute
 \begin{equation}
   z_1 = \frac{\sqrt{\ssiz}\ssr[1]}{\sqrt{1-\rho}} + 
-  \wrapParens{\oneby{\sqrt{1-\rho+\nlatf\rho}} - \oneby{\sqrt{1-\rho}}} \sqrt{\ssiz}\wrapParens{\frac{\tr{\vone}\svsr}{\nlatf} - c},
+  \wrapParens{\oneby{\sqrt{1-\rho+\nstrat\rho}} - \oneby{\sqrt{1-\rho}}} \sqrt{\ssiz}\wrapParens{\frac{\tr{\vone}\svsr}{\nstrat} - c},
   \label{eqn:fix_bonf_z}
 \end{equation}
 and reject the null hypothesis when $z_1$ is bigger than 
-$\qnorm{1-\typeI/\nlatf},$ the $1-\typeI/\nlatf$ quantile of the normal distribution.
+$\qnorm{1-\typeI/\nstrat},$ the $1-\typeI/\nstrat$ quantile of the normal distribution.
 In practice $\rho$ must be estimated. This could be done by computing the correlations
 of the first asset against all others, then taking the average.
 
@@ -947,17 +947,17 @@ This is an area of continued research.
   %z_1 = \sqrt{\ssiz}\sqrt{\qiform{\RMAT}{\basev[1]}} \wrapParens{\ssr[1] - \psnr[0]} \approx \normlaw{0,1}.
 %\end{equation}
 %Again, reject the null hypothesis when $z_1$ is bigger than 
-%$\qnorm{1-\typeI/\nlatf},$ the $1-\typeI/\nlatf$ quantile of the normal distribution.
+%$\qnorm{1-\typeI/\nstrat},$ the $1-\typeI/\nstrat$ quantile of the normal distribution.
 
 %Under the assumed form of \RMAT, we have
 %\begin{equation*}
-  %\minv{\RMAT} = \makerho{\frac{-\rho}{\wrapParens{1-\rho}\wrapBracks{\nlatf \rho + 1 - \rho}}}{\frac{1}{1-\rho}},
+  %\minv{\RMAT} = \makerho{\frac{-\rho}{\wrapParens{1-\rho}\wrapBracks{\nstrat \rho + 1 - \rho}}}{\frac{1}{1-\rho}},
 %\end{equation*}
 %and thus 
-%%c = \sqrt{\frac{\nlatf\rho + 1 - 2 \rho}{1-\rho}}.
+%%c = \sqrt{\frac{\nstrat\rho + 1 - 2 \rho}{1-\rho}}.
 %\begin{equation*}
   %z_1 = \sqrt{\ssiz}
-  %\sqrt{\frac{\nlatf\rho + 1 - 2 \rho}{1-\rho}}
+  %\sqrt{\frac{\nstrat\rho + 1 - 2 \rho}{1-\rho}}
   %\wrapParens{\ssr[1] - \psnr[0]}.
 %\end{equation*}
 
@@ -1002,7 +1002,7 @@ to test the null hypothesis
 $\forall_i \psnr[i]=c$, compute $z_1$ as in \eqnref{fix_bonf_z},
 plugging in $\rho$, 
 and reject the null hypothesis when $z_1$ is bigger than 
-$\qnorm{1-\typeI/\nlatf},$ the $1-\typeI/\nlatf$ quantile of the normal distribution.
+$\qnorm{1-\typeI/\nstrat},$ the $1-\typeI/\nstrat$ quantile of the normal distribution.
 This procedure has (approximate) type I rate \emph{no greater} than $\typeI$.
 
 \subsection{Testing against one-sided alternatives}
@@ -1018,21 +1018,24 @@ would be via Hotelling's $T^2$ test.  \cite{anderson2003introduction,press2012ap
 However, we are mostly not interested in the case where some of
 the $\psnr[i]$ are less than $c$. 
 One-sided multivariate tests were designed for this task.
+They may not scale well to the case of large \nstrat, except perhaps
+under simple models for correlation.
 %However, they often require that one construct a statistic like Hotelling's $T^2$,
 %which in our case would involve inverting the covariance of $\svsr$.
-%This will not scale well computationally to allow testing with large \nlatf.
+%This will not scale well computationally to allow testing with large \nstrat.
 
-One-sided tests will not scale well to the case of large \nlatf, except perhaps
+One-sided tests will not scale well to the case of large \nstrat, except perhaps
 under simple models for correlation.
 Consider testing the following null
 \begin{equation*}
-\Hyp[0] : \forall_i \psnr[i]=\psnr[0]\quad\mbox{versus}\quad \Hyp[1] :  \exists_i \psnr[i] > \psnr[0],
+\Hyp[0] : \forall_i \psnr[i]=\psnr[0]\quad\mbox{versus}\quad \Hyp[1] :  
+\forall_i \psnr[i]\ge\psnr[0]\,\,\mbox{and}\,\, \exists_j \psnr[j] > \psnr[0],
 \end{equation*}
 subject to the simple model of \eqnref{simple_RMAT} with $\rho \ge 0$.
 The inverse square root of \RMAT, given in \eqnref{simple_RMAT_ichol}, is monotonic.
 Moreover, 
 \begin{equation*}
-  \ichol{\RMAT} \vone = \oneby{\sqrt{1-\rho+\nlatf\rho}}.
+  \ichol{\RMAT} \vone = \oneby{\sqrt{1-\rho+\nstrat\rho}}.
 \end{equation*}
 
 Again assume the approximation of \eqnref{apx_srdist_simple},
@@ -1050,7 +1053,7 @@ the null hypothesis can then be expressed as
   c \psnr[i] = c \psnr[0]\quad\mbox{versus}\quad \Hyp[1] :  \exists_i 
   c \psnr[i] > c \psnr[0],
 \end{equation*}
-for $c=\wrapParens{1+\wrapParens{\nlatf-1}\rho}^{-\halff}$.
+for $c=\wrapParens{1+\wrapParens{\nstrat-1}\rho}^{-\halff}$.
 The equivalence of the alternative hypothesis follows from positivity of the $c$.
 
 
@@ -1058,19 +1061,19 @@ We can then appeal to the simple chi-bar square test.  \cite{nla.cat-vn3800977}
 First compute the test statistic
 \begin{equation}
   \label{eqn:chibstat}
-  \bar{x}^2 = \sum_i \frac{\ssiz}{1+\wrapParens{\nlatf-1}\rho} \pospsq{\wrapParens{\ssr[i] - \psnr[0]}},
+  \bar{x}^2 = \sum_i \frac{\ssiz}{1+\wrapParens{\nstrat-1}\rho} \pospsq{\wrapParens{\ssr[i] - \psnr[0]}},
 \end{equation}
 where $\posp{y}$ is the positive part of $y$, \ie $\posp{y}=y$ if $y > 0$ and zero otherwise.
 Then compute the CDF of the corresponding chi-bar square distribution as
 \begin{equation}
   \label{eqn:chibp}
-  Q = \sum_{i=0}^{\nlatf} w_i {\chisqcdf{\bar{x}^2}{i}},
+  Q = \sum_{i=0}^{\nstrat} w_i {\chisqcdf{\bar{x}^2}{i}},
 \end{equation}
 where $\chisqcdf{i}{x}$ is the cumulative distribution of the $\chi^2$ distribution
 with $i$ degrees of freedom, and $w_i$ are the chi-bar square weights.
 In this case they are defined as
 $$
-w_i = {\nlatf \choose i}{2^{-\nlatf}}.
+w_i = {\nstrat \choose i}{2^{-\nstrat}}.
 $$
 Reject the null hypothesis at the \typeI level if $1-Q \le \typeI$.
 
@@ -1094,13 +1097,13 @@ the case where returns are highly correlated, as one expects when
 returns are from backtested quantitative trading strategies, is via 
 a subspace approximation.
 %a Markowitz approximation. 
-First we assume that the $\bby{\ssiz}{\nlatf}$ matrix of returns, \mreti
+First we assume that the $\bby{\ssiz}{\nstrat}$ matrix of returns, \mreti
 can be approximated by a $k$-dimensional subspace
 $$
 \mreti \approx \Mtx{Y}\Mtx{W},
 $$
 where $\Mtx{Y}$ is a $\bby{\ssiz}{k}$ matrix of `latent' returns,
-and $\Mtx{W}$ is a $\bby{k}{\nlatf}$ `loading' matrix.
+and $\Mtx{W}$ is a $\bby{k}{\nstrat}$ `loading' matrix.
 
 Now the column of \mreti with maximal \svsr has \txtSR that
 is smaller than
@@ -1161,7 +1164,7 @@ development.  \cite{pav_maxsharpe_two}
 First we seek to establish if, and under what circumstances, 
 the normal approximation of \eqnref{apx_srdist_gaussian} is sufficiently accurate to 
 give nominal coverage under the conditional estimation procedure.
-First we test a single case of $\nlatf=100$ using a correlation
+First we test a single case of $\nstrat=100$ using a correlation
 matrix that is $\rho=0.7$ on the off-diagonals:
 $\RMAT=\makerho{0.7}{0.3}$.
 We generate Gaussian returns over $1260$ days, approximately
@@ -1176,7 +1179,7 @@ the covariance via \eqnref{apx_srdist_gaussian}.
 This is not, of course, how the test would be applied in practice since
 \RMAT and \pvsnr have to be estimated.
 
-We repeat this experiment \ensuremath{10^{5}} times and collect the \ensuremath{10^{5}}
+We repeat this experiment 1000 times and collect the 1000
 p-values. 
 In \figref{motherload_sims_hidden_plotz}, we present a P-P plot of those
 P-values against the uniform law.
@@ -1199,7 +1202,7 @@ uniform in their tails as well.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_hidden_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law]{The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law. Given the large sample size, a Q-Q plot is visually hard to interpret. Instead we plot the deviance of sample quantiles from the theoretical quantiles, with error bars around the $x$ axis. \cite{velez2015modified} Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:motherload_sims_hidden_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_hidden_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 1000 simulations are compared to a uniform law]{The computed p-values from the conditional estimation procedure over 1000 simulations are compared to a uniform law. Given the large sample size, a Q-Q plot is visually hard to interpret. Instead we plot the deviance of sample quantiles from the theoretical quantiles, with error bars around the $x$ axis. \cite{velez2015modified} Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:motherload_sims_hidden_plotz}
 \end{figure}
 
 
@@ -1227,8 +1230,8 @@ So we repeat the experiments, but plug in the usual sample estimate of covarianc
 vector of \txtSRs into \eqnref{apx_srdist_gaussian} to estimate the covariance
 matrix of \svsr. 
 Other than this change, we repeat the previous experiment, 
-performing $\ensuremath{10^{5}}$ simulations, 
-setting $\nlatf=100$,
+performing $1000$ simulations, 
+setting $\nstrat=100$,
 $\RMAT=\makerho{0.7}{0.3}$.
 $\ssiz=1260\dayto{}$, \etc
 In \figref{causal_sims_log_plotz} we P-P plot the transformed p-value,
@@ -1236,7 +1239,7 @@ $2\min\wrapParens{p,1-p}$ in log-log space.
 Again the simulations appear to be uniform.
 This is not surprising, because, as noted above, the statistical test
 only requires us to estimate the standard error of the \txtSR of the
-asset with maximum \txtSR, and so does not greatly rely on the $\nlatf^2$
+asset with maximum \txtSR, and so does not greatly rely on the $\nstrat^2$
 elements of the estimate of \RMAT.
 
 \begin{knitrout}\small
@@ -1270,19 +1273,19 @@ from the $y=x$ line in a P-P plot like
 So we repeat the previous experiments, using a feasible estimator of the covariance matrix of \svsr. 
 Again we draw returns from a Gaussian distribution.
 We let $\ssiz$ vary from $126$ to $2016$;
-we let $\nlatf$ vary from $50$ to $200$;
+we let $\nstrat$ vary from $50$ to $200$;
 we let $\rho$ vary from $0$ to $0.8$
 where we take 
 $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$;
 we take $\pvsnr$ to be a uniform sequence from $0$ to 
 $0.1\dayto{-\halff}$.
 For each setting of the parameters in the Cartesian product we perform
-$\ensuremath{5\times 10^{4}}$ simulations, computing p values from the feasible estimator.
+$500$ simulations, computing p values from the feasible estimator.
 
 In \figref{many_sims_plotz} we plot those K-S statistics against $\ssiz$,
-with facets for $\rho$ and $\nlatf$. 
+with facets for $\rho$ and $\nstrat$. 
 All else equal, we expect the approximation to be worse, and thus the K-S statistics
-to be higher, for smaller \ssiz and larger \nlatf.
+to be higher, for smaller \ssiz and larger \nstrat.
 %For the most part this does not seem born out, and there does not seem to be
 %a general pattern to the quality of our approximation.
 This pattern is somewhat visible in the plots, 
@@ -1290,12 +1293,12 @@ although large $\rho$ seems to reduce the number of `pseudo-assets' in that
 relationship.
 However, with the given limited evidence,
 we cannot claim to have definitively established where our procedure breaks down,
-but warn users that the $\nlatf \gg \ssiz$ cases are likely to be problematic
+but warn users that the $\nstrat \gg \ssiz$ cases are likely to be problematic
 in the sense that nominal type I rates may not be maintained.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_many_sims_plotz-1} \caption[Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\ssiz$ with facets for $\nlatf$ and $\rho$]{Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\ssiz$ with facets for $\nlatf$ and $\rho$.  Broadly we see that the test statistic is less uniform in the regime where $\nlatf\gg\ssiz$, but that a large positive $\rho$ perhaps reduces the number of assets in that relationship.}\label{fig:many_sims_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_many_sims_plotz-1} \caption[Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\ssiz$ with facets for $\nstrat$ and $\rho$]{Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\ssiz$ with facets for $\nstrat$ and $\rho$.  Broadly we see that the test statistic is less uniform in the regime where $\nstrat\gg\ssiz$, but that a large positive $\rho$ perhaps reduces the number of assets in that relationship.}\label{fig:many_sims_plotz}
 \end{figure}
 
 
@@ -1311,8 +1314,8 @@ The simulations above were carried out assuming Gaussian returns, and using
 Gaussian returns are not a good model for real asset returns,
 so we repeat those simulations with returns drawn from a multivariate $\tstat{}$-distribution
 with $5$ degrees of freedom.  \cite{Lin1972339,kotz2004multivariate}
-Again we perform $\ensuremath{10^{4}}$ simulations with
-$\nlatf=100$,
+Again we perform $100$ simulations with
+$\nstrat=100$,
 $\RMAT=\makerho{0.7}{0.3}$,
 $\ssiz=1260\dayto{}$, \etc
 We perform inference twice, once using 
@@ -1330,7 +1333,7 @@ We remain cautiously optimistic that for large \ssiz, one need correct
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption{The computed p-values from the conditional estimation procedure over 10000 simulations are transformed via $p_{*} = \log{2\min\wrapParens{p,1-p}}$, then plotted against a log uniform law using the subsampling procedure. Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Once again we focus on the lower left corner of the plots to trim the plot size.}\label{fig:causal_tfive_sims_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption{The computed p-values from the conditional estimation procedure over 100 simulations are transformed via $p_{*} = \log{2\min\wrapParens{p,1-p}}$, then plotted against a log uniform law using the subsampling procedure. Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Once again we focus on the lower left corner of the plots to trim the plot size.}\label{fig:causal_tfive_sims_plotz}
 \end{figure}
 
 
@@ -1344,16 +1347,16 @@ We remain cautiously optimistic that for large \ssiz, one need correct
 We wish to test the power of the method under the alternative hypothesis.
 However, it is hard to state exactly what constitutes the alternative.
 One interpretation is that we condition on $\psnr[1] > 0$, where again
-the indexing is such that $\ssr[1]$ was the maximum over $\nlatf$ assets;
+the indexing is such that $\ssr[1]$ was the maximum over $\nstrat$ assets;
 then we estimate the probability of (correctly) rejecting $\psnr[1] = 0$
 versus $\psnr[1]$. However, we suspect that the power, as described in 
 this way, would depend on the distribution of
 values of \pvsnr.
 
-We will consider two extremes: one where all \nlatf elements of \psnr are
-equal (``all equal''), and one where $m$ of \nlatf elements of \psnr
-are equal to some positive value, and the remaining $\nlatf - m$ are negative
-that value (``m-good''), mostly for the case where $m=1$ or $\nlatf = 2m$, which
+We will consider two extremes: one where all \nstrat elements of \psnr are
+equal (``all equal''), and one where $m$ of \nstrat elements of \psnr
+are equal to some positive value, and the remaining $\nstrat - m$ are negative
+that value (``m-good''), mostly for the case where $m=1$ or $\nstrat = 2m$, which
 we call ``half-good''.
 
 % power vs the MHT?
@@ -1376,10 +1379,10 @@ same power as the \tstat{}-test for a single asset.
 The conditional estimation procedure, however, may suffer in this case as
 we may condition on a \ssr[1] that is very close to being non-optimal,
 resulting in a small test statistic for which we do not reject.
-On the other hand, for the one-good case, as the $\nlatf - 1$ assets 
+On the other hand, for the one-good case, as the $\nstrat - 1$ assets 
 may have considerably negative \txtSNR, they are unlikely to exhibit the
 largest \txtSR, and so the MHT is merely testing a single asset, but
-at the $\typeI / \nlatf$ level instead of the $\typeI$ level, resulting
+at the $\typeI / \nstrat$ level instead of the $\typeI$ level, resulting
 in lower power. The conditional estimation procedure, however, should
 not suffer in this test.
 
@@ -1390,7 +1393,7 @@ to an `annualized' \txtSNR of around
 $2.4\yrto{-\halff}$.
 We draw Gaussian returns with diagonal covariance for
 $100$ assets, with $\ssiz=1008$.
-For each setting we perform $\ensuremath{10^{4}}$ simulations then 
+For each setting we perform $100$ simulations then 
 compute the empirical rejection rate of the test at the $0.05$ level,
 conditional on the \txtSNR of the \emph{selected} asset, which is
 to say the one with the largest \txtSR. Note that in some simulations
@@ -1432,7 +1435,7 @@ Note the odd plot in the half good facet: the MHT has greater
 than $0.05$ rejection rate for \emph{negative} \txtSNR. 
 The plot is somewhat misleading in this case, however.
 We have performed
-$\ensuremath{10^{4}}$ simulations for each setting of the `good'
+$100$ simulations for each setting of the `good'
 \txtSNR; in some very small number of them for the half good
 case, an asset with negative \txtSNR exhibits the maximum
 \txtSR. 
@@ -1444,7 +1447,7 @@ assets have zero or lower \txtSNR.
 We have not shown the probability that a `bad' asset has the
 highest \txtSR, but note that when the `good' \txtSNR
 is greater than $0.05\dayto{-\halff}$ we do not observe this
-occuring even once over the $\ensuremath{10^{4}}$ simulations performed
+occuring even once over the $100$ simulations performed
 for each setting. 
 This does indicate, however, that the simple settings of the 
 spread of \pvsnr we tested here are unlikely to have revealed 
@@ -1460,8 +1463,8 @@ On the other hand, the MHT test cannot maintain the nominal type I rate in the f
 To demonstrate this, we repeat the experiments above, but setting 
 $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$
 and $\psnr=\vzero$.
-Again we consider $\nlatf=100$, 
-$\ssiz=1008$, and perform $5000$ simulations to estimate the 
+Again we consider $\nstrat=100$, 
+$\ssiz=1008$, and perform $50$ simulations to estimate the 
 empirical rejection rate.
 In \figref{rho_plotz_one}, we plot the empirical rejection rate versus $\rho$ at the nominal
 $0.05$ type I level. 
@@ -1478,7 +1481,7 @@ yielding nominal rejection rates.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for three testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for three testing procedures: the conditional estimation, vanilla Bonferroni correction, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 100 assets over 1008 days. Tests were performed at the $0.05$ level, which appears to be maintained by the conditional estimation and fixed Bonferroni procedures but not by the regular Bonferroni procedure.  Empirical rates are over 5000 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for three testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for three testing procedures: the conditional estimation, vanilla Bonferroni correction, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 100 assets over 1008 days. Tests were performed at the $0.05$ level, which appears to be maintained by the conditional estimation and fixed Bonferroni procedures but not by the regular Bonferroni procedure.  Empirical rates are over 50 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
 \end{figure}
 
 
@@ -1506,8 +1509,8 @@ Healthcare with a \txtSR of
 around $0.192\,\moto{-\halff}$ which is approximately
 $0.664\,\yrto{-\halff}$.
 
-% latex table generated in R 3.4.3 by xtable 1.8-2 package
-% Fri Nov 22 05:48:23 2019
+% latex table generated in R 3.6.1 by xtable 1.8-4 package
+% Tue Nov 19 22:48:56 2019
 \begin{table}[ht]
 \centering
 \begin{tabular}{r|c}

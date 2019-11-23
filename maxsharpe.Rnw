@@ -71,6 +71,16 @@
 
 \providecommand{\sideWarning}[1][0.5]{\marginpar{\hfill\includegraphics[width=#1\marginparwidth]{warning}}}
 
+% transformed... 
+\providecommand{\altSNR}[0]{\xi}
+\providecommand{\ptvsnr}[1][]{\vectUL{\altSNR}{}{#1}}
+\providecommand{\stvsr}[1][]{\vectUL{\hat{\altSNR}}{}{#1}}
+\providecommand{\ptsrUL}[2]{\mathUL{\altSNR}{#1}{#2}}
+\providecommand{\ptsnr}[1][]{\ptsrUL{}{#1}}
+\providecommand{\stsrUL}[2]{\mathUL{\hat{\altSNR}}{#1}{#2}}
+\providecommand{\stsr}[1][]{\stsrUL{}{#1}}
+\providecommand{\ssravg}[1][]{\mathUL{\bar{\prvSNR}}{}{#1}}
+
 % knitr setup%FOLDUP
 
 <<'preamble', include=FALSE, warning=FALSE, message=FALSE>>=
@@ -1072,36 +1082,37 @@ Consider testing the following null
 \forall_i \psnr[i]\ge\psnr[0]\,\,\mbox{and}\,\, \exists_j \psnr[j] > \psnr[0],
 \end{equation*}
 subject to the rank one correlation structure of \eqnref{simple_RMAT} with $\rho \ge 0$.
-The inverse square root of \RMAT, given in \eqnref{simple_RMAT_ichol}, is monotonic.
-Moreover, 
-\begin{equation*}
-  \ichol{\RMAT} \vone = \oneby{\sqrt{1-\rho+\nstrat\rho}}.
-\end{equation*}
-
 Again assume the approximation of \eqnref{apx_srdist_simple},
 \begin{equation*}
 \svsr \approx \normlaw{\pvsnr,\oneby{\ssiz}\RMAT}.
 \end{equation*}
-This can be rewritten as
+Letting $\stvsr = \ichol{\RMAT}\svsr$ and 
+$\ptvsnr = \ichol{\RMAT}\pvsnr$, the normal approximation can be rewritten as
 \begin{equation*}
-  \sqrt{\ssiz}\ichol{\RMAT}\svsr \approx \normlaw{\sqrt{\ssiz}\ichol{\RMAT}\pvsnr,\eye}.
+  \sqrt{\ssiz}\stvsr \approx \normlaw{\sqrt{\ssiz}\ptvsnr,\eye}.
 \end{equation*}
-From the monotonicity and the relation on $\ichol{\RMAT}\vone$,
-the null hypothesis can then be expressed as
+The inverse square root of \RMAT, given in \eqnref{simple_RMAT_ichol}, is monotonic.
+Moreover, 
 \begin{equation*}
-\Hyp[0] : \forall_i 
-  c \psnr[i] = c \psnr[0]\quad\mbox{versus}\quad \Hyp[1] :  \exists_i 
-  c \psnr[i] > c \psnr[0],
+  \ichol{\RMAT} \vone = \wrapParens{1+\wrapParens{\nstrat-1}\rho}^{-\halff} = c > 0.
 \end{equation*}
-for $c=\wrapParens{1+\wrapParens{\nstrat-1}\rho}^{-\halff}$.
-The equivalence of the alternative hypothesis follows from positivity of the $c$.
-
+From the monotonicity of \ichol{\RMAT}, the null and alternative hypotheses can be expressed
+as 
+\begin{equation*}
+\Hyp[0] : \forall_i \ptsnr[i]=c \psnr[0]\quad\mbox{versus}\quad \Hyp[1] :  
+\forall_i \ptsnr[i]\ge c \psnr[0]\,\,\mbox{and}\,\, \exists_j \ptsnr[j] > c \psnr[0].
+\end{equation*}
 
 We can then appeal to the simple chi-bar square test.  \cite{nla.cat-vn3800977}
-First compute the test statistic
+First transform the vector of \txtSRs to \stvsr via 
+$$
+\stvsr=\ichol{\RMAT}\svsr= c\ssravg\vone + \wrapParens{1-\rho}^{-\halff}\wrapParens{\svsr - \ssravg \vone},
+$$
+where $\ssravg$ is the average of the sample \txtSRs.
+Then compute
 \begin{equation}
   \label{eqn:chibstat}
-  \bar{x}^2 = \sum_i \frac{\ssiz}{1+\wrapParens{\nstrat-1}\rho} \pospsq{\wrapParens{\ssr[i] - \psnr[0]}},
+  \bar{x}^2 = \ssiz \sum_i \pospsq{\wrapParens{\stsr[i] - c \psnr[0]}},
 \end{equation}
 where $\posp{y}$ is the positive part of $y$, \ie $\posp{y}=y$ if $y > 0$ and zero otherwise.
 Then compute the CDF of the corresponding chi-bar square distribution as
@@ -1343,7 +1354,7 @@ In \figref{motherload_sims_hidden_plotz}, we present a P-P plot of those
 P-values against the uniform law.
 P-P plots for such sample sizes are hard to interpret unless they show
 gross deviances from the uniform law. 
-Instead we present a subsampled P-P plot, as suggested by V{\\'e}lez and Correa Morales. \\cite{velez2015modified} ",
+Instead we present a subsampled P-P plot, as suggested by V{\'e}lez and Correa Morales. \cite{velez2015modified}
 The difference between empirical and theoretical p-values at vigintiles
 are plotted, along with the error bars around the $x$ axis based on 
 the theoretical density and sample size. 
@@ -1755,6 +1766,8 @@ bot_rawsim <- function(nday,nlatf,one_zeta,nsim=100,rho=0,
   sbwt <- cwts[okwt]
   # should check that sum(sbwt) is around 1
   stopifnot(abs(sum(sbwt) - 1) < 1e-5)
+  cval <- 1/sqrt(1 + (nlatf-1) * rho)
+  dval <- sqrt(1-rho)
 
   # MHT and chibarsquare
   mhtpvals <- replicate(nsim,{
@@ -1765,19 +1778,27 @@ bot_rawsim <- function(nday,nlatf,one_zeta,nsim=100,rho=0,
       x <- colMeans(X) / apply(X,2,sd)
     }
     xm <- which.max(x)
-    pval <- SharpeR::psr(max(x),df=nday-1,zeta=0,ope=1,lower.tail=FALSE) 
+    # the nlatf is the MHT correction here, a Bonferroni hack.
+    pval <- nlatf * SharpeR::psr(max(x),df=nday-1,zeta=0,ope=1,lower.tail=FALSE) 
+
+    # one sided test
+    zetavg <- mean(x)
+    xi <- cval * zetavg + (x-zetavg) / dval
 
     # chibarsquare test, assuming rho=0
-    chibs <- (nday) * sum(pmax(x,0)^2)
+    chibs <- (nday) * sum(pmax(xi,0)^2)
     chibp <- sum(sbwt * pchisq(chibs,df=sbdf,lower.tail=FALSE))
 
     c(pval,chibp,mu[xm])
   })
-  rbind(sim %>% select(-simvals) %>% mutate(pvals=1-pvals) %>% mutate(method='condest'),
-        data_frame(pvals=nlatf * as.numeric(mhtpvals[1,]),  # the pvals here is a correction for mht, a hack
+  rbind(sim %>% 
+        select(-simvals) %>% 
+        mutate(pvals=1-pvals) %>% 
+        mutate(method='condest'),
+        data_frame(pvals=as.numeric(mhtpvals[1,]),
                    popvals=as.numeric(mhtpvals[3,]),
                    method='mht'),
-        data_frame(pvals=as.numeric(mhtpvals[2,]),  # no correction here for chibar square
+        data_frame(pvals=as.numeric(mhtpvals[2,]),
                    popvals=as.numeric(mhtpvals[3,]),
                    method='chibs'))
 }
@@ -1949,6 +1970,16 @@ rawsim <- function(nday,nlatf,nsim=100,rho=0) {
 	apart <- sqrt(nday)/sqrt(1-rho)
 	bpart <- sqrt(nday) * ((1/sqrt(1-rho+nlatf*rho)) - (1/sqrt(1-rho)))
 
+  # weights from chi-bar square distro
+  cwts <- exp(lchoose(nlatf,0:nlatf) - nlatf * log(2))
+  okwt <- (cwts > 1e-9)
+  sbdf <- which(okwt) - 1
+  sbwt <- cwts[okwt]
+  # should check that sum(sbwt) is around 1
+  stopifnot(abs(sum(sbwt) - 1) < 1e-5)
+  cval <- 1/sqrt(1 + (nlatf-1) * rho)
+  dval <- sqrt(1-rho)
+
   mhtpvals <- replicate(nsim,{
 		X <- mvtnorm::rmvnorm(nday,mean=mu,sigma=R)
 		x <- colMeans(X) / apply(X,2,sd)
@@ -1957,10 +1988,18 @@ rawsim <- function(nday,nlatf,nsim=100,rho=0) {
 		corr_stat <- apart * max(x) + bpart * mean(x)
 		corr_pval <- nlatf * pnorm(corr_stat,lower.tail=FALSE)
 
-    c(bonf_pval,corr_pval)
+    # one-sided test
+    zetavg <- mean(x)
+    xi <- cval * zetavg + (x-zetavg) / dval
+    # chibarsquare test, assuming rho=0
+    chibs <- (nday) * sum(pmax(xi,0)^2)
+    chibp <- sum(sbwt * pchisq(chibs,df=sbdf,lower.tail=FALSE))
+
+    c(bonf_pval,corr_pval,chibp)
   })
   data_frame(bonf_pvals=as.numeric(mhtpvals[1,]),
 						 corr_pvals=as.numeric(mhtpvals[2,]),
+             chib_pvals=as.numeric(mhtpvals[3,]),
              nelc_pvals=1-sim$pvals)
 }
 many_rawsim <- function(nday,nlatf,rho,nsim=1000L,nnodes=7) {
@@ -2026,13 +2065,22 @@ yielding nominal rejection rates.
 %Intuitively, the number of `pseudo assets' is reduced when returns have higher correlation, and
 %the Bonferroni correction is too conservative.
 
-<<'rho_plotz_one',dependson=c('correlation_sims_vs_mht'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=paste0('The empirical type I rate under the null hypothesis is plotted versus $\\rho$ for the case where $\\RMAT=\\makerho{\\rho}{\\wrapParens{1-\\rho}}$, for three testing procedures: the conditional estimation, vanilla Bonferroni correction, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for ',mht_nlatf,' assets over ',mht_nday,' days. Tests were performed at the $0.05$ level, which appears to be maintained by the conditional estimation and fixed Bonferroni procedures but not by the regular Bonferroni procedure.  Empirical rates are over ',mht_null_nsim,' simulations. The $y$ axis is in log scale.')>>=
-#85d1c8a5-0c34-4217-95f9-1613751d84e9 
+<<'rho_plotz_one',dependson=c('correlation_sims_vs_mht'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+fig_cap <- paste0('The empirical type I rate under the null hypothesis is plotted versus $\\rho$ ',
+                  'for the case where $\\RMAT=\\makerho{\\rho}{\\wrapParens{1-\\rho}}$, ',
+                  'for three testing procedures: the conditional estimation, vanilla Bonferroni correction, ',
+                  'and Bonferroni correction with fix for common correlation.  ',
+                  'Tests are performed with Gaussian returns, for ',mht_nlatf,' assets over ',mht_nday,' days. ',
+                  'Tests were performed at the $0.05$ level, which appears to be maintained by the conditional ',
+                  'estimation and fixed Bonferroni procedures but not by the regular Bonferroni procedure.  ',
+                  'Empirical rates are over ',mht_null_nsim,' simulations. The $y$ axis is in log scale.')
 library(ggplot2)
 ph <- rhoresu %>%
-  mutate(method=gsub('^nelc_pvals$','cond. est.',method)) %>%
-  mutate(method=gsub('^bonf_pvals$','vanilla MHT',method)) %>%
-  mutate(method=gsub('^corr_pvals$','fixed MHT',method)) %>%
+  mutate(method=case_when(grepl('^nelc_pvals$',method)    ~ 'cond. est.',
+                          grepl('^bonf_pvals$',method)    ~ 'vanilla MHT',
+                          grepl('^chib_pvals$',method)    ~ 'chi-bar square',
+                          grepl('^corr_pvals$',method)    ~ 'fixed MHT',
+                          TRUE ~ 'ERROR')) %>%
   ggplot(aes(rho,rej_rate,color=method))  +
   geom_line() + geom_point() +
   geom_hline(yintercept=0.05,linetype=2,alpha=0.7) + 

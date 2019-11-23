@@ -121,6 +121,16 @@
 
 \providecommand{\sideWarning}[1][0.5]{\marginpar{\hfill\includegraphics[width=#1\marginparwidth]{warning}}}
 
+% transformed... 
+\providecommand{\altSNR}[0]{\xi}
+\providecommand{\ptvsnr}[1][]{\vectUL{\altSNR}{}{#1}}
+\providecommand{\stvsr}[1][]{\vectUL{\hat{\altSNR}}{}{#1}}
+\providecommand{\ptsrUL}[2]{\mathUL{\altSNR}{#1}{#2}}
+\providecommand{\ptsnr}[1][]{\ptsrUL{}{#1}}
+\providecommand{\stsrUL}[2]{\mathUL{\hat{\altSNR}}{#1}{#2}}
+\providecommand{\stsr}[1][]{\stsrUL{}{#1}}
+\providecommand{\ssravg}[1][]{\mathUL{\bar{\prvSNR}}{}{#1}}
+
 % knitr setup%FOLDUP
 
 
@@ -1031,37 +1041,38 @@ Consider testing the following null
 \Hyp[0] : \forall_i \psnr[i]=\psnr[0]\quad\mbox{versus}\quad \Hyp[1] :  
 \forall_i \psnr[i]\ge\psnr[0]\,\,\mbox{and}\,\, \exists_j \psnr[j] > \psnr[0],
 \end{equation*}
-subject to the simple model of \eqnref{simple_RMAT} with $\rho \ge 0$.
-The inverse square root of \RMAT, given in \eqnref{simple_RMAT_ichol}, is monotonic.
-Moreover, 
-\begin{equation*}
-  \ichol{\RMAT} \vone = \oneby{\sqrt{1-\rho+\nstrat\rho}}.
-\end{equation*}
-
+subject to the rank one correlation structure of \eqnref{simple_RMAT} with $\rho \ge 0$.
 Again assume the approximation of \eqnref{apx_srdist_simple},
 \begin{equation*}
 \svsr \approx \normlaw{\pvsnr,\oneby{\ssiz}\RMAT}.
 \end{equation*}
-This can be rewritten as
+Letting $\stvsr = \ichol{\RMAT}\svsr$ and 
+$\ptvsnr = \ichol{\RMAT}\pvsnr$, the normal approximation can be rewritten as
 \begin{equation*}
-  \sqrt{\ssiz}\ichol{\RMAT}\svsr \approx \normlaw{\sqrt{\ssiz}\ichol{\RMAT}\pvsnr,\eye}.
+  \sqrt{\ssiz}\stvsr \approx \normlaw{\sqrt{\ssiz}\ptvsnr,\eye}.
 \end{equation*}
-From the monotonicity and the relation on $\ichol{\RMAT}\vone$,
-the null hypothesis can then be expressed as
+The inverse square root of \RMAT, given in \eqnref{simple_RMAT_ichol}, is monotonic.
+Moreover, 
 \begin{equation*}
-\Hyp[0] : \forall_i 
-  c \psnr[i] = c \psnr[0]\quad\mbox{versus}\quad \Hyp[1] :  \exists_i 
-  c \psnr[i] > c \psnr[0],
+  \ichol{\RMAT} \vone = \wrapParens{1+\wrapParens{\nstrat-1}\rho}^{-\halff} = c > 0.
 \end{equation*}
-for $c=\wrapParens{1+\wrapParens{\nstrat-1}\rho}^{-\halff}$.
-The equivalence of the alternative hypothesis follows from positivity of the $c$.
-
+From the monotonicity of \ichol{\RMAT}, the null and alternative hypotheses can be expressed
+as 
+\begin{equation*}
+\Hyp[0] : \forall_i \ptsnr[i]=c \psnr[0]\quad\mbox{versus}\quad \Hyp[1] :  
+\forall_i \ptsnr[i]\ge c \psnr[0]\,\,\mbox{and}\,\, \exists_j \ptsnr[j] > c \psnr[0].
+\end{equation*}
 
 We can then appeal to the simple chi-bar square test.  \cite{nla.cat-vn3800977}
-First compute the test statistic
+First transform the vector of \txtSRs to \stvsr via 
+$$
+\stvsr=\ichol{\RMAT}\svsr= c\ssravg\vone + \wrapParens{1-\rho}^{-\halff}\wrapParens{\svsr - \ssravg \vone},
+$$
+where $\ssravg$ is the average of the sample \txtSRs.
+Then compute
 \begin{equation}
   \label{eqn:chibstat}
-  \bar{x}^2 = \sum_i \frac{\ssiz}{1+\wrapParens{\nstrat-1}\rho} \pospsq{\wrapParens{\ssr[i] - \psnr[0]}},
+  \bar{x}^2 = \ssiz \sum_i \pospsq{\wrapParens{\stsr[i] - c \psnr[0]}},
 \end{equation}
 where $\posp{y}$ is the positive part of $y$, \ie $\posp{y}=y$ if $y > 0$ and zero otherwise.
 Then compute the CDF of the corresponding chi-bar square distribution as
@@ -1185,7 +1196,7 @@ In \figref{motherload_sims_hidden_plotz}, we present a P-P plot of those
 P-values against the uniform law.
 P-P plots for such sample sizes are hard to interpret unless they show
 gross deviances from the uniform law. 
-Instead we present a subsampled P-P plot, as suggested by V{\\'e}lez and Correa Morales. \\cite{velez2015modified} ",
+Instead we present a subsampled P-P plot, as suggested by V{\'e}lez and Correa Morales. \cite{velez2015modified}
 The difference between empirical and theoretical p-values at vigintiles
 are plotted, along with the error bars around the $x$ axis based on 
 the theoretical density and sample size. 
@@ -1500,12 +1511,12 @@ We download the monthly returns of five industry portfolios
 from Ken French's data library. \cite{ind_5_def}
 %These consist of 
 We consider the 1080 months of data on five industries
-from Jan 1927 to Dec 2016.
+from 1927 to 2016.917.
 We compute the \txtSR of the returns of each, and present them
 in \tabref{mind_sr}. 
 We have reordered the industries in decreasing \txtSR.
 The industry portfolio with the highest \txtSR was
-Healthcare with a \txtSR of 
+ with a \txtSR of 
 around $0.192\,\moto{-\halff}$ which is approximately
 $0.664\,\yrto{-\halff}$.
 
@@ -1532,17 +1543,17 @@ Healthcare & $ 0.192\,\moto{-\halff} $ \\
 
 
 We are interested in computing $95\%$ upper confidence
-intervals on the \txtSNR of the Healthcare portfolio. 
+intervals on the \txtSNR of the  portfolio. 
 We are only considering this portfolio as it is the one with maximum \txtSR
 in our sample.
 If we had been interested in testing
-Healthcare 
+ 
 without our conditional selection, we would compute the confidence interval
 $\left[0.141\,\moto{-\halff}, \infty\right)$ based on inverting the non-central
 \tstat{}-distribution. \cite{pav_ssc,SharpeR-Manual}
 If instead we approximate the standard error by plugging in 
 $0.192\,\moto{-\halff}$ as the \txtSNR of 
-Healthcare 
+ 
 into \eqnref{apx_srdist_gaussian},
 we estimate the standard error of the \txtSR to be
 $0.031\,\moto{-\halff}$.
@@ -1553,7 +1564,7 @@ This also gives the confidence interval
 $\left[0.141\,\moto{-\halff}, \infty\right)$.
 
 Using the simple Bonferroni correction, however, since we selected
-Healthcare 
+ 
 only for having the maximum \txtSR, we should compute the 
 confidence interval by adding
 $\qnorm{0.01}=-2.326$ times the standard error.

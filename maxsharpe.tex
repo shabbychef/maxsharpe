@@ -130,6 +130,7 @@
 \providecommand{\stsrUL}[2]{\mathUL{\hat{\altSNR}}{#1}{#2}}
 \providecommand{\stsr}[1][]{\stsrUL{}{#1}}
 \providecommand{\ssravg}[1][]{\mathUL{\bar{\prvSNR}}{}{#1}}
+\providecommand{\logof}[1]{\funcit{\operatorname{log}}{#1}}  
 
 % knitr setup%FOLDUP
 
@@ -375,7 +376,7 @@
 \author{Steven E. Pav \thanks{\email{steven@gilgamath.com}.
 The source code to build this document is available at
 \href{http://www.github.com/shabbychef/maxsharpe}{\normalfont\texttt{www.github.com/shabbychef/maxsharpe}}.
-This revision was built from commit \texttt{\gitHash} of that repo.
+The document you are reading was built from commit \texttt{\gitHash} of that repo.
 }}
 %The code to build this document is available at
 %\href{http://www.github.com/shabbychef/qbound}{\normalfont\texttt{www.github.com/shabbychef/qbound}}.
@@ -1203,7 +1204,7 @@ the theoretical density and sample size.
 
 That plot suggests that the p-values are indeed uniformly distributed.
 To check the tail behavior of our computed p-values we transform
-the $p$ values by $p \mapsto \log{2\min\wrapParens{p,1-p}}$, and
+the $p$ values by $p \mapsto \logof{2\min\wrapParens{p,1-p}}$, and
 present a subsampled Q-Q plot against a log uniform law, in 
 \figref{motherload_sims_log_plotz}. 
 Slight deviations from uniformity are visible in that plot, but on
@@ -1220,7 +1221,7 @@ uniform in their tails as well.
 \end{knitrout}
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_log_plotz-1} \caption{We repeat the P-P plot of \figref{motherload_sims_hidden_plotz}, but in log-log space.  To check uniformity in both tails we compute $p_{*} = \log{2\min\wrapParens{p,1-p}}$, and plot against a log uniform law. Again, we plot the deviance of sample quantiles from the theoretical quantiles, with error bars around the $x$ axis. \cite{velez2015modified} Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. }\label{fig:motherload_sims_log_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_log_plotz-1} \caption{We repeat the P-P plot of \figref{motherload_sims_hidden_plotz}, but in log-log space.  To check uniformity in both tails we compute $p_{*} = \logof{2\min\wrapParens{p,1-p}}$, and plot against a log uniform law. Again, we plot the deviance of sample quantiles from the theoretical quantiles, with error bars around the $x$ axis. \cite{velez2015modified} Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. }\label{fig:motherload_sims_log_plotz}
 \end{figure}
 
 
@@ -1255,7 +1256,7 @@ elements of the estimate of \RMAT.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_sims_log_plotz-1} \caption[P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr]{P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr. P values $p$ were transformed to $p_{*}=\log{2\min\wrapParens{p,1-p}}$, then the $p_{*}$ are Q-Q plotted against a log uniform law, using the subsampling procedure. }\label{fig:causal_sims_log_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_sims_log_plotz-1} \caption[P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr]{P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr. P values $p$ were transformed to $p_{*}=\logof{2\min\wrapParens{p,1-p}}$, then the $p_{*}$ are Q-Q plotted against a log uniform law, using the subsampling procedure. }\label{fig:causal_sims_log_plotz}
 \end{figure}
 
 
@@ -1344,7 +1345,7 @@ We remain cautiously optimistic that for large \ssiz, one need correct
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption{The computed p-values from the conditional estimation procedure over 10000 simulations are transformed via $p_{*} = \log{2\min\wrapParens{p,1-p}}$, then plotted against a log uniform law using the subsampling procedure. Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Once again we focus on the lower left corner of the plots to trim the plot size.}\label{fig:causal_tfive_sims_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption{The computed p-values from the conditional estimation procedure over 10000 simulations are transformed via $p_{*} = \logof{2\min\wrapParens{p,1-p}}$, then plotted against a log uniform law using the subsampling procedure. Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Once again we focus on the lower left corner of the plots to trim the plot size.}\label{fig:causal_tfive_sims_plotz}
 \end{figure}
 
 
@@ -1511,12 +1512,12 @@ We download the monthly returns of five industry portfolios
 from Ken French's data library. \cite{ind_5_def}
 %These consist of 
 We consider the 1080 months of data on five industries
-from Jan 1927 to Dec 2016.
+from 1927 to 2016.917.
 We compute the \txtSR of the returns of each, and present them
 in \tabref{mind_sr}. 
 We have reordered the industries in decreasing \txtSR.
 The industry portfolio with the highest \txtSR was
-Healthcare with a \txtSR of 
+ with a \txtSR of 
 around $0.192\,\moto{-\halff}$ which is approximately
 $0.664\,\yrto{-\halff}$.
 
@@ -1543,17 +1544,17 @@ Healthcare & $ 0.192\,\moto{-\halff} $ \\
 
 
 We are interested in computing $95\%$ upper confidence
-intervals on the \txtSNR of the Healthcare portfolio. 
+intervals on the \txtSNR of the  portfolio. 
 We are only considering this portfolio as it is the one with maximum \txtSR
 in our sample.
 If we had been interested in testing
-Healthcare 
+ 
 without our conditional selection, we would compute the confidence interval
 $\left[0.141\,\moto{-\halff}, \infty\right)$ based on inverting the non-central
 \tstat{}-distribution. \cite{pav_ssc,SharpeR-Manual}
 If instead we approximate the standard error by plugging in 
 $0.192\,\moto{-\halff}$ as the \txtSNR of 
-Healthcare 
+ 
 into \eqnref{apx_srdist_gaussian},
 we estimate the standard error of the \txtSR to be
 $0.031\,\moto{-\halff}$.
@@ -1564,7 +1565,7 @@ This also gives the confidence interval
 $\left[0.141\,\moto{-\halff}, \infty\right)$.
 
 Using the simple Bonferroni correction, however, since we selected
-Healthcare 
+ 
 only for having the maximum \txtSR, we should compute the 
 confidence interval by adding
 $\qnorm{0.01}=-2.326$ times the standard error.

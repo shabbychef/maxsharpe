@@ -80,6 +80,7 @@
 \providecommand{\stsrUL}[2]{\mathUL{\hat{\altSNR}}{#1}{#2}}
 \providecommand{\stsr}[1][]{\stsrUL{}{#1}}
 \providecommand{\ssravg}[1][]{\mathUL{\bar{\prvSNR}}{}{#1}}
+\providecommand{\logof}[1]{\funcit{\operatorname{log}}{#1}}  
 
 % knitr setup%FOLDUP
 
@@ -405,7 +406,7 @@ qlogunif <- function(p,min=0,max=1,lower.tail=TRUE,log.p=FALSE) {
 \author{Steven E. Pav \thanks{\email{steven@gilgamath.com}.
 The source code to build this document is available at
 \href{http://www.github.com/shabbychef/maxsharpe}{\normalfont\texttt{www.github.com/shabbychef/maxsharpe}}.
-This revision was built from commit \texttt{\gitHash} of that repo.
+The document you are reading was built from commit \texttt{\gitHash} of that repo.
 }}
 %The code to build this document is available at
 %\href{http://www.github.com/shabbychef/qbound}{\normalfont\texttt{www.github.com/shabbychef/qbound}}.
@@ -1361,7 +1362,7 @@ the theoretical density and sample size.
 
 That plot suggests that the p-values are indeed uniformly distributed.
 To check the tail behavior of our computed p-values we transform
-the $p$ values by $p \mapsto \log{2\min\wrapParens{p,1-p}}$, and
+the $p$ values by $p \mapsto \logof{2\min\wrapParens{p,1-p}}$, and
 present a subsampled Q-Q plot against a log uniform law, in 
 \figref{motherload_sims_log_plotz}. 
 Slight deviations from uniformity are visible in that plot, but on
@@ -1438,7 +1439,7 @@ suppressMessages({
 })
 
 fig_cap <- paste0('We repeat the P-P plot of \\figref{motherload_sims_hidden_plotz}, but in log-log space.  ',
-                  'To check uniformity in both tails we compute $p_{*} = \\log{2\\min\\wrapParens{p,1-p}}$, and plot against a log uniform law. ',
+                  'To check uniformity in both tails we compute $p_{*} = \\logof{2\\min\\wrapParens{p,1-p}}$, and plot against a log uniform law. ',
                   'Again, we plot the deviance of sample quantiles from the theoretical quantiles, ',
                   "with error bars around the $x$ axis. \\cite{velez2015modified} ",
                   'Simulations use the exact \\RMAT and \\pvsnr to compute the covariance matrix. ')
@@ -1520,7 +1521,7 @@ elements of the estimate of \RMAT.
 # b6aa6d8c-2872-4496-a704-a7e090645a7d 
 fig_cap <- paste0('P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \\RMAT, ',
                   'and the vector of \\txtSNRs, \\pvsnr. ',
-                  'P values $p$ were transformed to $p_{*}=\\log{2\\min\\wrapParens{p,1-p}}$, then the $p_{*}$ are Q-Q plotted against a log uniform law, ',
+                  'P values $p$ were transformed to $p_{*}=\\logof{2\\min\\wrapParens{p,1-p}}$, then the $p_{*}$ are Q-Q plotted against a log uniform law, ',
                   'using the subsampling procedure. ')
 suppressMessages({
 	library(dplyr)
@@ -1676,7 +1677,7 @@ We remain cautiously optimistic that for large \ssiz, one need correct
 <<'causal_tfive_sims_plotz',dependson=c('causal_tfive_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 
 fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',nsim,
-                  ' simulations are transformed via $p_{*} = \\log{2\\min\\wrapParens{p,1-p}}$, then plotted against a log uniform law using the subsampling procedure. ',
+                  ' simulations are transformed via $p_{*} = \\logof{2\\min\\wrapParens{p,1-p}}$, then plotted against a log uniform law using the subsampling procedure. ',
                   'Returns are drawn from a $\\tstat{}\\wrapParens{5}$ distribution.  ',
                   'Sample estimates are used to construct the variance-covariance matrix of \\svsr.  ',
                   'The experiments are performed twice: first assuming that returns are Gaussian; ',
@@ -1713,9 +1714,10 @@ ph <- rbind(ok_tsim %>% mutate(higher_order=TRUE),
   mutate(ymin=-zalp * serr,ymax=zalp * serr) %>%
   ggplot(aes(iii,delta,ymin=ymin,ymax=ymax,color=higher_order)) + 
   geom_point() + 
-  geom_errorbar(width=0.5) + 
+  geom_errorbar(width=0.5,color='black') + 
   geom_hline(yintercept=0,linetype=2,alpha=0.5) + 
   labs(x='vigintile',y=expression(Delta),
+       color='higher order?',
        title='Large sample P-P plot, transformed p-values from conditional estimation procedure')
 print(ph)
 @
@@ -1905,9 +1907,10 @@ half-good and all equal.
 #filter(grepl('equal|onegood',mutype)) %>%
 library(ggplot2)
 ph <- resu %>%
-  mutate(method=gsub('^condest$','cond. est.',method)) %>%
-  mutate(method=gsub('^mht$','MHT',method)) %>%
-  mutate(method=gsub('^chibs$','chi-bar^2',method)) %>%
+  mutate(method=case_when(grepl('^condest$',method)   ~ 'cond. est.',
+                          grepl('^mht$',method)       ~ 'MHT',
+                          grepl('^chibs$',method)     ~ 'chi-bar^2',
+                          TRUE ~ 'ERROR')) %>%
   ggplot(aes(popvals,rej_rate,color=method))  +
   geom_line() + geom_point() +
   facet_grid(.~mutype) + 
@@ -2078,7 +2081,7 @@ library(ggplot2)
 ph <- rhoresu %>%
   mutate(method=case_when(grepl('^nelc_pvals$',method)    ~ 'cond. est.',
                           grepl('^bonf_pvals$',method)    ~ 'vanilla MHT',
-                          grepl('^chib_pvals$',method)    ~ 'chi-bar square',
+                          grepl('^chib_pvals$',method)    ~ 'chi-bar^2',
                           grepl('^corr_pvals$',method)    ~ 'fixed MHT',
                           TRUE ~ 'ERROR')) %>%
   ggplot(aes(rho,rej_rate,color=method))  +

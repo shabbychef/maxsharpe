@@ -1192,35 +1192,24 @@ the covariance via \eqnref{apx_srdist_gaussian}.
 This is not, of course, how the test would be applied in practice since
 \RMAT and \pvsnr have to be estimated.
 
-We repeat this experiment \ensuremath{10^{5}} times and collect the \ensuremath{10^{5}}
-p-values. 
-In \figref{motherload_sims_hidden_plotz}, we present a P-P plot of those
-P-values against the uniform law.
-P-P plots for such sample sizes are hard to interpret unless they show
-gross deviances from the uniform law. 
-Instead we present a subsampled P-P plot, as suggested by V{\'e}lez and Correa Morales. \cite{velez2015modified}
-The difference between empirical and theoretical p-values at vigintiles
-are plotted, along with the error bars around the $x$ axis based on 
-the theoretical density and sample size. 
-
-That plot suggests that the p-values are indeed uniformly distributed.
-As a further check, in \figref{motherload_sims_log_plotz}, we present
-a subsampled Q-Q plot or log transformed p values against a log uniform law.
-Slight deviations from uniformity are visible in that plot, but on
-the whole we believe this plot indicates that our p-values are
-uniform in their tails as well.
-
+We repeat this experiment \ensuremath{10^{5}} times and collect the \ensuremath{10^{5}} p-values. 
+We would like to Q-Q or P-P plot these putative p-values, 
+as evidence that they are near uniform, 
+but the large sample size presents some challenges.
+Instead, we choose some selected small $q$ (like 0.05 or 0.01), and
+compute the proportion of our p-values $\le q$. We then subtract $q$.
+This value, call it $\Delta$, should be near zero. We plot $\Delta$ against
+$q$, with errorbars around the $x$ axis reflecting the area where we would
+expect the points to fall roughly 95\% of the time. 
+Those errorbars are computed via the Binomial law, but do not always have width
+of exactly 95\% because of the finite sample size.
+However, the plot suggests that the p-values are indeed uniformly distributed,
+and that the procedure has near nominal type I rate when selecting a cutoff
+near the selected $q$.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_hidden_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law]{The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law. Given the large sample size, a Q-Q plot is visually hard to interpret. Instead we plot the deviance of sample quantiles from the theoretical quantiles, with error bars around the $x$ axis. \cite{velez2015modified} Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:motherload_sims_hidden_plotz}
-\end{figure}
-
-
-\end{knitrout}
-\begin{knitrout}\small
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_log_plotz-1} \caption{We repeat the P-P plot of \figref{motherload_sims_hidden_plotz}, but plot quantiles of the log p values against a log uniform law. Again, we plot the deviance of sample quantiles from the theoretical quantiles, with error bars around the $x$ axis. \cite{velez2015modified} Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot indicates that the smallest p-values reported by the procedure are slightly smaller than they theoretically should be; given the log transform, one can interpret the plot as indicating the nominal p-values are around 3\% smaller than they should be. }\label{fig:motherload_sims_log_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_hidden_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law]{The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law. Given the large sample size, a Q-Q plot is visually hard to interpret. Instead, for selected $q$, we compute the proportion of our putative p-values less than $q$. We then compute $\Delta = \wrapParens{\mbox{Prop }\le q} - q$ against $q$. Using the binomial law, we plot approximate error bars around the $x$ axis that indicate where the points should fall with approximately $95\%$ confidence. Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:motherload_sims_hidden_plotz}
 \end{figure}
 
 
@@ -1245,9 +1234,8 @@ performing $\ensuremath{10^{5}}$ simulations,
 setting $\nstrat=100$,
 $\RMAT=\makerho{0.7}{0.3}$.
 $\ssiz=1260\dayto{}$, \etc
-In \figref{causal_sims_log_plotz} we present a sampled P-P plot of the log p values
-against a log uniform law.
-Again the simulations appear to be uniform.
+In \figref{causal_sims_log_plotz} we present a sampled CDF plot of the log p values, as above.
+Again the simulations are consistent with the procedure having nominal coverage.
 This is not surprising, because, as noted above, the statistical test
 only requires us to estimate the standard error of the \txtSR of the
 asset with maximum \txtSR, and so does not greatly rely on the $\nstrat^2$
@@ -1255,7 +1243,7 @@ elements of the estimate of \RMAT.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_sims_log_plotz-1} \caption[P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr]{P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr. Differences in empirical and theoretical vigintiles of log p values are plotted. }\label{fig:causal_sims_log_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_sims_log_plotz-1} \caption[The computed p-values from the conditional estimation procedure using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr are used in this sampled CDF plot]{The computed p-values from the conditional estimation procedure using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr are used in this sampled CDF plot. P values are computed over 1e+05 simulations. For selected $q$, we compute the proportion of our putative p-values less than $q$. We then compute $\Delta = \wrapParens{\mbox{Prop }\le q} - q$ against $q$. Using the binomial law, we plot approximate error bars around the $x$ axis that indicate where the points should fall with approximately $95\%$ confidence. Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:causal_sims_log_plotz}
 \end{figure}
 
 
@@ -1346,7 +1334,7 @@ We remain cautiously optimistic that for large \ssiz, one need correct
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 10000 simulations are logged, then plotted against a log uniform law using the subsampling procedure]{The computed p-values from the conditional estimation procedure over 10000 simulations are logged, then plotted against a log uniform law using the subsampling procedure. Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Without correcting for higher order moments, the nominal p values are smaller than uniform, on the order of 6\% larger; under the correction, however, the nominal p values are larger than uniform, by as much as 3\%. }\label{fig:causal_tfive_sims_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 10000 simulations are plotted using our sampled CDF procedure]{The computed p-values from the conditional estimation procedure over 10000 simulations are plotted using our sampled CDF procedure. Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Without correcting for higher order moments, the procedure has higher than nominal type I rate; with the correction it has slightly smaller than the nominal rate. }\label{fig:causal_tfive_sims_plotz}
 \end{figure}
 
 
@@ -1523,12 +1511,12 @@ We download the monthly returns of five industry portfolios
 from Ken French's data library. \cite{ind_5_def}
 %These consist of 
 We consider the 1080 months of data on five industries
-from 1927 to 2016.917.
+from Jan 1927 to Dec 2016.
 We compute the \txtSR of the returns of each, and present them
 in \tabref{mind_sr}. 
 We have reordered the industries in decreasing \txtSR.
 The industry portfolio with the highest \txtSR was
- with a \txtSR of 
+Healthcare with a \txtSR of 
 around $0.192\,\moto{-\halff}$ which is approximately
 $0.664\,\yrto{-\halff}$.
 
@@ -1555,17 +1543,17 @@ Healthcare & $ 0.192\,\moto{-\halff} $ \\
 
 
 We are interested in computing $95\%$ upper confidence
-intervals on the \txtSNR of the  portfolio. 
+intervals on the \txtSNR of the Healthcare portfolio. 
 We are only considering this portfolio as it is the one with maximum \txtSR
 in our sample.
 If we had been interested in testing
- 
+Healthcare 
 without our conditional selection, we would compute the confidence interval
 $\left[0.141\,\moto{-\halff}, \infty\right)$ based on inverting the non-central
 \tstat{}-distribution. \cite{pav_ssc,SharpeR-Manual}
 If instead we approximate the standard error by plugging in 
 $0.192\,\moto{-\halff}$ as the \txtSNR of 
- 
+Healthcare 
 into \eqnref{apx_srdist_gaussian},
 we estimate the standard error of the \txtSR to be
 $0.031\,\moto{-\halff}$.
@@ -1576,7 +1564,7 @@ This also gives the confidence interval
 $\left[0.141\,\moto{-\halff}, \infty\right)$.
 
 Using the simple Bonferroni correction, however, since we selected
- 
+Healthcare 
 only for having the maximum \txtSR, we should compute the 
 confidence interval by adding
 $\qnorm{0.01}=-2.326$ times the standard error.

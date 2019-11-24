@@ -170,6 +170,35 @@ dlogunif <- function(x,min=0,max=1) {
 qlogunif <- function(p,min=0,max=1,lower.tail=TRUE,log.p=FALSE) { 
   log(qunif(p,min=min,max=max,lower.tail=lower.tail,log.p=log.p))
 }
+# cdf & qtile, max of np independent SRs, SNR=zeta
+pmaxsr <- function(q,df,np,zeta=0,ope=1) {
+	pv <- SharpeR::psr(q,df=df,zeta=zeta,ope=ope)
+	pbeta(pv,shape1=np,shape2=1)
+}
+qmaxsr <- function(p,df,np,zeta=0,ope=1) {
+	pv <- qbeta(p,shape1=np,shape2=1)
+	SharpeR::qsr(pv,df=df,zeta=zeta,ope=ope)
+}
+
+# try a different kind of plot
+cdf_helper <- function(x,qts=c(0.001,0.005,0.01,0.05,0.1),alpha=0.05) {
+  if (!require(zipper) && (require(devtools))) {
+    devtools::install_github("shabbychef/zipper")
+  }
+  x <- x[!is.na(x)]
+  nnn <- length(x)
+  emp_cdf <- zipper::zip_le(sort(x),qts) / nnn
+  nn_lo <- qbinom(alpha/2,size=nnn,prob=qts,lower.tail=TRUE) 
+  nn_hi <- qbinom(alpha/2,size=nnn,prob=qts,lower.tail=FALSE)
+  qt_lo <- pbinom(nn_lo,size=nnn,prob=qts,lower.tail=TRUE)
+  qt_hi <- pbinom(nn_lo,size=nnn,prob=qts,lower.tail=FALSE)
+  retv <- data.frame(qts=qts,emp_cdf=emp_cdf,
+                     ci_lo=nn_lo / nnn,ci_hi=nn_hi / nnn,
+                     qt_lo=qt_lo,qt_hi=qt_hi)
+  retv$width <- retv$qt_hi - retv$qt_lo
+  attr(retv,'alpha') <- alpha
+  retv
+}
 @
     
 % SYMPY preamble%FOLDUP
@@ -1350,42 +1379,29 @@ the covariance via \eqnref{apx_srdist_gaussian}.
 This is not, of course, how the test would be applied in practice since
 \RMAT and \pvsnr have to be estimated.
 
-We repeat this experiment \Sexpr{nsim} times and collect the \Sexpr{nsim}
-p-values. 
-In \figref{motherload_sims_hidden_plotz}, we present a P-P plot of those
-P-values against the uniform law.
-P-P plots for such sample sizes are hard to interpret unless they show
-gross deviances from the uniform law. 
-Instead we present a subsampled P-P plot, as suggested by V{\'e}lez and Correa Morales. \cite{velez2015modified}
-The difference between empirical and theoretical p-values at vigintiles
-are plotted, along with the error bars around the $x$ axis based on 
-the theoretical density and sample size. 
-
-That plot suggests that the p-values are indeed uniformly distributed.
-As a further check, in \figref{motherload_sims_log_plotz}, we present
-a subsampled Q-Q plot or log transformed p values against a log uniform law.
-Slight deviations from uniformity are visible in that plot, but on
-the whole we believe this plot indicates that our p-values are
-uniform in their tails as well.
-
+We repeat this experiment \Sexpr{nsim} times and collect the \Sexpr{nsim} p-values. 
+We would like to Q-Q or P-P plot these putative p-values, 
+as evidence that they are near uniform, 
+but the large sample size presents some challenges.
+Instead, we choose some selected small $q$ (like 0.05 or 0.01), and
+compute the proportion of our p-values $\le q$. We then subtract $q$.
+This value, call it $\Delta$, should be near zero. We plot $\Delta$ against
+$q$, with errorbars around the $x$ axis reflecting the area where we would
+expect the points to fall roughly 95\% of the time. 
+Those errorbars are computed via the Binomial law, but do not always have width
+of exactly 95\% because of the finite sample size.
+However, the plot suggests that the p-values are indeed uniformly distributed,
+and that the procedure has near nominal type I rate when selecting a cutoff
+near the selected $q$.
 
 <<'motherload_sims_hidden_plotz',dependson=c('motherload_sims_run','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
-# 7e9fddf8-92e1-45d3-8da4-ae4dab5e2ee8 
-# cdf & qtile, max of np independent SRs, SNR=zeta
-pmaxsr <- function(q,df,np,zeta=0,ope=1) {
-	pv <- SharpeR::psr(q,df=df,zeta=zeta,ope=ope)
-	pbeta(pv,shape1=np,shape2=1)
-}
-qmaxsr <- function(p,df,np,zeta=0,ope=1) {
-	pv <- qbeta(p,shape1=np,shape2=1)
-	SharpeR::qsr(pv,df=df,zeta=zeta,ope=ope)
-}
-
+alpha <- 0.05
 fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',nsim,
                   ' simulations are compared to a uniform law. ',
                   'Given the large sample size, a Q-Q plot is visually hard to interpret. ',
-                  'Instead we plot the deviance of sample quantiles from the theoretical quantiles, ',
-                  "with error bars around the $x$ axis. \\cite{velez2015modified} ",
+                  'Instead, for selected $q$, we compute the proportion of our putative p-values less than $q$. ',
+                  'We then compute $\\Delta = \\wrapParens{\\mbox{Prop }\\le q} - q$ against $q$. ',
+                  'Using the binomial law, we plot approximate error bars around the $x$ axis that indicate where the points should fall with approximately $',100*(1-alpha),'\\%$ confidence. ',
                   'Simulations use the exact \\RMAT and \\pvsnr to compute the covariance matrix. ',
                   'The plot supports uniformity of the putative p-values. ')
 
@@ -1393,92 +1409,17 @@ suppressMessages({
 	library(dplyr)
 	library(ggplot2)
 })
-## the 1 - takes care of lower.tail=FALSE
-#mht_pvals <- 1 - pmaxsr(sim$simvals,df=nday-1,np=p,zeta=max(zeta),ope=1)
-#data_frame(simvals=sim$simvals,mht_pvals=mht_pvals,ce_pvals=sim$pvals) %>%
-	#tidyr::gather(key=proc,value=pvalue,mht_pvals,ce_pvals) %>%
-	#mutate(procedure=case_when(grepl('^mht_',proc)   ~ 'MHT',
-														 #grepl('^ce_',proc)    ~ 'Conditional Estimation')) %>%
-	#mutate(procedure=forcats::fct_rev(factor(procedure))) %>%
-	#ggplot(aes(sample=pvalue)) + 
-	#stat_qq(distribution=qunif,alpha=0.15) +
-  #geom_abline(intercept=0,slope=1,color='red') + 
-  #scale_x_log10() + scale_y_log10() + 
-	#facet_grid(.~procedure)
-
-  #scale_x_log10() + scale_y_log10() + 
-#nevery <- 100
-#ph <- sim %>%
-  #arrange(pvals) %>%
-  #mutate(rown=seq_len(n())) %>%
-  #filter((rown %% nevery) == 0) %>%
-	#ggplot(aes(sample=pvals)) + 
-	#stat_qq(distribution=qunif,alpha=0.15) +
-  #geom_abline(intercept=0,slope=1,color='red') + 
-  #labs(title='P-P plot of p-values from conditional estimation procedure')
-
-
-alpha <- 0.05
-zalp <- qnorm(alpha/2,lower.tail=FALSE)
-ph <- modqq(sim$pvals,qnt_func=qunif,dens_func=dunif,k=19) %>%
-  mutate(ymin=-zalp * serr,ymax=zalp * serr) %>%
-  ggplot(aes(iii,delta,ymin=ymin,ymax=ymax)) + 
+ph <- cdf_helper(sim$pvals,qts=10^seq(-3,-1,length.out=9),alpha=alpha) %>%
+  mutate(Delta=emp_cdf-qts,ymin=ci_lo-qts,ymax=ci_hi-qts) %>%
+  ggplot(aes(qts,Delta,ymin=ymin,ymax=ymax)) +
   geom_point() + 
-  geom_errorbar(width=0.5) + 
-  geom_hline(yintercept=0,linetype=2,alpha=0.5) + 
-  labs(x='vigintile',y=expression(Delta),
-       title='Large sample P-P plot, p-values from conditional estimation procedure')
-print(ph)
-@
-<<'motherload_sims_log_plotz',dependson=c('motherload_sims_run'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
-# fba5ce14-4639-4cf6-aa20-ba27d9b98041 
-suppressMessages({
-	library(dplyr)
-	library(ggplot2)
-})
-
-fig_cap <- paste0('We repeat the P-P plot of \\figref{motherload_sims_hidden_plotz}, but plot quantiles of the log p values against a log uniform law. ',
-                  'Again, we plot the deviance of sample quantiles from the theoretical quantiles, ',
-                  "with error bars around the $x$ axis. \\cite{velez2015modified} ",
-                  'Simulations use the exact \\RMAT and \\pvsnr to compute the covariance matrix. ',
-                  'The plot indicates that the smallest p-values reported by the procedure are slightly smaller than they theoretically should be; ',
-                  'given the log transform, one can interpret the plot as indicating the nominal p-values are around 3\\% smaller than they should be. ')
-
-#limsy <- c(1e-6,5e-3)
-#ph <- sim %>%
-#  mutate(transp=2*pmin(pvals,1-pvals)) %>%
-#  arrange(transp) %>%
-#  mutate(rown=seq_len(n())) %>%
-#  mutate(xvals=ppoints(n())) %>%
-#  ggplot(aes(x=xvals,y=transp)) + 
-#  geom_point(alpha=0.25) + 
-#  scale_x_log10(limits=limsy) + scale_y_log10(limits=limsy) + 
-#  geom_abline(intercept=0,slope=1,color='red') + 
-#  labs(title='P-P plot of transformed p-values from conditional estimation procedure',
-#       x='theoretical',y='sample')
-#ph <- sim %>%
-  #mutate(transp=2*pmin(pvals,1-pvals)) %>%
-  #ggplot(aes(sample=transp)) + 
-  #stat_qq(distribution=qunif,alpha=0.25) +
-  #scale_x_log10(limits=limsy) + scale_y_log10(limits=limsy) + 
-  #geom_abline(intercept=0,slope=1,color='red') + 
-  #labs(title='P-P plot of transformed p-values from conditional estimation procedure',
-       #x='theoretical',y='sample')
-
-alpha <- 0.05
-zalp <- qnorm(alpha/2,lower.tail=FALSE)
-
-ph <- sim %>%
-  mutate(logtransp=log(pvals)) %>%
-  pull(logtransp) %>%
-  modqq(qnt_func=qlogunif,dens_func=dlogunif,k=19) %>%
-  mutate(ymin=-zalp * serr,ymax=zalp * serr) %>%
-  ggplot(aes(iii,delta,ymin=ymin,ymax=ymax)) + 
-  geom_point() + 
-  geom_errorbar(width=0.5) + 
-  geom_hline(yintercept=0,linetype=2,alpha=0.5) + 
-  labs(x='vigintile',y=expression(Delta),
-       title='Large sample P-P plot, transformed p-values from conditional estimation procedure')
+  geom_errorbar(alpha=0.5,width=0.03) + 
+  geom_abline(slope=0,intercept=0,linetype=3,alpha=0.7) + 
+  #scale_x_sqrt() + scale_y_sqrt() + 
+  scale_x_log10() + 
+  labs(x='quantile q',
+       y='Delta : (proportion of observed p-values <= q) - q',
+       title='Sampled empirical CDF, p-values from conditional estimation procedure')
 print(ph)
 @
 %UNFOLD
@@ -1508,44 +1449,38 @@ performing $\Sexpr{nsim}$ simulations,
 setting $\nstrat=\Sexpr{nlatf}$,
 $\RMAT=\makerho{\Sexpr{rho}}{\Sexpr{1-rho}}$.
 $\ssiz=\Sexpr{nday}\dayto{}$, \etc
-In \figref{causal_sims_log_plotz} we present a sampled P-P plot of the log p values
-against a log uniform law.
-Again the simulations appear to be uniform.
+In \figref{causal_sims_log_plotz} we present a sampled CDF plot of the log p values, as above.
+Again the simulations are consistent with the procedure having nominal coverage.
 This is not surprising, because, as noted above, the statistical test
 only requires us to estimate the standard error of the \txtSR of the
 asset with maximum \txtSR, and so does not greatly rely on the $\nstrat^2$
 elements of the estimate of \RMAT.
 
-<<'causal_sims_log_plotz',dependson=c('causal_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'causal_sims_log_plotz',dependson=c('causal_sims','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+alpha <- 0.05
+fig_cap <- paste0('The computed p-values from the conditional estimation procedure using sample estimates of the covariance matrix, \\RMAT, ',
+                  'and the vector of \\txtSNRs, \\pvsnr are used in this sampled CDF plot. ',
+                  'P values are computed over ',nsim,' simulations. ',
+                  'For selected $q$, we compute the proportion of our putative p-values less than $q$. ',
+                  'We then compute $\\Delta = \\wrapParens{\\mbox{Prop }\\le q} - q$ against $q$. ',
+                  'Using the binomial law, we plot approximate error bars around the $x$ axis that indicate where the points should fall with approximately $',100*(1-alpha),'\\%$ confidence. ',
+                  'Simulations use the exact \\RMAT and \\pvsnr to compute the covariance matrix. ',
+                  'The plot supports uniformity of the putative p-values. ')
 
-# b6aa6d8c-2872-4496-a704-a7e090645a7d 
-fig_cap <- paste0('P values from the conditional estimation procedure were computed using sample estimates of the covariance matrix, \\RMAT, ',
-                  'and the vector of \\txtSNRs, \\pvsnr. ',
-                  'Differences in empirical and theoretical vigintiles of log p values are plotted. ')
 suppressMessages({
 	library(dplyr)
 	library(ggplot2)
 })
-#limsy <- c(1e-6,5e-3)
-#ph <- causim %>%
-	#ggplot(aes(sample=2*pmin(pvals,1-pvals))) +
-	#stat_qq(distribution=qunif,alpha=0.25) +
-  #scale_x_log10(limits=limsy) + scale_y_log10(limits=limsy) + 
-  #geom_abline(intercept=0,slope=1,color='red') + 
-  #labs(title='P-P plot of transformed p-values from conditional estimation procedure, feasible estimates')
-alpha <- 0.05
-zalp <- qnorm(alpha/2,lower.tail=FALSE)
-ph <- causim %>%
-  mutate(logtransp=log(pvals)) %>%
-  pull(logtransp) %>%
-  modqq(qnt_func=qlogunif,dens_func=dlogunif,k=19) %>%
-  mutate(ymin=-zalp * serr,ymax=zalp * serr) %>%
-  ggplot(aes(iii,delta,ymin=ymin,ymax=ymax)) + 
+
+ph <- cdf_helper(causim$pvals,qts=10^seq(-3,-1,length.out=9),alpha=alpha) %>%
+  mutate(Delta=emp_cdf-qts,ymin=ci_lo-qts,ymax=ci_hi-qts) %>%
+  ggplot(aes(qts,Delta,ymin=ymin,ymax=ymax)) +
   geom_point() + 
-  geom_errorbar(width=0.5) + 
-  geom_hline(yintercept=0,linetype=2,alpha=0.5) + 
-  labs(x='vigintile',y=expression(Delta),
-       title='Large sample P-P plot, transformed p-values from conditional estimation procedure, feasible estimates')
+  geom_errorbar(alpha=0.5,width=0.03) + 
+  geom_abline(slope=0,intercept=0,linetype=3,alpha=0.7) + 
+  scale_x_log10() + 
+  labs(x='quantile q',y='Delta : (proportion of observed p-values <= q) - q',
+       title='Sampled empirical CDF, p-values from conditional estimation procedure, feasible estimates')
 print(ph)
 @
 %UNFOLD
@@ -1676,51 +1611,36 @@ We remain cautiously optimistic that for large \ssiz, one need correct
 
 
 <<'causal_tfive_sims_plotz',dependson=c('causal_tfive_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
-
+alpha <- 0.05
 fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',nsim,
-                  ' simulations are logged, then plotted against a log uniform law using the subsampling procedure. ',
+                  ' simulations are plotted using our sampled CDF procedure. ',
                   'Returns are drawn from a $\\tstat{}\\wrapParens{5}$ distribution.  ',
                   'Sample estimates are used to construct the variance-covariance matrix of \\svsr.  ',
                   'The experiments are performed twice: first assuming that returns are Gaussian; ',
                   'then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  ',
                   'Both procedures give near-uniform p values. ',
-                  'Without correcting for higher order moments, the nominal p values are smaller than uniform, on the order of 6\\% larger; ',
-                  'under the correction, however, the nominal p values are larger than uniform, by as much as 3\\%. ')
+                  'Without correcting for higher order moments, the procedure has higher than nominal type I rate; ',
+                  'with the correction it has slightly smaller than the nominal rate. ')
 
-# 155290d7-d763-4034-b068-0d68e6d874db 
 suppressMessages({
 	library(dplyr)
 	library(ggplot2)
 })
-#limsy <- c(1e-5,5e-2)
-#ph <- rbind(ok_tsim %>% mutate(higher_order=TRUE),
-            #badtsim %>% mutate(higher_order=FALSE)) %>%
-  #mutate(quasi_p=2*pmin(pvals,1-pvals)) %>%
-	#ggplot(aes(sample=quasi_p)) + 
-	#stat_qq(distribution=qunif,alpha=0.25) +
-  #geom_abline(intercept=0,slope=1,color='red') + 
-  #scale_x_log10(limits=limsy) + scale_y_log10(limits=limsy) + 
-  #facet_grid(.~higher_order,labeller=label_both) + 
-  #labs(title='P-P plot of p-values from conditional estimation procedure')
-
-  #facet_grid(.~higher_order,labeller=label_both) + 
-alpha <- 0.05
-zalp <- qnorm(alpha/2,lower.tail=FALSE)
 ph <- rbind(ok_tsim %>% mutate(higher_order=TRUE),
             badtsim %>% mutate(higher_order=FALSE)) %>%
-  mutate(logtransp=log(pvals)) %>%
   group_by(higher_order) %>%
-    summarize(fooret=list(modqq(logtransp,qnt_func=qlogunif,dens_func=dlogunif,k=19))) %>%
+    summarize(fooret=list(cdf_helper(pvals,qts=10^seq(-3,-1,length.out=9),alpha=alpha))) %>%
   ungroup() %>%
   tidyr::unnest() %>%
-  mutate(ymin=-zalp * serr,ymax=zalp * serr) %>%
-  ggplot(aes(iii,delta,ymin=ymin,ymax=ymax,color=higher_order)) + 
+  mutate(Delta=emp_cdf-qts,ymin=ci_lo-qts,ymax=ci_hi-qts) %>%
+  ggplot(aes(qts,Delta,ymin=ymin,ymax=ymax,color=higher_order)) +
   geom_point() + 
-  geom_errorbar(width=0.5,color='black') + 
-  geom_hline(yintercept=0,linetype=2,alpha=0.5) + 
-  labs(x='vigintile',y=expression(Delta),
+  geom_errorbar(alpha=0.5,width=0.03,color='black') + 
+  geom_abline(slope=0,intercept=0,linetype=3,alpha=0.7) + 
+  scale_x_log10() + 
+  labs(x='quantile q',y='Delta : (proportion of observed p-values <= q) - q',
        color='higher order?',
-       title='Large sample P-P plot, transformed p-values from conditional estimation procedure')
+       title='Sampled empirical CDF, p-values from conditional estimation procedure, feasible estimates')
 print(ph)
 @
 %UNFOLD
@@ -2116,6 +2036,10 @@ print(ph)
 
 % 2FIX: start from here ... 
 <<'load_mind_data',echo=FALSE,eval=TRUE,cache=TRUE>>=
+if (!require(aqfb.data) && require(devtools)) {
+  stop('please install_githb("shabbychef/aqfb_data")')
+  #devtools::install_github("shabbychef/aqfb_data")
+}
 library(aqfb.data)
 data(mind5)
 svsr <- colMeans(mind5) / apply(mind5,2,sd)

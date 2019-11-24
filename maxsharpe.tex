@@ -1164,8 +1164,6 @@ development.  \cite{pav_maxsharpe_two}
 
 \subsection{Simulations under the null}
 
-
-
 % motherload first sims%FOLDUP
 
 
@@ -1253,7 +1251,6 @@ elements of the estimate of \RMAT.
 \clearpage
 
 \subsubsection{Gaussian returns, feasible estimator, sensitivity}
-
 
 % many sims with K-S stat?%FOLDUP
 
@@ -1355,7 +1352,7 @@ this way, would depend on the distribution of
 values of \pvsnr.
 
 We will consider two extremes: one where all \nstrat elements of \psnr are
-equal (``all equal''), and one where $m$ of \nstrat elements of \psnr
+equal (``all-equal''), and one where $m$ of \nstrat elements of \psnr
 are equal to some positive value, and the remaining $\nstrat - m$ are negative
 that value (``m-good''), mostly for the case where $m=1$ or $\nstrat = 2m$, which
 we call ``half-good''.
@@ -1374,7 +1371,7 @@ to perform inference on the \txtSNR. \cite{pav_ssc}
 We then use the Bonferroni correction to account for the multiple tests performed.
 We also perform the one-sided test based on the chi-bar square statistic.
 
-Note that in the all equal case, since every asset has the same \txtSNR,
+Note that in the all-equal case, since every asset has the same \txtSNR,
 whichever we select will have the same \txtSNR, and the Bonferroni-corrected test should have the
 same power as the \tstat{}-test for a single asset. 
 The conditional estimation procedure, however, may suffer in this case as
@@ -1384,10 +1381,11 @@ On the other hand, for the one-good case, as the $\nstrat - 1$ assets
 may have considerably negative \txtSNR, they are unlikely to exhibit the
 largest \txtSR, and so the MHT is merely testing a single asset, but
 at the $\typeI / \nstrat$ level instead of the $\typeI$ level, resulting
-in lower power. The conditional estimation procedure, however, should
-not suffer in this test.
+in lower power. The chi-bar square test is also unlikely to reject.
+The conditional estimation procedure, however, should
+not suffer under this alternative.
 
-In fact, this is what we see. We perform simulations under all equal, one-good,
+In fact, this is what we see. We perform simulations under all-equal, one-good,
 and half-good configurations, letting the `good' \txtSNR vary from 
 $0$ to $0.15\dayto{-\halff}$, which corresponds
 to an `annualized' \txtSNR of around
@@ -1402,17 +1400,19 @@ the largest \txtSR is observed in an asset with a negative \txtSNR.
 We hope our tests to have lower power when this occurs.
 
 In \figref{power_plotz_one}, we plot the power of the MHT Bonferroni
-test and the conditional estimation procedure versus the \txtSNR
+test, the chi-bar square test, 
+and the conditional estimation procedure versus the \txtSNR
 of the selected asset. 
 We present facet columns for the three configurations, 
-\viz all equal, one-good, half-good.
+\viz all-equal, one-good, half-good.
 A horizontal line at $0.05$ gives the nominal rate under the null,
 which occurs as $x=0$ in these plots.
-As expected from the above explanation, MHT has higher
-power for all equal, while conditional estimation is superior for
-one-good.  
-For this case we see little difference in performance for 
-half-good and all equal.
+As expected from the above explanation, 
+chi-bar square has the highest power for the all-equal alternative,
+then the MHT, then the conditional estimation test.
+These relationships are reversed for the one-good case.
+The chi-bar square test has zero power against the one-good alternative.
+All tests perform similarly in the half-good and all-equal alternatives.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
@@ -1492,7 +1492,7 @@ yielding nominal rejection rates.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for three testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for three testing procedures: the conditional estimation, vanilla Bonferroni correction, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 100 assets over 1008 days. Tests were performed at the $0.05$ level, which appears to be maintained by the conditional estimation and fixed Bonferroni procedures but not by the regular Bonferroni procedure.  Empirical rates are over 5000 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for four testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for four testing procedures: the conditional estimation, the chi-bar square test, the vanilla Bonferroni correction, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 100 assets over 1008 days. Tests were performed at the $0.05$ level, which appears to be maintained by all procedures except the regular Bonferroni procedure.  Empirical rates are over 5000 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
 \end{figure}
 
 
@@ -1502,7 +1502,7 @@ yielding nominal rejection rates.
 
 \clearpage
 
-\subsection{Five Industry Portfolios}
+\subsection{Five Industry Portfolios}%FOLDUP
 
 % 2FIX: start from here ... 
 
@@ -1562,6 +1562,9 @@ the measured \txtSR plus
 $\qnorm{0.05}=-1.645$ times the standard error.
 This also gives the confidence interval
 $\left[0.141\,\moto{-\halff}, \infty\right)$.
+We also invert the one-sided test procedure based on a chi-bar square
+distribution. This yields the confidence interval
+$\left[0.14\,\moto{-\halff}, \infty\right)$.
 
 Using the simple Bonferroni correction, however, since we selected
 Healthcare 
@@ -1587,7 +1590,7 @@ Finally we use the conditional estimation procedure, inverting
 the hypothesis test to find the corresponding population value.
 This yields the confidence interval 
 $\left[0.039\,\moto{-\halff}, \infty\right)$.
-
+%UNFOLD
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions and Future Work}%FOLDUP

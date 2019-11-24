@@ -1233,8 +1233,6 @@ development.  \cite{pav_maxsharpe_two}
 
 \subsection{Simulations under the null}
 
-
-
 % motherload first sims%FOLDUP
 <<'motherload_sim_funcs',echo=FALSE,eval=TRUE,cache=TRUE>>=
 suppressMessages({
@@ -1489,7 +1487,6 @@ print(ph)
 
 \subsubsection{Gaussian returns, feasible estimator, sensitivity}
 
-
 % many sims with K-S stat?%FOLDUP
 
 <<'many_sims',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs','runtime')>>=
@@ -1635,7 +1632,7 @@ ph <- rbind(ok_tsim %>% mutate(higher_order=TRUE),
   mutate(Delta=emp_cdf-qts,ymin=ci_lo-qts,ymax=ci_hi-qts) %>%
   ggplot(aes(qts,Delta,ymin=ymin,ymax=ymax,color=higher_order)) +
   geom_point() + 
-  geom_errorbar(alpha=0.5,width=0.03,color='black') + 
+  geom_errorbar(alpha=0.33,width=0.03,color='black') + 
   geom_abline(slope=0,intercept=0,linetype=3,alpha=0.7) + 
   scale_x_log10() + 
   labs(x='quantile q',y='Delta : (proportion of observed p-values <= q) - q',
@@ -1659,7 +1656,7 @@ this way, would depend on the distribution of
 values of \pvsnr.
 
 We will consider two extremes: one where all \nstrat elements of \psnr are
-equal (``all equal''), and one where $m$ of \nstrat elements of \psnr
+equal (``all-equal''), and one where $m$ of \nstrat elements of \psnr
 are equal to some positive value, and the remaining $\nstrat - m$ are negative
 that value (``m-good''), mostly for the case where $m=1$ or $\nstrat = 2m$, which
 we call ``half-good''.
@@ -1784,7 +1781,7 @@ to perform inference on the \txtSNR. \cite{pav_ssc}
 We then use the Bonferroni correction to account for the multiple tests performed.
 We also perform the one-sided test based on the chi-bar square statistic.
 
-Note that in the all equal case, since every asset has the same \txtSNR,
+Note that in the all-equal case, since every asset has the same \txtSNR,
 whichever we select will have the same \txtSNR, and the Bonferroni-corrected test should have the
 same power as the \tstat{}-test for a single asset. 
 The conditional estimation procedure, however, may suffer in this case as
@@ -1794,10 +1791,11 @@ On the other hand, for the one-good case, as the $\nstrat - 1$ assets
 may have considerably negative \txtSNR, they are unlikely to exhibit the
 largest \txtSR, and so the MHT is merely testing a single asset, but
 at the $\typeI / \nstrat$ level instead of the $\typeI$ level, resulting
-in lower power. The conditional estimation procedure, however, should
-not suffer in this test.
+in lower power. The chi-bar square test is also unlikely to reject.
+The conditional estimation procedure, however, should
+not suffer under this alternative.
 
-In fact, this is what we see. We perform simulations under all equal, one-good,
+In fact, this is what we see. We perform simulations under all-equal, one-good,
 and half-good configurations, letting the `good' \txtSNR vary from 
 $0$ to $\Sexpr{max(params$one_zeta)}\dayto{-\halff}$, which corresponds
 to an `annualized' \txtSNR of around
@@ -1812,17 +1810,19 @@ the largest \txtSR is observed in an asset with a negative \txtSNR.
 We hope our tests to have lower power when this occurs.
 
 In \figref{power_plotz_one}, we plot the power of the MHT Bonferroni
-test and the conditional estimation procedure versus the \txtSNR
+test, the chi-bar square test, 
+and the conditional estimation procedure versus the \txtSNR
 of the selected asset. 
 We present facet columns for the three configurations, 
-\viz all equal, one-good, half-good.
+\viz all-equal, one-good, half-good.
 A horizontal line at $0.05$ gives the nominal rate under the null,
 which occurs as $x=0$ in these plots.
-As expected from the above explanation, MHT has higher
-power for all equal, while conditional estimation is superior for
-one-good.  
-For this case we see little difference in performance for 
-half-good and all equal.
+As expected from the above explanation, 
+chi-bar square has the highest power for the all-equal alternative,
+then the MHT, then the conditional estimation test.
+These relationships are reversed for the one-good case.
+The chi-bar square test has zero power against the one-good alternative.
+All tests perform similarly in the half-good and all-equal alternatives.
 
 <<'power_plotz_one',dependspn=c('sims_vs_mht'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0('The empirical power of the conditional estimation, MHT corrected test, and one-sided test are shown versus the \\txtSNR of the asset with maximum \\txtSR under different arrangements of the vector \\pvsnr.')
@@ -1833,6 +1833,10 @@ ph <- resu %>%
   mutate(method=case_when(grepl('^condest$',method)   ~ 'cond. est.',
                           grepl('^mht$',method)       ~ 'MHT',
                           grepl('^chibs$',method)     ~ 'chi-bar^2',
+                          TRUE ~ 'ERROR')) %>%
+  mutate(mutype=case_when(mutype=='equal'     ~ 'all-equal',
+                          mutype=='halfgood'  ~ 'half-good',
+                          mutype=='onegood'   ~ 'one-good',
                           TRUE ~ 'ERROR')) %>%
   ggplot(aes(popvals,rej_rate,color=method))  +
   geom_line() + geom_point() +
@@ -2004,11 +2008,11 @@ yielding nominal rejection rates.
 <<'rho_plotz_one',dependson=c('correlation_sims_vs_mht'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0('The empirical type I rate under the null hypothesis is plotted versus $\\rho$ ',
                   'for the case where $\\RMAT=\\makerho{\\rho}{\\wrapParens{1-\\rho}}$, ',
-                  'for three testing procedures: the conditional estimation, vanilla Bonferroni correction, ',
+                  'for four testing procedures: the conditional estimation, the chi-bar square test, the vanilla Bonferroni correction, ',
                   'and Bonferroni correction with fix for common correlation.  ',
                   'Tests are performed with Gaussian returns, for ',mht_nlatf,' assets over ',mht_nday,' days. ',
-                  'Tests were performed at the $0.05$ level, which appears to be maintained by the conditional ',
-                  'estimation and fixed Bonferroni procedures but not by the regular Bonferroni procedure.  ',
+                  'Tests were performed at the $0.05$ level, which appears to be maintained by all procedures except the ',
+                  'regular Bonferroni procedure.  ',
                   'Empirical rates are over ',mht_null_nsim,' simulations. The $y$ axis is in log scale.')
 library(ggplot2)
 ph <- rhoresu %>%
@@ -2032,7 +2036,7 @@ print(ph)
 
 \clearpage
 
-\subsection{Five Industry Portfolios}
+\subsection{Five Industry Portfolios}%FOLDUP
 
 % 2FIX: start from here ... 
 <<'load_mind_data',echo=FALSE,eval=TRUE,cache=TRUE>>=
@@ -2116,6 +2120,39 @@ conde <- epsiwal::ci_connorm(y=svsr,
                              A=AAA,b=bbb,
                              eta=nu,Sigma=mySigma,p=1-typeI)
 #checky <- ptn(svsr,AAA,bbb,nu,mu=NULL,Sigma=mySigma,numu=conde)
+
+# now the chi-bar square procedure
+
+#' @param x  a vector of observed Sharpe ratios, in daily units.
+#' @param nday  the number of days to compute the SR.
+pchibsq <- function(x,nday,zeta=0,rho=0,lower.tail=TRUE) {
+  nlatf <- length(x)
+
+  # weights from chi-bar square distro
+  cwts <- exp(lchoose(nlatf,0:nlatf) - nlatf * log(2))
+  okwt <- (cwts > 1e-9)
+  sbdf <- which(okwt) - 1
+  sbwt <- cwts[okwt]
+  # should check that sum(sbwt) is around 1
+  stopifnot(abs(sum(sbwt) - 1) < 1e-5)
+  cval <- 1/sqrt(1 + (nlatf-1) * rho)
+  dval <- sqrt(1-rho)
+
+  # one-sided test
+  zetavg <- mean(x)
+  xi <- cval * zetavg + (x-zetavg) / dval
+  # chibarsquare test, assuming rho=0
+  chibs <- (nday) * sum(pmax(xi - cval * zeta,0)^2)
+  chibp <- sum(sbwt * pchisq(chibs,df=sbdf,lower.tail=lower.tail))
+}
+
+ci_chibsq <- function(x,nday,rho=0,typeI=0.05,lower.tail=FALSE) {
+  zerme <- function(zeta) { pchibsq(x=x,nday=nday,zeta=zeta,rho=rho,lower.tail=lower.tail) - typeI }
+  fval <- uniroot(zerme,
+                  interval=c(min(min(x),-3),max(x)),
+                  maxiter=2000)$root
+}
+os_cilo <- ci_chibsq(svsr,nday=ssiz,typeI=typeI,lower.tail=FALSE)
 @
 
 We are interested in computing $\Sexpr{100 * (1-typeI)}\%$ upper confidence
@@ -2138,6 +2175,9 @@ the measured \txtSR plus
 $\qnorm{\Sexpr{typeI}}=\Sexpr{qnorm(typeI)}$ times the standard error.
 This also gives the confidence interval
 $\left[\Sexpr{silly}\,\moto{-\halff}, \infty\right)$.
+We also invert the one-sided test procedure based on a chi-bar square
+distribution. This yields the confidence interval
+$\left[\Sexpr{os_cilo}\,\moto{-\halff}, \infty\right)$.
 
 Using the simple Bonferroni correction, however, since we selected
 \Sexpr{names(X)[1]} 
@@ -2163,7 +2203,7 @@ Finally we use the conditional estimation procedure, inverting
 the hypothesis test to find the corresponding population value.
 This yields the confidence interval 
 $\left[\Sexpr{conde}\,\moto{-\halff}, \infty\right)$.
-
+%UNFOLD
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions and Future Work}%FOLDUP

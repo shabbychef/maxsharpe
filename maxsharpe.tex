@@ -395,7 +395,7 @@ We find a multivariate analogue of the commonly used
 approximate standard error of the \txtSR to use in this conditional estimation procedure.
 We also consider the simple Bonferroni correction for multiple
 hypothesis testing, fixing it for the case of positive common
-correlation among assets.
+correlation among assets, and a chi-bar square test against one-sided alternatives.
 
 Testing indicates the conditional inference procedure achieves nominal type I rate,
 and does not appear to suffer from non-normality of returns.
@@ -816,9 +816,9 @@ One wishes to also use the result for more general problems wherein one will hol
 of assets, conditional on some observed properties of \svsr. For example:
 \begin{itemize}
   \item
-    Suppose you observe the \txtSRs of \nstrat assets, then select the top $k$ by \txtSR, then
-    you choose to hold an some portfolio of those $k$ assets.
-    In this case set $\AAA$ and $\bbb$ to reflect the ``$k$ choose $\nstrat - k$'' relevant
+    Suppose you observe the \txtSRs of \nstrat assets, then select the top $m$ by \txtSR, then
+    you choose to hold an some portfolio of those $m$ assets.
+    In this case set $\AAA$ and $\bbb$ to reflect the ``$m$ choose $\nstrat - m$'' relevant
     inequalities to condition on.
     %Let $\etav$ be the indicator for the top $k$ assets.
     %ACK! 2FIX: you are not concerned about the linear combination of these ...
@@ -910,10 +910,11 @@ Under the assumed form for \RMAT given in \eqnref{simple_RMAT}, it is simple to 
 \end{equation}
 (This relation holds if we replace \ogram{\vone} in \RMAT with \ogram{\pmone} where
 $\pmone$ is any vector whose elements are $\pm 1$. However in this case
-we will lose monotonicity.)
+we will lose the order-preserving property.)
 
-Now it is simple to confirm that this $\ichol{\RMAT}$ is monotonic. That is,
-if $\vect{a} = \ichol{\RMAT}\vect{b}$ and $b_i \le b_j$ then $a_i \le a_j$.
+Now it is simple to confirm that in this case the
+transform induced by $\ichol{\RMAT}$ is ``order-preserving.''
+That is, if $\vect{a} = \ichol{\RMAT}\vect{b}$ and $b_i \le b_j$ then $a_i \le a_j$.
 As a consequence, if $i$ is the maximal element of $\wrapParens{\svsr - \pvsnr[0]}$,
 then $i$ is the maximal element of $\vect{z}$.  Let us assume, again, that by
 convention we have reordered the elements such that the first element of
@@ -1027,11 +1028,11 @@ against a one-sided alternative.  \cite{nla.cat-vn3800977,perlman2002class,Perlm
 That is, the usual multivariate procedure to test the null hypothesis 
 $\Hyp[0] : \forall_i \psnr[i]=c$ under a normal approximation
 would be via Hotelling's $T^2$ test.  \cite{anderson2003introduction,press2012applied}
-However, we are mostly not interested in the case where some of
-the $\psnr[i]$ are less than $c$. 
-One-sided multivariate tests were designed for this task.
-They may not scale well to the case of large \nstrat, except perhaps
-under simple models for correlation.
+However we are not interested in the case where some of
+the $\psnr[i]$ are less than $c$.
+%One-sided multivariate tests were designed for this task.
+%They may not scale well to the case of large \nstrat, except perhaps
+%under simple models for correlation.
 %However, they often require that one construct a statistic like Hotelling's $T^2$,
 %which in our case would involve inverting the covariance of $\svsr$.
 %This will not scale well computationally to allow testing with large \nstrat.
@@ -1053,12 +1054,13 @@ $\ptvsnr = \ichol{\RMAT}\pvsnr$, the normal approximation can be rewritten as
 \begin{equation*}
   \sqrt{\ssiz}\stvsr \approx \normlaw{\sqrt{\ssiz}\ptvsnr,\eye}.
 \end{equation*}
-The inverse square root of \RMAT, given in \eqnref{simple_RMAT_ichol}, is monotonic.
+The inverse square root of \RMAT, given in \eqnref{simple_RMAT_ichol}, is order-preserving.
 Moreover, 
 \begin{equation*}
-  \ichol{\RMAT} \vone = \wrapParens{1+\wrapParens{\nstrat-1}\rho}^{-\halff} = c > 0.
+  \ichol{\RMAT} \vone = c\vone,
 \end{equation*}
-From the monotonicity of \ichol{\RMAT}, the null and alternative hypotheses can be expressed
+for $c=\wrapParens{1+\wrapParens{\nstrat-1}\rho}^{-\halff} > 0$.
+From the order-preserving nature of \ichol{\RMAT}, the null and alternative hypotheses can be expressed
 as 
 \begin{equation*}
 \Hyp[0] : \forall_i \ptsnr[i]=c \psnr[0]\quad\mbox{versus}\quad \Hyp[1] :  
@@ -1096,6 +1098,16 @@ may not be ``about'' \ssr[1].
 In testing we will see that the one-sided test is highly susceptible to distribution of the \pvsnr,
 moreso than the Bonferroni correction.
 
+We note that under this setup it is also easy to use Follman's test, which is a very simple procedure with
+increased power against one-sided alternatives. \cite{10.2307/2291680}
+Here we would compute
+$$
+g^2 = \ssiz^2 c^2 \wrapParens{\ssravg - \psnr[0]}^2 + \frac{\ssiz}{1-\rho}\sum_i \wrapParens{\ssr[i]-\ssravg}^2,
+$$
+and reject at the \typeI level if both $1-\chisqcdf{g^2}{\nstrat} \le 2 \typeI$ and $\ssravg > \psnr[0]$.
+
+
+
 \subsection{Subspace approximation}%FOLDUP
 
 %Lastly we mention that when asset returns are well approximated
@@ -1111,19 +1123,19 @@ returns are from backtested quantitative trading strategies, is via
 a subspace approximation.
 %a Markowitz approximation. 
 First we assume that the $\bby{\ssiz}{\nstrat}$ matrix of returns, \mreti
-can be approximated by a $k$-dimensional subspace
+can be approximated by a $m$-dimensional subspace
 $$
 \mreti \approx \Mtx{Y}\Mtx{W},
 $$
-where $\Mtx{Y}$ is a $\bby{\ssiz}{k}$ matrix of `latent' returns,
-and $\Mtx{W}$ is a $\bby{k}{\nstrat}$ `loading' matrix.
+where $\Mtx{Y}$ is a $\bby{\ssiz}{m}$ matrix of `latent' returns,
+and $\Mtx{W}$ is a $\bby{m}{\nstrat}$ `loading' matrix.
 
 Now the column of \mreti with maximal \svsr has \txtSR that
 is smaller than
 $$
 \ssropt \defeq \max_{\vect{\nu}} \frac{\trAB{\svmu}{\vect{\nu}}}{\sqrt{\qform{\svsig}{\vect{\nu}}}},
 $$
-where $\svmu$ is the $k$-vector of the (sample) means of columns of \Mtx{Y} and 
+where $\svmu$ is the $m$-vector of the (sample) means of columns of \Mtx{Y} and 
 $\svsig$ is the sample covariance matrix.
 This maximum takes value
 $$
@@ -1134,16 +1146,16 @@ which is, up to scaling, Hotelling's $T^2$ statistic.
 Under the null hypotheis that the rows of \Mtx{Y} are independent draws from a Gaussian
 random variable with zero mean, then
 $$
-\frac{\wrapParens{\ssiz-k}\ssrsqopt}{k \wrapParens{\ssiz-1}}
+\frac{\wrapParens{\ssiz-m}\ssrsqopt}{m \wrapParens{\ssiz-1}}
 $$
-follows an $F$ distribution with $k$ and $n-k$ degrees of 
+follows an $F$ distribution with $m$ and $\ssiz-m$ degrees of 
 freedom.  
 Under the alternative it follows a non-central $F$ distribution.
 \cite{anderson2003introduction,press2012applied}
 Via this upper bound $\ssr[1] \le \ssropt$, one can then perform
 tests on the null hypothesis $\forall_i \psnr[i]=0$.
 
-However, this approach requires that one estimate $k$, the
+However, this approach requires that one estimate $m$, the
 dimensionality of the latent subspace. Moreover, the subspace
 approximation may not be very good. It would seem that to
 get near equality of \ssr[1] and \ssropt, the columns
@@ -1189,9 +1201,11 @@ we use the actual population value of \RMAT, and the \pvsnr to compute
 the covariance via \eqnref{apx_srdist_gaussian}.
 This is not, of course, how the test would be applied in practice since
 \RMAT and \pvsnr have to be estimated.
+Moreover, we with to check coverage of the procedure under the null, so 
+we use the actual $\trAB{\etav}{\pvsnr}$ in our test.
 
-We repeat this experiment \ensuremath{10^{5}} times and collect the \ensuremath{10^{5}} p-values. 
-We would like to Q-Q or P-P plot these putative p-values, 
+We repeat this experiment \ensuremath{10^{5}} times and collect the resultant putative p-values.
+We would like to Q-Q or P-P plot these p-values, 
 as evidence that they are near uniform, 
 but the large sample size presents some challenges.
 Instead, we choose some selected small $q$ (like 0.05 or 0.01), and
@@ -1319,13 +1333,13 @@ We perform inference twice, once using
 and once using \eqnref{apx_srdist_elliptical} where we have estimated
 the kurtosis factor, \kurty, by taking the median of the sample marginal 
 kurtosises of the assets. 
-In \figref{causal_tfive_sims_plotz} we present the subsampled P-P plots
+In \figref{causal_tfive_sims_plotz} we present the subsampled empirical CDF plots
 on the log-transformed p-values under the two methods of estimating
 the covariance of \svsr.
 There is little difference in the performance of the two sets of simulations,
-though without the correction, the smallest p-values are slightly smaller
-than nominal, while with the correction they are slightly larger.
-We remain cautiously optimistic that for large \ssiz, one need correct
+though without the correction, the procedure is slightly anti-conservative, while with the correction
+it is slightly conservative.
+We remain cautiously optimistic that for large \ssiz, one need not correct
 \eqnref{apx_srdist_gaussian} to account for non-normal returns.
 
 
@@ -1432,7 +1446,7 @@ The test suffers from low power because we are conditioning on
 ``\ssr[1] is the largest \txtSR'', where we should actually
 be conditioning on ``the asset with the largest \txtSR.''
 
-Note the odd plot in the half good facet: the MHT correction
+Note the odd plot in the half-good facet: the MHT correction
 and one-sided tests have greater
 than $0.05$ rejection rate for \emph{negative} \txtSNR. 
 The plot is somewhat misleading in this case, however.
@@ -1442,7 +1456,7 @@ $\ensuremath{10^{4}}$ simulations for each setting of the `good'
 case, an asset with negative \txtSNR exhibits the maximum
 \txtSR. 
 We are plotting the rejection rate for the test in this case.
-But note that the null hypothesis that MHT and one-sided test are testing
+But note that the null hypothesis that MHT and the one-sided test are testing
 \emph{is} violated in this case, because half the assets
 have positive \txtSNR, and the alternative procedures test the null that all
 assets have zero or lower \txtSNR.
@@ -1459,12 +1473,9 @@ This is to be expected, since the chi-bar square test depends strongly
 on all the observed \txtSRs, and in this case we expect many of them
 to be negative.
 
-%In summary we 
-%This does indicate, however, that the simple settings of the 
-%spread of \pvsnr we tested here are unlikely to have revealed 
-%all the relevant differences between the tests or their
-%deficiencies in certain situations.
-
+We doubt that the simple experiments performed here
+have revealed all the relevant differences between the various tests or when
+one dominates the others.
 
 \subsubsection{Simulations under the null versus with correlated returns}
 
@@ -1516,7 +1527,7 @@ We compute the \txtSR of the returns of each, and present them
 in \tabref{mind_sr}. 
 We have reordered the industries in decreasing \txtSR.
 The industry portfolio with the highest \txtSR was
- with a \txtSR of 
+Healthcare with a \txtSR of 
 around $0.192\,\moto{-\halff}$ which is approximately
 $0.664\,\yrto{-\halff}$.
 
@@ -1543,17 +1554,17 @@ Healthcare & $ 0.192\,\moto{-\halff} $ \\
 
 
 We are interested in computing $95\%$ upper confidence
-intervals on the \txtSNR of the  portfolio. 
+intervals on the \txtSNR of the Healthcare portfolio. 
 We are only considering this portfolio as it is the one with maximum \txtSR
 in our sample.
 If we had been interested in testing
- 
+Healthcare 
 without our conditional selection, we would compute the confidence interval
 $\left[0.141\,\moto{-\halff}, \infty\right)$ based on inverting the non-central
 \tstat{}-distribution. \cite{pav_ssc,SharpeR-Manual}
 If instead we approximate the standard error by plugging in 
 $0.192\,\moto{-\halff}$ as the \txtSNR of 
- 
+Healthcare 
 into \eqnref{apx_srdist_gaussian},
 we estimate the standard error of the \txtSR to be
 $0.031\,\moto{-\halff}$.
@@ -1562,12 +1573,9 @@ the measured \txtSR plus
 $\qnorm{0.05}=-1.645$ times the standard error.
 This also gives the confidence interval
 $\left[0.141\,\moto{-\halff}, \infty\right)$.
-We also invert the one-sided test procedure based on a chi-bar square
-distribution. This yields the confidence interval
-$\left[0.14\,\moto{-\halff}, \infty\right)$.
 
 Using the simple Bonferroni correction, however, since we selected
- 
+Healthcare 
 only for having the maximum \txtSR, we should compute the 
 confidence interval by adding
 $\qnorm{0.01}=-2.326$ times the standard error.
@@ -1585,6 +1593,11 @@ is equal to
 $\qnorm{0.01}=-2.326$.
 This leads to the confidence interval 
 $\left[0.125\,\moto{-\halff}, \infty\right)$.
+
+We use this estimate of $\rho$ to compute the chi-bar square test.
+We invert the test to find the $95\%$ upper confidence interval
+$\left[0.14\,\moto{-\halff}, \infty\right)$.
+
 
 Finally we use the conditional estimation procedure, inverting
 the hypothesis test to find the corresponding population value.
@@ -1611,8 +1624,8 @@ Clearly the low power of the test gives us reason to seek improvements.
 Perhaps the conditioning procedure can be adapted to recognize
 that the strategist would have been testing another asset if the
 \txtSR of the currently selected asset had been lower. 
-Perhaps the power of the MHT for the case of equal \txtSNRs can
-be somehow ported to the conditional estimation procedure, perhaps
+Perhaps the power of the MHT, or the chi-bar square test for the case of equal \txtSNRs can
+be somehow ported to the conditional estimation procedure, maybe
 by testing multiple 
 assets\footnote{Note that White's Reality Check and Hansen's SPA
 appear to avoid this issue by comparing the maximum in-sample 

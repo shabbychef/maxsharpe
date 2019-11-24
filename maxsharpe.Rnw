@@ -1655,11 +1655,11 @@ versus $\psnr[1]$. However, we suspect that the power, as described in
 this way, would depend on the distribution of
 values of \pvsnr.
 
-We will consider two extremes: one where all \nstrat elements of \psnr are
-equal (``all-equal''), and one where $m$ of \nstrat elements of \psnr
+We will consider following alternatives: one where all \nstrat elements of \psnr are
+equal (``all-equal''), and two where $m$ of \nstrat elements of \psnr
 are equal to some positive value, and the remaining $\nstrat - m$ are negative
-that value (``m-good''), mostly for the case where $m=1$ or $\nstrat = 2m$, which
-we call ``half-good''.
+that value. For $m=1$, we call this the ``one-good'' alternative; for $m=\nstrat/2$,
+the ``half-good'' alternative.
 
 % power vs the MHT?
 <<'mht_test_functions',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs')>>=

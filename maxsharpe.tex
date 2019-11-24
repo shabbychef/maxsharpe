@@ -1351,11 +1351,11 @@ versus $\psnr[1]$. However, we suspect that the power, as described in
 this way, would depend on the distribution of
 values of \pvsnr.
 
-We will consider two extremes: one where all \nstrat elements of \psnr are
-equal (``all-equal''), and one where $m$ of \nstrat elements of \psnr
+We will consider following alternatives: one where all \nstrat elements of \psnr are
+equal (``all-equal''), and two where $m$ of \nstrat elements of \psnr
 are equal to some positive value, and the remaining $\nstrat - m$ are negative
-that value (``m-good''), mostly for the case where $m=1$ or $\nstrat = 2m$, which
-we call ``half-good''.
+that value. For $m=1$, we call this the ``one-good'' alternative; for $m=\nstrat/2$,
+the ``half-good'' alternative.
 
 % power vs the MHT?
 
@@ -1511,12 +1511,12 @@ We download the monthly returns of five industry portfolios
 from Ken French's data library. \cite{ind_5_def}
 %These consist of 
 We consider the 1080 months of data on five industries
-from Jan 1927 to Dec 2016.
+from 1927 to 2016.917.
 We compute the \txtSR of the returns of each, and present them
 in \tabref{mind_sr}. 
 We have reordered the industries in decreasing \txtSR.
 The industry portfolio with the highest \txtSR was
-Healthcare with a \txtSR of 
+ with a \txtSR of 
 around $0.192\,\moto{-\halff}$ which is approximately
 $0.664\,\yrto{-\halff}$.
 
@@ -1543,17 +1543,17 @@ Healthcare & $ 0.192\,\moto{-\halff} $ \\
 
 
 We are interested in computing $95\%$ upper confidence
-intervals on the \txtSNR of the Healthcare portfolio. 
+intervals on the \txtSNR of the  portfolio. 
 We are only considering this portfolio as it is the one with maximum \txtSR
 in our sample.
 If we had been interested in testing
-Healthcare 
+ 
 without our conditional selection, we would compute the confidence interval
 $\left[0.141\,\moto{-\halff}, \infty\right)$ based on inverting the non-central
 \tstat{}-distribution. \cite{pav_ssc,SharpeR-Manual}
 If instead we approximate the standard error by plugging in 
 $0.192\,\moto{-\halff}$ as the \txtSNR of 
-Healthcare 
+ 
 into \eqnref{apx_srdist_gaussian},
 we estimate the standard error of the \txtSR to be
 $0.031\,\moto{-\halff}$.
@@ -1567,7 +1567,7 @@ distribution. This yields the confidence interval
 $\left[0.14\,\moto{-\halff}, \infty\right)$.
 
 Using the simple Bonferroni correction, however, since we selected
-Healthcare 
+ 
 only for having the maximum \txtSR, we should compute the 
 confidence interval by adding
 $\qnorm{0.01}=-2.326$ times the standard error.

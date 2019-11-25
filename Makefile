@@ -58,7 +58,7 @@ STY_FILES    =
 #aspell
 ASPELL_FLAGS = 
 
-ARXIV_VERSION  			 = v5
+ARXIV_VERSION  			?= v6
 ARXIV_TAG 					 = $(PROJECT)_$(ARXIV_VERSION)
 
 # for running in docker this gets passed to the knit

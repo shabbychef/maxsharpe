@@ -1180,7 +1180,7 @@ and reject at the \typeI level if both $1-\chisqcdf{g^2}{\nstrat} \le 2 \typeI$ 
 \subsection{Subspace approximation}%FOLDUP
 
 %Lastly we mention that when asset returns are well approximated
-%by a linear combination of $k$ `latent' returns, we can
+%by a linear combination of $m$ `latent' returns, we can
 %view the asset with maximum \txtSR as holding the sample \txtMP
 %over the latent returns, then appeal to the theory of the
 %statistic of the \txtMP via Hotelling's $T^2$ statistic.  \cite{pav_maxsharpe_two}
@@ -2250,7 +2250,7 @@ correlation \RMAT can potentially be generalized to deal
 with more realistic correlation matrices.
 
 %Lastly we mention that when asset returns are well approximated
-%by a linear combination of $k$ `latent' returns, we can
+%by a linear combination of $m$ `latent' returns, we can
 %view the asset with maximum \txtSR as holding the sample \txtMP
 %over the latent returns, then appeal to the theory of the
 %statistic of the \txtMP via Hotelling's $T^2$ statistic.  \cite{pav_maxsharpe_two}

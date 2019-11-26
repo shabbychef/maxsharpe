@@ -2051,6 +2051,7 @@ print(ph)
 
 % 2FIX: start from here ... 
 <<'load_mind_data',echo=FALSE,eval=TRUE,cache=TRUE>>=
+# ack. 2018?
 if (!require(aqfb.data) && require(devtools)) {
   stop('please install_githb("shabbychef/aqfb_data")')
   #devtools::install_github("shabbychef/aqfb_data")

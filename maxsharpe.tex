@@ -1521,29 +1521,29 @@ yielding nominal rejection rates.
 We download the monthly returns of five industry portfolios
 from Ken French's data library. \cite{ind_5_def}
 %These consist of 
-We consider the 1080 months of data on five industries
-from 1927 to 2016.917.
+We consider the 1104 months of data on five industries
+from Jan 1927 to Dec 2018.
 We compute the \txtSR of the returns of each, and present them
 in \tabref{mind_sr}. 
 We have reordered the industries in decreasing \txtSR.
 The industry portfolio with the highest \txtSR was
 Healthcare with a \txtSR of 
-around $0.192\,\moto{-\halff}$ which is approximately
-$0.664\,\yrto{-\halff}$.
+around $0.193\,\moto{-\halff}$ which is approximately
+$0.667\,\yrto{-\halff}$.
 
 % latex table generated in R 3.4.3 by xtable 1.8-2 package
-% Mon Nov 25 22:24:51 2019
+% Mon Nov 25 22:27:54 2019
 \begin{table}[ht]
 \centering
 \begin{tabular}{r|c}
   \hline
 industry & Sharpe Ratio \\ 
   \hline
-Healthcare & $ 0.192\,\moto{-\halff} $ \\ 
-  Consumer & $ 0.188\,\moto{-\halff} $ \\ 
-  Manufacturing & $ 0.174\,\moto{-\halff} $ \\ 
-  Technology & $ 0.169\,\moto{-\halff} $ \\ 
-  Other & $ 0.141\,\moto{-\halff} $ \\ 
+Healthcare & $ 0.193\,\moto{-\halff} $ \\ 
+  Consumer & $ 0.187\,\moto{-\halff} $ \\ 
+  Manufacturing & $ 0.172\,\moto{-\halff} $ \\ 
+  Technology & $ 0.170\,\moto{-\halff} $ \\ 
+  Other & $ 0.140\,\moto{-\halff} $ \\ 
    \hline
 \end{tabular}
 \caption{The \txtSRs of the five industry portfolios are shown.} 
@@ -1560,19 +1560,19 @@ in our sample.
 If we had been interested in testing
 Healthcare 
 without our conditional selection, we would compute the confidence interval
-$\left[0.141\,\moto{-\halff}, \infty\right)$ based on inverting the non-central
+$\left[0.143\,\moto{-\halff}, \infty\right)$ based on inverting the non-central
 \tstat{}-distribution. \cite{pav_ssc,SharpeR-Manual}
 If instead we approximate the standard error by plugging in 
-$0.192\,\moto{-\halff}$ as the \txtSNR of 
+$0.193\,\moto{-\halff}$ as the \txtSNR of 
 Healthcare 
 into \eqnref{apx_srdist_gaussian},
 we estimate the standard error of the \txtSR to be
-$0.031\,\moto{-\halff}$.
+$0.03\,\moto{-\halff}$.
 Based on this we can compute the na\"{i}ve confidence interval of
 the measured \txtSR plus 
 $\qnorm{0.05}=-1.645$ times the standard error.
 This also gives the confidence interval
-$\left[0.141\,\moto{-\halff}, \infty\right)$.
+$\left[0.143\,\moto{-\halff}, \infty\right)$.
 
 Using the simple Bonferroni correction, however, since we selected
 Healthcare 
@@ -1580,13 +1580,13 @@ only for having the maximum \txtSR, we should compute the
 confidence interval by adding
 $\qnorm{0.01}=-2.326$ times the standard error.
 This yields the confidence interval
-$\left[0.12\,\moto{-\halff}, \infty\right)$.
+$\left[0.122\,\moto{-\halff}, \infty\right)$.
 
 The correlation of industry returns is high, however.
 The pairwise sample correlations range from
-0.709 to 
+0.708 to 
 0.891 with a median value of
-0.803.
+0.801.
 Plugging this value in as $\rho$, 
 we find the value $c$ such that the $z_1$ from \eqnref{fix_bonf_z}
 is equal to 
@@ -1596,13 +1596,13 @@ $\left[0.125\,\moto{-\halff}, \infty\right)$.
 
 We use this estimate of $\rho$ to compute the chi-bar square test.
 We invert the test to find the $95\%$ upper confidence interval
-$\left[0.14\,\moto{-\halff}, \infty\right)$.
+$\left[0.141\,\moto{-\halff}, \infty\right)$.
 
 
 Finally we use the conditional estimation procedure, inverting
 the hypothesis test to find the corresponding population value.
 This yields the confidence interval 
-$\left[0.039\,\moto{-\halff}, \infty\right)$.
+$\left[0.073\,\moto{-\halff}, \infty\right)$.
 %UNFOLD
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

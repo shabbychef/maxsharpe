@@ -1153,7 +1153,7 @@ Then compute the CDF of the corresponding chi-bar square distribution as
   \label{eqn:chibp}
   Q = \sum_{i=0}^{\nstrat} w_i {\chisqcdf{\bar{x}^2}{i}},
 \end{equation}
-where $\chisqcdf{i}{x}$ is the cumulative distribution of the $\chi^2$ distribution
+where $\chisqcdf{x}{i}$ is the cumulative distribution of the $\chi^2$ distribution
 with $i$ degrees of freedom, and $w_i$ are the chi-bar square weights.
 In this case they are defined as
 $$

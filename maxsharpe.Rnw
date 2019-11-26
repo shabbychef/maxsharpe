@@ -2087,7 +2087,7 @@ The industry portfolio with the highest \txtSR was
 around $\Sexpr{svsr[1]}\,\moto{-\halff}$ which is approximately
 $\Sexpr{sqrt(12)*svsr[1]}\,\yrto{-\halff}$.
 
-<<'mind_sr',echo=FALSE,cache=TRUE,results='asis'>>=
+<<'mind_sr',echo=FALSE,cache=TRUE,results='asis',dependson=c('load_mind_data')>>=
 foo_tab <- data_frame(industry=names(X),sr=as.numeric(svsr)) %>%
   mutate(sr=sprintf('$ %.3f\\,\\moto{-\\halff} $',sr)) %>%
   rename(`Sharpe Ratio`=sr) 
@@ -2100,7 +2100,7 @@ xres <- xtable(foo_tab,
 print(xres,sanitize.text.function=identity,include.rownames=FALSE)
 @
 
-<<'mind_inference',echo=FALSE,cache=TRUE,results='asis'>>=
+<<'mind_inference',echo=FALSE,cache=TRUE,results='asis',dependson=c('load_mind_data')>>=
 options(width=64,digits=3)
 typeI <- 0.05
 library(SharpeR)

@@ -1489,7 +1489,7 @@ one dominates the others.
 
 
 
-On the other hand, the MHT test cannot maintain the nominal type I rate in the face of correlated assets.
+On the other hand, the na{\"i}ve MHT test cannot maintain the nominal type I rate in the face of correlated assets.
 To demonstrate this, we repeat the experiments above, but setting 
 $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$
 and $\psnr=\vzero$.
@@ -1499,7 +1499,7 @@ empirical rejection rate.
 In \figref{rho_plotz_one}, we plot the empirical rejection rate versus $\rho$ at the nominal
 $0.05$ type I level. 
 While the conditional estimation procedure and one-sided tests appear to maintain the nominal rejection
-rate, even though \RMAT is being estimated from the sample,
+rate, %even though \RMAT is being estimated from the sample,   % it is not...
 the MHT test is conservative, with near zero rejection rates for large $\rho$.
 The fix for common correlation described in \subsecref{fix_bonferroni} is also tested,
 yielding nominal rejection rates.
@@ -1511,7 +1511,7 @@ yielding nominal rejection rates.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for four testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for four testing procedures: the conditional estimation, the chi-bar square test, the vanilla Bonferroni correction, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 100 assets over 1008 days. Tests were performed at the $0.05$ level, which appears to be maintained by all procedures except the regular Bonferroni procedure.  Empirical rates are over 5000 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for five testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for five testing procedures: the conditional estimation, the chi-bar square test, Follman's test, the vanilla Bonferroni correction, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 100 assets over 1008 days. Tests were performed at the $0.05$ level, which appears to be maintained by all procedures except the regular Bonferroni procedure.  Empirical rates are over 5000 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
 \end{figure}
 
 

@@ -1964,6 +1964,18 @@ rawsim <- function(nday,nstrat,nsim=100,rho=0) {
   cval <- 1/sqrt(1 + (nstrat-1) * rho)
   dval <- sqrt(1-rho)
 
+  # follman's, and redundant to above
+  kurty <- 1.0 # assumed
+  psnr0 <- 0.0 # assumed
+  a0 <- (1-rho) + (kurty/2) * psnr0^2 * (1-rho^2)
+  a2 <- rho + ((kurty-1)/4) * psnr0^2 + (kurty/2) * psnr0^2 * rho^2
+  b0 <- 1 / sqrt(a0)
+  #b2 <- (-1 / (nstrat*sqrt(a0))) + (1/nstrat) / sqrt(a0 + nstrat*a2)
+  #cval <- b0 + nstrat * b2
+
+  f1 <- nday * nstrat * cval^2
+  f2 <- nday * b0^2
+
   mhtpvals <- replicate(nsim,{
 		X <- mvtnorm::rmvnorm(nday,mean=mu,sigma=R)
 		x <- colMeans(X) / apply(X,2,sd)
@@ -1979,11 +1991,17 @@ rawsim <- function(nday,nstrat,nsim=100,rho=0) {
     chibs <- (nday) * sum(pmax(xi,0)^2)
     chibp <- sum(sbwt * pchisq(chibs,df=sbdf,lower.tail=FALSE))
 
-    c(bonf_pval,corr_pval,chibp)
+    # follman test
+    g2 <- f1 * (zetavg - psnr0)^2 + f2 * sum((x - zetavg)^2)
+    follp <- pchisq(g2,df=nstrat,lower.tail=FALSE)
+    ffollp <- ifelse(zetavg > psnr0,0.5 * follp,1 - 0.5*follp)
+
+    c(bonf_pval,corr_pval,chibp,ffollp)
   })
   data_frame(bonf_pvals=as.numeric(mhtpvals[1,]),
 						 corr_pvals=as.numeric(mhtpvals[2,]),
              chib_pvals=as.numeric(mhtpvals[3,]),
+             foll_pvals=as.numeric(mhtpvals[4,]),
              nelc_pvals=1-sim$pvals)
 }
 many_rawsim <- function(nday,nstrat,rho,nsim=1000L,nnodes=7) {
@@ -2029,7 +2047,7 @@ rhoresu <- params %>%
 #})
 @
 
-On the other hand, the MHT test cannot maintain the nominal type I rate in the face of correlated assets.
+On the other hand, the na{\"i}ve MHT test cannot maintain the nominal type I rate in the face of correlated assets.
 To demonstrate this, we repeat the experiments above, but setting 
 $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$
 and $\psnr=\vzero$.
@@ -2039,7 +2057,7 @@ empirical rejection rate.
 In \figref{rho_plotz_one}, we plot the empirical rejection rate versus $\rho$ at the nominal
 $0.05$ type I level. 
 While the conditional estimation procedure and one-sided tests appear to maintain the nominal rejection
-rate, even though \RMAT is being estimated from the sample,
+rate, %even though \RMAT is being estimated from the sample,   % it is not...
 the MHT test is conservative, with near zero rejection rates for large $\rho$.
 The fix for common correlation described in \subsecref{fix_bonferroni} is also tested,
 yielding nominal rejection rates.
@@ -2052,7 +2070,7 @@ yielding nominal rejection rates.
 <<'rho_plotz_one',dependson=c('correlation_sims_vs_mht'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0('The empirical type I rate under the null hypothesis is plotted versus $\\rho$ ',
                   'for the case where $\\RMAT=\\makerho{\\rho}{\\wrapParens{1-\\rho}}$, ',
-                  'for four testing procedures: the conditional estimation, the chi-bar square test, the vanilla Bonferroni correction, ',
+                  "for five testing procedures: the conditional estimation, the chi-bar square test, Follman's test, the vanilla Bonferroni correction, ",
                   'and Bonferroni correction with fix for common correlation.  ',
                   'Tests are performed with Gaussian returns, for ',mht_nstrat,' assets over ',mht_nday,' days. ',
                   'Tests were performed at the $0.05$ level, which appears to be maintained by all procedures except the ',
@@ -2064,6 +2082,7 @@ ph <- rhoresu %>%
                           grepl('^bonf_pvals$',method)    ~ 'vanilla MHT',
                           grepl('^chib_pvals$',method)    ~ 'chi-bar^2',
                           grepl('^corr_pvals$',method)    ~ 'fixed MHT',
+                          grepl('^foll_pvals$',method)    ~ 'Follman',
                           TRUE ~ 'ERROR')) %>%
   ggplot(aes(rho,rej_rate,color=method))  +
   geom_line() + geom_point() +

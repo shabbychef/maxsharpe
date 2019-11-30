@@ -1383,7 +1383,8 @@ draw returns from a Gaussian distribution with diagonal covariance.
 Under this assumption, one can use the distribution of the \tstat{} statistic
 to perform inference on the \txtSNR. \cite{pav_ssc}
 We then use the Bonferroni correction to account for the multiple tests performed.
-We also perform the one-sided test based on the chi-bar square statistic.
+We also perform the one-sided test based on the chi-bar square statistic,
+and Follman's test.
 
 Note that in the all-equal case, since every asset has the same \txtSNR,
 whichever we select will have the same \txtSNR, and the Bonferroni-corrected test should have the
@@ -1395,7 +1396,8 @@ On the other hand, for the one-good case, as the $\nstrat - 1$ assets
 may have considerably negative \txtSNR, they are unlikely to exhibit the
 largest \txtSR, and so the MHT is merely testing a single asset, but
 at the $\typeI / \nstrat$ level instead of the $\typeI$ level, resulting
-in lower power. The chi-bar square test is also unlikely to reject.
+in lower power. 
+The chi-bar square test and Follman's test are also unlikely to reject.
 The conditional estimation procedure, however, should
 not suffer under this alternative.
 
@@ -1414,7 +1416,7 @@ the largest \txtSR is observed in an asset with a negative \txtSNR.
 We hope our tests to have lower power when this occurs.
 
 In \figref{power_plotz_one}, we plot the power of the MHT Bonferroni
-test, the chi-bar square test, 
+test, the chi-bar square test, Follman's test, 
 and the conditional estimation procedure versus the \txtSNR
 of the selected asset. 
 We present facet columns for the three configurations, 
@@ -1423,14 +1425,20 @@ A horizontal line at $0.05$ gives the nominal rate under the null,
 which occurs as $x=0$ in these plots.
 As expected from the above explanation, 
 chi-bar square has the highest power for the all-equal alternative,
-then the MHT, then the conditional estimation test.
+followed by Follman'st test, 
+then the MHT, 
+then the conditional estimation test.
 These relationships are reversed for the one-good case.
-The chi-bar square test has zero power against the one-good alternative.
-All tests perform similarly in the half-good and all-equal alternatives.
+The chi-bar square test and Follman's test have zero power against the one-good alternative.
+All tests perform similarly in the half-good and all-equal alternatives,
+with the exception of Follman's test, which achieves a maximum power of $1/2$ in the
+half-good case, as is to be expected since this is the probability that
+$\ssravg > 0$ in the half-good case.
+
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_one-1} \caption[The empirical power of the conditional estimation, MHT corrected test, and one-sided test are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr]{The empirical power of the conditional estimation, MHT corrected test, and one-sided test are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr.}\label{fig:power_plotz_one}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_one-1} \caption[The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, and Follman's test and one-sided test are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr]{The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, and Follman's test and one-sided test are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr. For the one-good case, the chi-bar-square and Follman's test have the same power, which is essentially zero under the alternative. }\label{fig:power_plotz_one}
 \end{figure}
 
 
@@ -1449,7 +1457,7 @@ be conditioning on ``the asset with the largest \txtSR.''
 Note the odd plot in the half-good facet: the MHT correction
 and one-sided tests have greater
 than $0.05$ rejection rate for \emph{negative} \txtSNR. 
-The plot is somewhat misleading in this case, however.
+The plot is somewhat misleading under this alternative, however.
 We have performed
 $\ensuremath{10^{4}}$ simulations for each setting of the `good'
 \txtSNR; in some very small number of them for the half-good
@@ -1466,10 +1474,10 @@ is greater than $0.05\dayto{-\halff}$ we do not observe this
 occuring even once over the $\ensuremath{10^{4}}$ simulations performed
 for each setting. 
 
-We note that the one-sided test appears to have higher power than either
+We note that the chi-bar-square test appears to have higher power than either
 of the other tests for the all-equal and half-good populations,
 but fails to reject at all in the one-good case, except under the null.
-This is to be expected, since the chi-bar square test depends strongly
+This is to be expected, since the chi-bar-square test depends strongly
 on all the observed \txtSRs, and in this case we expect many of them
 to be negative.
 
@@ -1522,7 +1530,7 @@ We download the monthly returns of five industry portfolios
 from Ken French's data library. \cite{ind_5_def}
 %These consist of 
 We consider the 1104 months of data on five industries
-from 1927 to 2018.917.
+from Jan 1927 to Dec 2018.
 We compute the \txtSR of the returns of each, and present them
 in \tabref{mind_sr}. 
 We have reordered the industries in decreasing \txtSR.
@@ -1532,7 +1540,7 @@ around $0.193\,\moto{-\halff}$ which is approximately
 $0.667\,\yrto{-\halff}$.
 
 % latex table generated in R 3.4.3 by xtable 1.8-2 package
-% Mon Nov 25 22:27:54 2019
+% Fri Nov 29 20:31:03 2019
 \begin{table}[ht]
 \centering
 \begin{tabular}{r|c}

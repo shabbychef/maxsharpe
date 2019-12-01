@@ -1212,7 +1212,7 @@ $$
 $$
 which is, up to scaling, Hotelling's $T^2$ statistic.
 
-Under the null hypotheis that the rows of \Mtx{Y} are independent draws from a Gaussian
+Under the null hypothesis that the rows of \Mtx{Y} are independent draws from a Gaussian
 random variable with zero mean, then
 $$
 \frac{\wrapParens{\ssiz-m}\ssrsqopt}{m \wrapParens{\ssiz-1}}

@@ -852,7 +852,7 @@ have inferior \txtSNR.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Alternative Approaches}%FOLDUP
 
-\subsection{Bonferroni correction with simple correlation fix}
+\subsection{Bonferroni correction with simple correlation fix}%FOLDUP
 
 \label{subsec:fix_bonferroni}
 The simple MHT approach to the problem is via a Bonferroni correction.  \cite{bretz2016multiple}
@@ -861,9 +861,10 @@ and normally distributed.
 In this case the marginals of \svsr are independent, and distributed
 as rescaled non-central \tstat{} random variables.
 So to test the null hypothesis
-\begin{equation*}
+\begin{equation}
+\label{hyp:eq_test}
 \Hyp[0] : \forall_i \psnr[i]=c\quad\mbox{versus}\quad \Hyp[1] :  \exists_i \psnr[i] > c,
-\end{equation*}
+\end{equation}
 compute the \txtSRs, \svsr, then
 reject at the $\typeI$ level when
 $\sqrt{\ssiz} \max_i \svsr[i]$ exceeds $\nctqnt{1-\typeI/\nstrat}{\sqrt{\ssiz} c}{\ssiz-1}$,
@@ -1017,8 +1018,9 @@ plugging in $\rho$,
 and reject the null hypothesis when $z_1$ is bigger than 
 $\qnorm{1-\typeI/\nstrat},$ the $1-\typeI/\nstrat$ quantile of the normal distribution.
 This procedure has (approximate) type I rate \emph{no greater} than $\typeI$.
+%UNFOLD
 
-\subsection{Testing against one-sided alternatives}
+\subsection{Testing against one-sided alternatives}%FOLDUP
 
 Another obvious approach to the problem is to appeal to the
 normal approximation of 
@@ -1067,11 +1069,12 @@ as
 \forall_i \ptsnr[i]\ge c \psnr[0]\,\,\mbox{and}\,\, \exists_j \ptsnr[j] > c \psnr[0].
 \end{equation*}
 
-We can then appeal to the simple chi-bar square test.  \cite{nla.cat-vn3800977}
+We can then appeal to the simple chi-bar square test.  \cite{nla.cat-vn3800977,wolak1987exact}
 First transform the vector of \txtSRs to \stvsr via 
-$$
+\begin{equation}
+  \label{eqn:xi_transform}
 \stvsr=\ichol{\RMAT}\svsr= c\ssravg\vone + \wrapParens{1-\rho}^{-\halff}\wrapParens{\svsr - \ssravg \vone},
-$$
+\end{equation}
 where $\ssravg$ is the average of the sample \txtSRs.
 Then compute
 \begin{equation}
@@ -1105,8 +1108,45 @@ $$
 g^2 = \ssiz \nstrat c^2 \wrapParens{\ssravg - \psnr[0]}^2 + \frac{\ssiz}{1-\rho}\sum_i \wrapParens{\ssr[i]-\ssravg}^2,
 $$
 and reject at the \typeI level if both $1-\chisqcdf{g^2}{\nstrat} \le 2 \typeI$ and $\ssravg > \psnr[0]$.
+%UNFOLD
 
+\subsection{Hansen's $\log \log$ Test}%FOLDUP
 
+One failing of many of the approaches considered above is the problem
+of irrelevant alternatives.
+That is, instead of testing under the null of equality, (\ref{hyp:eq_test}) above,
+we should test the following
+\begin{equation*}
+\Hyp[0] : \forall_i \psnr[i] \le c\quad\mbox{versus}\quad \Hyp[1] :  \exists_i \psnr[i] > c.
+\end{equation*}
+Testing such a composite null hypothesis is typically via a \emph{non-similar} test,
+\ie one which has a type I rate no greater than the nominal rate for all \pvsnr in the null, 
+and which achieves that nominal rate for some \pvsnr under the null. 
+Such tests achieve the nominal rate under the \emph{least favorable configuration} (LFC),
+which in our case is the null of equality, or the problem of (\ref{hyp:eq_test}). \cite{nla.cat-vn3800977}
+
+Hansen describes a procedure which avoids this problem. 
+The idea is elegant, and ultimately simple to implement.  \cite{Hansen2003Asymptotic}
+In the terms of the problem we consider, it amounts to assuming that the null takes the form
+\begin{equation*}
+  \Hyp[0] : \forall_i\,\psnr[i] \le c\mbox{ and }\abs{\psnr[i]-\ssr[i]} \le g_{\ssiz}\quad\mbox{versus}\quad \Hyp[1] :  \exists_i \psnr[i] > c,
+\end{equation*}
+for some $g_{\ssiz}$. 
+Note this seems odd since the sample \txtSR appears in the null hypothesis to be tested.
+Hansen describes how such a test can be performed while maintaining a maximum
+type I rate asymptotically, while achieving higher power than the chi-bar-square test.
+
+For our problem, first perform the translation to \stvsr given in \eqnref{xi_transform}.
+Then compute the $\bar{x}^2$ statistic of \eqnref{chibstat}.
+However, instead of comparing to the unconstrained chi-bar-square statistic,
+a different procedure is used to compute the rejection region.
+
+% WTAH is the test? ack...
+%> nnn <- 10^seq(1,7,length.out=101) 
+%> ccc <- sqrt(2*log(log(nnn))) 
+%> plot(nnn,ccc,log='xy') 
+
+%UNFOLD
 
 \subsection{Subspace approximation}%FOLDUP
 
@@ -1530,7 +1570,7 @@ We download the monthly returns of five industry portfolios
 from Ken French's data library. \cite{ind_5_def}
 %These consist of 
 We consider the 1104 months of data on five industries
-from Jan 1927 to Dec 2018.
+from 1927 to 2018.917.
 We compute the \txtSR of the returns of each, and present them
 in \tabref{mind_sr}. 
 We have reordered the industries in decreasing \txtSR.

@@ -45,6 +45,8 @@ DVI_TARGET   = $(PROJECT).dvi
 PDF_TARGET   = $(PROJECT).pdf
 BBLS         = $(PROJECT).bbl
 
+TIMEIT 			?= time 
+
 #SAVE
 # tracked projects
 PROJECTS     = $(PROJECT) 
@@ -99,7 +101,7 @@ all : $(PROJECT).pdf  ## build the document by knitting source code
 doc : $(PROJECT).pdf  ## build the document by knitting source code
 
 %.tex : %.Rnw $(R_DEPS)
-		Rscript -e 'require(knitr);knit("$<")'
+		$(TIMEIT)Rscript -e 'require(knitr);knit("$<")'
 		@-perl -pi -e 's/(syn|ft)=(Rnw|rnoweb)/$$1=tex/g;' $@
 
 %.R : %.Rnw

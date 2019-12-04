@@ -1717,6 +1717,15 @@ the ``half-good'' alternative.
 
 % power vs the MHT?
 <<'mht_test_functions',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs')>>=
+chib_test <- function(xbar2,nstrat,lower.tail=FALSE) {
+  cwts <- exp(lchoose(nstrat,0:nstrat) - nstrat * log(2))
+  okwt <- (cwts > 1e-9)
+  sbdf <- which(okwt) - 1
+  sbwt <- cwts[okwt]
+  # should check that sum(sbwt) is around 1
+  #stopifnot(abs(sum(sbwt) - 1) < 1e-5)
+  sum(sbwt * pchisq(xbar2,df=sbdf,lower.tail=lower.tail))
+}
 # set up the functions
 bot_rawsim <- function(nday,nstrat,one_zeta,nsim=100,rho=0,
                        mutype=c('equal','onegood','halfgood','spread')) { 
@@ -1755,6 +1764,8 @@ bot_rawsim <- function(nday,nstrat,one_zeta,nsim=100,rho=0,
   f1 <- nday * nstrat * cval^2
   f2 <- nday * b0^2
 
+  # Hansens cutoff
+  spcut <- - sqrt(2*log(log(nday))/nday)
 
   # MHT and chibarsquare
   mhtpvals <- replicate(nsim,{
@@ -1783,21 +1794,20 @@ bot_rawsim <- function(nday,nstrat,one_zeta,nsim=100,rho=0,
     follp <- pchisq(g2,df=nstrat,lower.tail=FALSE)
     ffollp <- ifelse(ssravg > psnr0,0.5 * follp,1 - 0.5*follp)
 
-    c(pval,chibp,ffollp,mu[xm])
+    # hansens procedures; only for the rho=0 case, btw
+    nabove <- sum(svsr > spcut)
+    lval <- ifelse(nabove > 0,nabove * SharpeR::psr(ssrmax,df=nday-1,zeta=0,ope=1,lower.tail=FALSE),1)
+    spval <- ifelse(nabove > 0,chib_test(chibs,nabove),1)
+
+    c(pval,chibp,ffollp,lval,spval,mu[xm])
   })
   rbind(sim %>% 
         select(-simvals) %>% 
         mutate(pvals=1-pvals) %>% 
         mutate(method='condest'),
-        data_frame(pvals=as.numeric(mhtpvals[1,]),
-                   popvals=as.numeric(mhtpvals[4,]),
-                   method='mht'),
-        data_frame(pvals=as.numeric(mhtpvals[2,]),
-                   popvals=as.numeric(mhtpvals[4,]),
-                   method='chibs'),
-        data_frame(pvals=as.numeric(mhtpvals[3,]),
-                   popvals=as.numeric(mhtpvals[4,]),
-                   method='follman'))
+        data.frame(t(mhtpvals)) %>%
+        setNames(c('mht','chibs','follman','loglog','spa','popvals')) %>%
+        tidyr::gather(key=method,value=pvals,-popvals)) 
 }
 mhtsim <- function(alpha=0.05,...) {
   bot_rawsim(...) %>%
@@ -1909,8 +1919,8 @@ $\ssravg > 0$ in the half-good case.
 
 
 <<'power_plotz_one',dependson=c('sims_vs_mht'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
-fig_cap <- paste0("The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, and Follman's test ",
-                  'and one-sided test are shown versus the \\txtSNR of the asset with maximum \\txtSR under different arrangements of the vector \\pvsnr. ',
+fig_cap <- paste0("The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures ",
+                  'are shown versus the \\txtSNR of the asset with maximum \\txtSR under different arrangements of the vector \\pvsnr. ',
                   "For the one-good case, the chi-bar-square and Follman's test have the same power, which is essentially zero under the alternative. ")
 # 482b4da5-36ad-45fe-9c8f-687625aa5cc7 
 #filter(grepl('equal|onegood',mutype)) %>%
@@ -1920,6 +1930,8 @@ ph <- resu %>%
                           grepl('^mht$',method)       ~ 'MHT',
                           grepl('^chibs$',method)     ~ 'chi-bar^2',
                           grepl('^follman$',method)   ~ 'Follman',
+                          grepl('^loglog$',method)    ~ 'Hansen chi-bar^2',
+                          grepl('^spa$',method)       ~ 'Hansen SPA',
                           TRUE ~ 'ERROR')) %>%
   mutate(mutype=case_when(mutype=='equal'     ~ 'all-equal',
                           mutype=='halfgood'  ~ 'half-good',

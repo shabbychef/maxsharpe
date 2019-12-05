@@ -1417,7 +1417,7 @@ chib_test <- function(xbar2,nstrat,lower.tail=FALSE) {
   sum(sbwt * pchisq(xbar2,df=sbdf,lower.tail=lower.tail))
 }
 # call a bunch of testing procedures
-alt_test <- function(nday,mu,nsim=100,rho=0,psnr0=0,do_condest=TRUE) {
+alt_test <- function(nday,mu,nsim=100,rho=0,psnr0=0) {
   nstrat <- length(mu)
   R <- pmin(diag(nstrat) + rho,1)  
   kurty <- 1.0 # assumed
@@ -1493,20 +1493,24 @@ alt_test <- function(nday,mu,nsim=100,rho=0,psnr0=0,do_condest=TRUE) {
     setNames(c('norho_mht','mht','chibarsquare','follman','loglog','spa','popvals')) %>%
     tidyr::gather(key=method,value=pvals,-popvals)
 
-  if (do_condest) {
-    cd_sim <- parsim(nsim=nsim,nday=nday,R=R,mu=mu,testmu=rep(psnr0,nstrat)) %>%
-      select(-simvals) %>% 
-      mutate(pvals=1-pvals) %>% 
-      mutate(method='condest')
-
-    retv <- bind_rows(retv,cd_sim)
+  retv
+}
+par_alt_test <- function(nday,mu,nsim=100,rho=0,psnr0=0,nnodes=7) {
+  if (nsim > 2*nnodes) {
+    # do in parallel.
+    nper <- table(1 + ((0:(nsim-1) %% nnodes))) 
+    retv <- foreach(i=1:nnodes,.export = c('nday','mu','rho','psnr0','chib_test','alt_test')) %dopar% {
+      alt_test(nsim=nper[i],nday=nday,mu=mu,psnr0=psnr0,rho=rho)
+    } %>%
+      bind_rows()
+  } else {
+    retv <- alt_test(nsim=nsim,nday=nday,mu=mu,psnr0=psnr0,rho=rho)
   }
   retv
 }
 # spawn mu and call the sims
 bot_rawsim <- function(nday,nstrat,one_zeta,nsim=100,rho=0,
-                       mutype=c('equal','onegood','halfgood','spread'),
-                       do_condest=TRUE) { 
+                       mutype=c('equal','onegood','halfgood','spread')) {
 	mutype <- match.arg(mutype)
   mu <- switch(mutype,
                equal=rep(one_zeta,nstrat),
@@ -1514,7 +1518,12 @@ bot_rawsim <- function(nday,nstrat,one_zeta,nsim=100,rho=0,
                halfgood=c(rep(one_zeta,floor(nstrat/2)),
                           rep(-one_zeta,ceiling(nstrat/2))),
                spread=seq(-one_zeta,one_zeta,length.out=nstrat))
-  alt_test(nday=nday,mu=mu,nsim=nsim,rho=rho,do_condest=do_condest)
+  R <- pmin(diag(nstrat) + rho,1)  
+  bind_rows(parsim(nsim=nsim,nday=nday,R=R,mu=mu,testmu=rep(0,nstrat)) %>%
+            select(-simvals) %>% 
+            mutate(pvals=1-pvals) %>% 
+            mutate(method='condest'),
+          par_alt_test(nday=nday,mu=mu,nsim=nsim,rho=rho))
 }
 # compute the rejection rates
 mhtsim <- function(alpha=0.05,...) {

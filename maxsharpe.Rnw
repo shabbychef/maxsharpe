@@ -1179,7 +1179,7 @@ $$
 and reject at the \typeI level if both $1-\chisqcdf{g^2}{\nstrat} \le 2 \typeI$ and $\ssravg > \psnr[0]$.
 %UNFOLD
 
-\subsection{Hansen's $\log \log$ Test}%FOLDUP
+\subsection{Hansen's $\log \log$ Corrections}%FOLDUP
 
 One failing of many of the approaches considered above is the problem
 of irrelevant alternatives.
@@ -1195,7 +1195,7 @@ Such tests achieve the nominal rate under the \emph{least favorable configuratio
 which in our case is the null of equality, or the problem of (\ref{hyp:eq_test}). \cite{nla.cat-vn3800977}
 
 Hansen describes a procedure which avoids this problem. 
-The idea is elegant, and ultimately simple to implement.  \cite{Hansen2003Asymptotic}
+The idea is elegant, and ultimately simple to implement.  \cite{Hansen2003Asymptotic,Hansen:2005}
 In the terms of the problem we consider, it amounts to assuming that the null takes the form
 \begin{equation*}
   \Hyp[0] : \forall_i\,\psnr[i] \le c\mbox{ and }\abs{\psnr[i]-\ssr[i]} \le g_{\ssiz}\quad\mbox{versus}\quad \Hyp[1] :  \exists_i \psnr[i] > c,
@@ -1203,12 +1203,34 @@ In the terms of the problem we consider, it amounts to assuming that the null ta
 for some $g_{\ssiz}$. 
 Note this seems odd since the sample \txtSR appears in the null hypothesis to be tested.
 Hansen describes how such a test can be performed while maintaining a maximum
-type I rate asymptotically, while achieving higher power than the chi-bar-square test.
+type I rate asymptotically, and achieving higher power.
 
-For our problem, first perform the translation to \stvsr given in \eqnref{xi_transform}.
-Then compute the $\bar{x}^2$ statistic of \eqnref{chibstat}.
-However, instead of comparing to the unconstrained chi-bar-square statistic,
-a different procedure is used to compute the rejection region.
+Hansen applied this correction to the chi-bar-square statistic (\cf \eqnref{chibstat}),
+and later to 
+and to a Studentized version of White's Reality Check statistic, which is rather like
+the corrected Bonferroni statistic computed in 
+\eqnref{fix_bonf_z}.  \cite{Hansen2003Asymptotic,Hansen:2005}
+Applying Hansen's correction to our problem is simple: compute \stvsr as in \eqnref{xi_transform}.
+Let $\tilde{\nstrat}$ be the number of elements of \stvsr greater than $c\psnr[0] - \sqrt{\wrapParens{2\log\log\ssiz}/\ssiz}$,
+where $c=\wrapParens{1+\wrapParens{\nstrat-1}\rho}^{-\halff}$.
+If $\tilde{\nstrat}=0$ fail to reject.
+Otherwise compute the chi-bar-square statistic $\bar{x}^2$ as in \eqnref{chibstat}
+and reject if
+\begin{equation*}
+  \sum_{i=0}^{\tilde{\nstrat}} w_i {\chisqcdf{\bar{x}^2}{i}} \ge 1-\typeI,\quad\mbox{where }
+  w_i = {\tilde{\nstrat} \choose i}{2^{-\tilde{\nstrat}}}.
+\end{equation*}
+We will refer to this as ``Hansen's chi-bar-square.''
+
+The same correction is easily applied to the Bonferroni maximum test: again,
+compute \stvsr and $\tilde{\nstrat}$. 
+If $\tilde{\nstrat}=0$ fail to reject.
+Otherwise reject at the $\typeI$ level if
+\begin{equation*}
+  \max_i \stvsr[i] - c\psnr[0] \ge \qnorm{1-\typeI/\tilde{\nstrat}}.
+\end{equation*}
+We will refer to this as ``Hansen's SPA.''
+
 
 % WTAH is the test? ack...
 %> nnn <- 10^seq(1,7,length.out=101) 
@@ -1384,6 +1406,125 @@ ks_sim <- function(rho,nday,nstrat,max_zeta,estimate_parms=FALSE,ret_dist='gauss
 }
 #sim <- parsim(nsim,nday=nday,R=R,mu=mu,estimate_parms=FALSE,ret_dist='t5')
 #plot(ecdf(sim$pvals))
+
+chib_test <- function(xbar2,nstrat,lower.tail=FALSE) {
+  cwts <- exp(lchoose(nstrat,0:nstrat) - nstrat * log(2))
+  okwt <- (cwts > 1e-9)
+  sbdf <- which(okwt) - 1
+  sbwt <- cwts[okwt]
+  # should check that sum(sbwt) is around 1
+  #stopifnot(abs(sum(sbwt) - 1) < 1e-5)
+  sum(sbwt * pchisq(xbar2,df=sbdf,lower.tail=lower.tail))
+}
+# call a bunch of testing procedures
+alt_test <- function(nday,mu,nsim=100,rho=0,psnr0=0,do_condest=TRUE) {
+  nstrat <- length(mu)
+  R <- pmin(diag(nstrat) + rho,1)  
+  kurty <- 1.0 # assumed
+
+	apart <- sqrt(nday)/sqrt(1-rho)
+	bpart <- sqrt(nday) * ((1/sqrt(1-rho+nstrat*rho)) - (1/sqrt(1-rho)))
+
+  # weights from chi-bar square distro
+  cwts <- exp(lchoose(nstrat,0:nstrat) - nstrat * log(2))
+  okwt <- (cwts > 1e-9)
+  sbdf <- which(okwt) - 1
+  sbwt <- cwts[okwt]
+  # should check that sum(sbwt) is around 1
+  stopifnot(abs(sum(sbwt) - 1) < 1e-5)
+  cval <- 1/sqrt(1 + (nstrat-1) * rho)
+  dval <- sqrt(1-rho)
+  xi0 <- cval * psnr0
+
+  # follman's, and redundant to above
+  a0 <- (1-rho) + (kurty/2) * psnr0^2 * (1-rho^2)
+  a2 <- rho + ((kurty-1)/4) * psnr0^2 + (kurty/2) * psnr0^2 * rho^2
+  b0 <- 1 / sqrt(a0)
+  #b2 <- (-1 / (nstrat*sqrt(a0))) + (1/nstrat) / sqrt(a0 + nstrat*a2)
+  #cval <- b0 + nstrat * b2
+
+  f1 <- nday * nstrat * cval^2
+  f2 <- nday * b0^2
+
+  # Hansens cutoff
+  spcut <- xi0 - sqrt(2*log(log(nday))/nday)
+
+  # would be great to parallelize this with future_replicate?
+  mhtpvals <- replicate(nsim,{
+    if (rho == 0) {
+      svsr <- SharpeR::rsr(n=nstrat,df=nday-1,zeta=mu,ope=1)
+    } else {
+      X <- mvtnorm::rmvnorm(nday,mean=mu,sigma=R)
+      svsr <- colMeans(X) / apply(X,2,sd)
+    }
+    xm <- which.max(svsr)
+    ssravg <- mean(svsr)
+    ssrmax <- max(svsr)
+
+    # this is uncorrected bonferroni p-value, FWIW.
+		bonf_pval <- nstrat * SharpeR::psr(ssrmax,df=nday-1,zeta=psnr0,ope=1,lower.tail=FALSE) 
+
+		# do the correction
+		corr_stat <- apart * ssrmax + bpart * ssravg
+		corr_pval <- nstrat * pnorm(corr_stat,lower.tail=FALSE)
+
+    # convert to 'xi'
+    xi <- cval * ssravg + (svsr-ssravg) / dval
+
+    # chibarsquare test, assuming rho=0
+    chibs <- (nday) * sum(pmax(xi - xi0,0)^2)
+    chibp <- sum(sbwt * pchisq(chibs,df=sbdf,lower.tail=FALSE))
+
+    # follman test
+    g2 <- f1 * (ssravg - psnr0)^2 + f2 * sum((svsr - ssravg)^2)
+    follp <- pchisq(g2,df=nstrat,lower.tail=FALSE)
+    ffollp <- ifelse(ssravg > psnr0,0.5 * follp,1 - 0.5*follp)
+
+    # hansens procedures; 
+    nabove <- sum(xi > spcut)
+    # chibar-square with loglog adjustment
+    llval <- ifelse(nabove > 0,chib_test(chibs,nabove,lower.tail=FALSE),1)
+    # bonferroni/SPA p-value, correcting the rho-safe Bonferroni above
+    spval <- ifelse(nabove > 0,(nabove/nstrat) * corr_pval,1)
+
+    c(bonf_pval,corr_pval,chibp,ffollp,llval,spval,mu[xm])
+  })
+  retv <- data.frame(t(mhtpvals)) %>%
+    setNames(c('norho_mht','mht','chibarsquare','follman','loglog','spa','popvals')) %>%
+    tidyr::gather(key=method,value=pvals,-popvals)
+
+  if (do_condest) {
+    cd_sim <- parsim(nsim=nsim,nday=nday,R=R,mu=mu,testmu=rep(psnr0,nstrat)) %>%
+      select(-simvals) %>% 
+      mutate(pvals=1-pvals) %>% 
+      mutate(method='condest')
+
+    retv <- bind_rows(retv,cd_sim)
+  }
+  retv
+}
+# spawn mu and call the sims
+bot_rawsim <- function(nday,nstrat,one_zeta,nsim=100,rho=0,
+                       mutype=c('equal','onegood','halfgood','spread'),
+                       do_condest=TRUE) { 
+	mutype <- match.arg(mutype)
+  mu <- switch(mutype,
+               equal=rep(one_zeta,nstrat),
+               onegood=c(one_zeta,rep(-one_zeta,nstrat-1)),
+               halfgood=c(rep(one_zeta,floor(nstrat/2)),
+                          rep(-one_zeta,ceiling(nstrat/2))),
+               spread=seq(-one_zeta,one_zeta,length.out=nstrat))
+  alt_test(nday=nday,mu=mu,nsim=nsim,rho=rho,do_condest=do_condest)
+}
+# compute the rejection rates
+mhtsim <- function(alpha=0.05,...) {
+  bot_rawsim(...) %>%
+    group_by(method,popvals) %>%
+      summarize(rej_rate=mean(pvals < alpha),
+                tot_base=n()) %>%
+    ungroup() %>%
+    arrange(method,popvals)
+}
 @
 
 \subsubsection{Gaussian returns, infeasible estimator}
@@ -1715,124 +1856,7 @@ are equal to some positive value, and the remaining $\nstrat - m$ are negative
 that value. For $m=1$, we call this the ``one-good'' alternative; for $m=\nstrat/2$,
 the ``half-good'' alternative.
 
-% power vs the MHT?
-<<'mht_test_functions',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs')>>=
-chib_test <- function(xbar2,nstrat,lower.tail=FALSE) {
-  cwts <- exp(lchoose(nstrat,0:nstrat) - nstrat * log(2))
-  okwt <- (cwts > 1e-9)
-  sbdf <- which(okwt) - 1
-  sbwt <- cwts[okwt]
-  # should check that sum(sbwt) is around 1
-  #stopifnot(abs(sum(sbwt) - 1) < 1e-5)
-  sum(sbwt * pchisq(xbar2,df=sbdf,lower.tail=lower.tail))
-}
-# set up the functions
-bot_rawsim <- function(nday,nstrat,one_zeta,nsim=100,rho=0,
-                       mutype=c('equal','onegood','halfgood','spread')) { 
-	mutype <- match.arg(mutype)
-  R <- pmin(diag(nstrat) + rho,1)  
-  mu <- switch(mutype,
-               equal=rep(one_zeta,nstrat),
-               onegood=c(one_zeta,rep(-one_zeta,nstrat-1)),
-               halfgood=c(rep(one_zeta,floor(nstrat/2)),
-                          rep(-one_zeta,ceiling(nstrat/2))),
-               spread=seq(-one_zeta,one_zeta,length.out=nstrat))
-  sim <- parsim(nsim=nsim,nday=nday,R=R,mu=mu,testmu=rep(0,nstrat))
-  # note that the MHT/bonferroni correction here is only valid
-  # for rho==0.
-  # see below for the proper version
-  stopifnot(rho==0)
-
-  # weights from chi-bar square distro
-  cwts <- exp(lchoose(nstrat,0:nstrat) - nstrat * log(2))
-  okwt <- (cwts > 1e-9)
-  sbdf <- which(okwt) - 1
-  sbwt <- cwts[okwt]
-  # should check that sum(sbwt) is around 1
-  stopifnot(abs(sum(sbwt) - 1) < 1e-5)
-  cval <- 1/sqrt(1 + (nstrat-1) * rho)
-  dval <- sqrt(1-rho)
-
-  kurty <- 1.0 # assumed
-  psnr0 <- 0.0 # assumed
-  a0 <- (1-rho) + (kurty/2) * psnr0^2 * (1-rho^2)
-  a2 <- rho + ((kurty-1)/4) * psnr0^2 + (kurty/2) * psnr0^2 * rho^2
-  b0 <- 1 / sqrt(a0)
-  #b2 <- (-1 / (nstrat*sqrt(a0))) + (1/nstrat) / sqrt(a0 + nstrat*a2)
-  #cval <- b0 + nstrat * b2
-
-  f1 <- nday * nstrat * cval^2
-  f2 <- nday * b0^2
-
-  # Hansens cutoff
-  spcut <- - sqrt(2*log(log(nday))/nday)
-
-  # MHT and chibarsquare
-  mhtpvals <- replicate(nsim,{
-    if (rho == 0) {
-      svsr <- SharpeR::rsr(n=nstrat,df=nday-1,zeta=mu,ope=1)
-    } else {
-      X <- mvtnorm::rmvnorm(nday,mean=mu,sigma=R)
-      svsr <- colMeans(X) / apply(X,2,sd)
-    }
-    xm <- which.max(svsr)
-    ssravg <- mean(svsr)
-    ssrmax <- max(svsr)
-
-    # the nstrat is the MHT correction here, a Bonferroni hack.
-    pval <- nstrat * SharpeR::psr(ssrmax,df=nday-1,zeta=0,ope=1,lower.tail=FALSE) 
-
-    # one sided test
-    xi <- cval * ssravg + (svsr-ssravg) / dval
-
-    # chibarsquare test, assuming rho=0
-    chibs <- (nday) * sum(pmax(xi,0)^2)
-    chibp <- sum(sbwt * pchisq(chibs,df=sbdf,lower.tail=FALSE))
-
-    # follman test
-    g2 <- f1 * (ssravg - psnr0)^2 + f2 * sum((svsr - ssravg)^2)
-    follp <- pchisq(g2,df=nstrat,lower.tail=FALSE)
-    ffollp <- ifelse(ssravg > psnr0,0.5 * follp,1 - 0.5*follp)
-
-    # hansens procedures; only for the rho=0 case, btw
-    nabove <- sum(svsr > spcut)
-    lval <- ifelse(nabove > 0,nabove * SharpeR::psr(ssrmax,df=nday-1,zeta=0,ope=1,lower.tail=FALSE),1)
-    spval <- ifelse(nabove > 0,chib_test(chibs,nabove),1)
-
-    c(pval,chibp,ffollp,lval,spval,mu[xm])
-  })
-  rbind(sim %>% 
-        select(-simvals) %>% 
-        mutate(pvals=1-pvals) %>% 
-        mutate(method='condest'),
-        data.frame(t(mhtpvals)) %>%
-        setNames(c('mht','chibs','follman','loglog','spa','popvals')) %>%
-        tidyr::gather(key=method,value=pvals,-popvals)) 
-}
-mhtsim <- function(alpha=0.05,...) {
-  bot_rawsim(...) %>%
-    group_by(method,popvals) %>%
-      summarize(rej_rate=mean(pvals < alpha),
-                tot_base=n()) %>%
-    ungroup() %>%
-    arrange(method,popvals)
-}
-#set.seed(1234)
-#mhtsim(nday=252*4,nstrat=100,one_zeta=0.10,nsim=200,mutype='spread')
-#mhtsim(nday=252*4,nstrat=100,one_zeta=0.10,nsim=200,mutype='onegood')
-#mhtsim(nday=252*4,nstrat=100,one_zeta=0.10,nsim=200,mutype='equal')
-#mhtsim(nday=252*4,nstrat=100,one_zeta=0.10,nsim=200,mutype='halfgood')
-#mhtsim(nday=252*4,nstrat=100,one_zeta=0.10,rho=0.7,nsim=200,mutype='onegood')
-#mhtsim(nday=252*4,nstrat=200,one_zeta=0.10,nsim=200,mutype='halfgood')
-#mhtsim(nday=252*4,nstrat=20,one_zeta=0.10,nsim=200,mutype='halfgood')
-#mhtsim(nday=252*4,nstrat=10,one_zeta=0.10,rho=0.7,nsim=200,mutype='onegood')
-#mhtsim(nday=252*4,nstrat=100,one_zeta=0.10,nsim=200,rho=0.99,mutype='equal')
-#mhtsim(nday=252*4,nstrat=100,one_zeta=0,nsim=200,rho=0.99,mutype='equal')
-#mhtsim(nday=252*4,nstrat=200,one_zeta=0,nsim=200,rho=0.99,mutype='equal')
-#mhtsim(nday=252*4,nstrat=200,one_zeta=0,nsim=200,rho=0.999,mutype='equal')
-@
-
-<<'sims_vs_mht',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('mht_test_functions','runtime')>>=
+<<'sims_vs_mht',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs','runtime')>>=
 suppressMessages({
   library(tidyr)
 })
@@ -1926,9 +1950,10 @@ fig_cap <- paste0("The empirical power of the conditional estimation, MHT correc
 #filter(grepl('equal|onegood',mutype)) %>%
 library(ggplot2)
 ph <- resu %>%
+  filter(method!='norho_mht') %>%  # we are using rho=0, so should be the same
   mutate(method=case_when(grepl('^condest$',method)   ~ 'cond. est.',
                           grepl('^mht$',method)       ~ 'MHT',
-                          grepl('^chibs$',method)     ~ 'chi-bar^2',
+                          grepl('^chibarsquare$',method)  ~ 'chi-bar^2',
                           grepl('^follman$',method)   ~ 'Follman',
                           grepl('^loglog$',method)    ~ 'Hansen chi-bar^2',
                           grepl('^spa$',method)       ~ 'Hansen SPA',
@@ -1996,104 +2021,20 @@ suppressMessages({
   library(tidyr)
 })
 
-# set up the functions
-rawsim <- function(nday,nstrat,nsim=100,rho=0) {
-  R <- pmin(diag(nstrat) + rho,1)  
-  mu <- rep(0,nstrat)
-
-  sim <- parsim(nsim=nsim,nday=nday,R=R,mu=mu,testmu=rep(0,nstrat))
-
-	apart <- sqrt(nday)/sqrt(1-rho)
-	bpart <- sqrt(nday) * ((1/sqrt(1-rho+nstrat*rho)) - (1/sqrt(1-rho)))
-
-  # weights from chi-bar square distro
-  cwts <- exp(lchoose(nstrat,0:nstrat) - nstrat * log(2))
-  okwt <- (cwts > 1e-9)
-  sbdf <- which(okwt) - 1
-  sbwt <- cwts[okwt]
-  # should check that sum(sbwt) is around 1
-  stopifnot(abs(sum(sbwt) - 1) < 1e-5)
-  cval <- 1/sqrt(1 + (nstrat-1) * rho)
-  dval <- sqrt(1-rho)
-
-  # follman's, and redundant to above
-  kurty <- 1.0 # assumed
-  psnr0 <- 0.0 # assumed
-  a0 <- (1-rho) + (kurty/2) * psnr0^2 * (1-rho^2)
-  a2 <- rho + ((kurty-1)/4) * psnr0^2 + (kurty/2) * psnr0^2 * rho^2
-  b0 <- 1 / sqrt(a0)
-  #b2 <- (-1 / (nstrat*sqrt(a0))) + (1/nstrat) / sqrt(a0 + nstrat*a2)
-  #cval <- b0 + nstrat * b2
-
-  f1 <- nday * nstrat * cval^2
-  f2 <- nday * b0^2
-
-  mhtpvals <- replicate(nsim,{
-		X <- mvtnorm::rmvnorm(nday,mean=mu,sigma=R)
-		x <- colMeans(X) / apply(X,2,sd)
-		bonf_pval <- nstrat * SharpeR::psr(max(x),df=nday-1,zeta=0,ope=1,lower.tail=FALSE) 
-		# do the correction
-		corr_stat <- apart * max(x) + bpart * mean(x)
-		corr_pval <- nstrat * pnorm(corr_stat,lower.tail=FALSE)
-
-    # one-sided test
-    zetavg <- mean(x)
-    xi <- cval * zetavg + (x-zetavg) / dval
-    # chibarsquare test, assuming rho=0
-    chibs <- (nday) * sum(pmax(xi,0)^2)
-    chibp <- sum(sbwt * pchisq(chibs,df=sbdf,lower.tail=FALSE))
-
-    # follman test
-    g2 <- f1 * (zetavg - psnr0)^2 + f2 * sum((x - zetavg)^2)
-    follp <- pchisq(g2,df=nstrat,lower.tail=FALSE)
-    ffollp <- ifelse(zetavg > psnr0,0.5 * follp,1 - 0.5*follp)
-
-    c(bonf_pval,corr_pval,chibp,ffollp)
-  })
-  data_frame(bonf_pvals=as.numeric(mhtpvals[1,]),
-						 corr_pvals=as.numeric(mhtpvals[2,]),
-             chib_pvals=as.numeric(mhtpvals[3,]),
-             foll_pvals=as.numeric(mhtpvals[4,]),
-             nelc_pvals=1-sim$pvals)
-}
-many_rawsim <- function(nday,nstrat,rho,nsim=1000L,nnodes=7) {
-  if ((nsim > 10*nnodes) && require(doFuture)) {
-		registerDoFuture()
-		plan(multiprocess)
-		nper <- as.numeric(table(1:nsim %% nnodes))
-    retv <- foreach(iii=1:nnodes,.export = c('nday','nstrat','rho','nper','rawsim')) %dopar% {
-			rawsim(nday=nday,nstrat=nstrat,rho=rho,nsim=nper[iii])
-    } %>%
-      bind_rows()
-  } else {
-		retv <- rawsim(nday=nday,nstrat=nstrat,rho=rho,nsim=nsim)
-  }
-  retv
-}
-mhtsim <- function(alpha=0.05,...) {
-  many_rawsim(...) %>%
-		tidyr::gather(key=method,value=pvalues) %>%
-    group_by(method) %>%
-      summarize(rej_rate=mean(pvalues < alpha)) %>%
-    ungroup() %>%
-    arrange(method)
-}
-
-
 # actual run the sims
 params <- data_frame(rho=seq(0,0.9,by=0.1)) 
 
 options(future.globals.maxSize=1e9)
 mht_null_nsim <- ceiling(5e3/max(1,RUNTIME_PARAM))
-mht_nday <- 4*252
-mht_nstrat <- 100
+mht_nday <- 1*252
+mht_nstrat <- 20
 
 registerDoFuture()
 set.seed(4321)
 #system.time({
 rhoresu <- params %>%
   group_by(rho) %>%
-    summarize(resu=list(mhtsim(nday=mht_nday,nstrat=mht_nstrat,rho=rho,nsim=mht_null_nsim))) %>%
+    summarize(resu=list(mhtsim(nday=mht_nday,one_zeta=0,nstrat=mht_nstrat,rho=rho,nsim=mht_null_nsim))) %>%
   ungroup() %>%
   unnest()
 #})
@@ -2130,11 +2071,13 @@ fig_cap <- paste0('The empirical type I rate under the null hypothesis is plotte
                   'Empirical rates are over ',mht_null_nsim,' simulations. The $y$ axis is in log scale.')
 library(ggplot2)
 ph <- rhoresu %>%
-  mutate(method=case_when(grepl('^nelc_pvals$',method)    ~ 'cond. est.',
-                          grepl('^bonf_pvals$',method)    ~ 'vanilla MHT',
-                          grepl('^chib_pvals$',method)    ~ 'chi-bar^2',
-                          grepl('^corr_pvals$',method)    ~ 'fixed MHT',
-                          grepl('^foll_pvals$',method)    ~ 'Follman',
+  mutate(method=case_when(grepl('^condest$',method)   ~ 'cond. est.',
+                          grepl('^norho_mht$',method) ~ 'vanilla MHT',
+                          grepl('^mht$',method)       ~ 'fixed MHT',
+                          grepl('^chibarsquare$',method)  ~ 'chi-bar^2',
+                          grepl('^follman$',method)   ~ 'Follman',
+                          grepl('^loglog$',method)    ~ 'Hansen chi-bar^2',
+                          grepl('^spa$',method)       ~ 'Hansen SPA',
                           TRUE ~ 'ERROR')) %>%
   ggplot(aes(rho,rej_rate,color=method))  +
   geom_line() + geom_point() +

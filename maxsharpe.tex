@@ -1110,7 +1110,7 @@ $$
 and reject at the \typeI level if both $1-\chisqcdf{g^2}{\nstrat} \le 2 \typeI$ and $\ssravg > \psnr[0]$.
 %UNFOLD
 
-\subsection{Hansen's $\log \log$ Test}%FOLDUP
+\subsection{Hansen's $\log \log$ Corrections}%FOLDUP
 
 One failing of many of the approaches considered above is the problem
 of irrelevant alternatives.
@@ -1126,7 +1126,7 @@ Such tests achieve the nominal rate under the \emph{least favorable configuratio
 which in our case is the null of equality, or the problem of (\ref{hyp:eq_test}). \cite{nla.cat-vn3800977}
 
 Hansen describes a procedure which avoids this problem. 
-The idea is elegant, and ultimately simple to implement.  \cite{Hansen2003Asymptotic}
+The idea is elegant, and ultimately simple to implement.  \cite{Hansen2003Asymptotic,Hansen:2005}
 In the terms of the problem we consider, it amounts to assuming that the null takes the form
 \begin{equation*}
   \Hyp[0] : \forall_i\,\psnr[i] \le c\mbox{ and }\abs{\psnr[i]-\ssr[i]} \le g_{\ssiz}\quad\mbox{versus}\quad \Hyp[1] :  \exists_i \psnr[i] > c,
@@ -1134,12 +1134,34 @@ In the terms of the problem we consider, it amounts to assuming that the null ta
 for some $g_{\ssiz}$. 
 Note this seems odd since the sample \txtSR appears in the null hypothesis to be tested.
 Hansen describes how such a test can be performed while maintaining a maximum
-type I rate asymptotically, while achieving higher power than the chi-bar-square test.
+type I rate asymptotically, and achieving higher power.
 
-For our problem, first perform the translation to \stvsr given in \eqnref{xi_transform}.
-Then compute the $\bar{x}^2$ statistic of \eqnref{chibstat}.
-However, instead of comparing to the unconstrained chi-bar-square statistic,
-a different procedure is used to compute the rejection region.
+Hansen applied this correction to the chi-bar-square statistic (\cf \eqnref{chibstat}),
+and later to 
+and to a Studentized version of White's Reality Check statistic, which is rather like
+the corrected Bonferroni statistic computed in 
+\eqnref{fix_bonf_z}.  \cite{Hansen2003Asymptotic,Hansen:2005}
+Applying Hansen's correction to our problem is simple: compute \stvsr as in \eqnref{xi_transform}.
+Let $\tilde{\nstrat}$ be the number of elements of \stvsr greater than $c\psnr[0] - \sqrt{\wrapParens{2\log\log\ssiz}/\ssiz}$,
+where $c=\wrapParens{1+\wrapParens{\nstrat-1}\rho}^{-\halff}$.
+If $\tilde{\nstrat}=0$ fail to reject.
+Otherwise compute the chi-bar-square statistic $\bar{x}^2$ as in \eqnref{chibstat}
+and reject if
+\begin{equation*}
+  \sum_{i=0}^{\tilde{\nstrat}} w_i {\chisqcdf{\bar{x}^2}{i}} \ge 1-\typeI,\quad\mbox{where }
+  w_i = {\tilde{\nstrat} \choose i}{2^{-\tilde{\nstrat}}}.
+\end{equation*}
+We will refer to this as ``Hansen's chi-bar-square.''
+
+The same correction is easily applied to the Bonferroni maximum test: again,
+compute \stvsr and $\tilde{\nstrat}$. 
+If $\tilde{\nstrat}=0$ fail to reject.
+Otherwise reject at the $\typeI$ level if
+\begin{equation*}
+  \max_i \stvsr[i] - c\psnr[0] \ge \qnorm{1-\typeI/\tilde{\nstrat}}.
+\end{equation*}
+We will refer to this as ``Hansen's SPA.''
+
 
 % WTAH is the test? ack...
 %> nnn <- 10^seq(1,7,length.out=101) 
@@ -1533,8 +1555,8 @@ On the other hand, the na{\"i}ve MHT test cannot maintain the nominal type I rat
 To demonstrate this, we repeat the experiments above, but setting 
 $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$
 and $\psnr=\vzero$.
-Again we consider $\nstrat=100$, 
-$\ssiz=1008$, and perform $5000$ simulations to estimate the 
+Again we consider $\nstrat=20$, 
+$\ssiz=252$, and perform $5000$ simulations to estimate the 
 empirical rejection rate.
 In \figref{rho_plotz_one}, we plot the empirical rejection rate versus $\rho$ at the nominal
 $0.05$ type I level. 
@@ -1551,7 +1573,7 @@ yielding nominal rejection rates.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for five testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for five testing procedures: the conditional estimation, the chi-bar square test, Follman's test, the vanilla Bonferroni correction, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 100 assets over 1008 days. Tests were performed at the $0.05$ level, which appears to be maintained by all procedures except the regular Bonferroni procedure.  Empirical rates are over 5000 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for five testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for five testing procedures: the conditional estimation, the chi-bar square test, Follman's test, the vanilla Bonferroni correction, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 20 assets over 252 days. Tests were performed at the $0.05$ level, which appears to be maintained by all procedures except the regular Bonferroni procedure.  Empirical rates are over 5000 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
 \end{figure}
 
 

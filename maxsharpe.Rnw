@@ -2064,11 +2064,12 @@ suppressMessages({
 params <- data_frame(rho=seq(0,0.9,by=0.1)) 
 
 options(future.globals.maxSize=1e9)
-mht_null_nsim <- ceiling(5e3/max(1,RUNTIME_PARAM))
-mht_nday <- 1*252
+mht_null_nsim <- ceiling(1e4/max(1,RUNTIME_PARAM))
+mht_nday <- 2*252
 mht_nstrat <- 20
 
 registerDoFuture()
+plan(multiprocess)
 set.seed(4321)
 #system.time({
 rhoresu <- params %>%
@@ -2077,6 +2078,7 @@ rhoresu <- params %>%
   ungroup() %>%
   unnest()
 #})
+plan(sequential)
 @
 
 The na{\"i}ve MHT test cannot maintain the nominal type I rate in the face of correlated assets.
@@ -2107,8 +2109,9 @@ fig_cap <- paste0('The empirical type I rate under the null hypothesis is plotte
                   'and Bonferroni correction with fix for common correlation.  ',
                   'Tests are performed with Gaussian returns, for ',mht_nstrat,' assets over ',mht_nday,' days. ',
                   'Tests were performed at the $0.05$ level, which appears to be maintained by all procedures except the ',
-                  'regular Bonferroni procedure.  ',
-                  'Empirical rates are over ',mht_null_nsim,' simulations. The $y$ axis is in log scale.')
+                  'regular Bonferroni procedure, ',
+                  "and Hansen's chi-bar-square test, which has slightly higher than nominal rejection rates for this \\ssiz. ",
+                  'Empirical rates are over ',prettyNum(mht_null_nsim,big.mark=','),' simulations. The $y$ axis is in log scale.')
 library(ggplot2)
 ph <- rhoresu %>%
   mutate(method=case_when(grepl('^condest$',method)   ~ 'cond. est.',

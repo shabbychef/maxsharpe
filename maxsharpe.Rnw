@@ -452,15 +452,21 @@ inference on the \txtSNR of the asset which displays maximum sample \txtSR over
 a set of possibly correlated assets.
 We find a multivariate analogue of the commonly used
 approximate standard error of the \txtSR to use in this conditional estimation procedure.
-We also consider the simple Bonferroni correction for multiple
-hypothesis testing, fixing it for the case of positive common
-correlation among assets, and a chi-bar square test against one-sided alternatives.
+We also consider several alternative procedures, including
+the simple Bonferroni correction for multiple
+hypothesis testing, which we fix for the case of positive common
+correlation among assets, 
+the chi-bar square test against one-sided alternatives,
+Follman's test, 
+and Hansen's asymptotic adjustments.  \cite{nla.cat-vn3800977,10.2307/2291680,Hansen2003Asymptotic}
 
 Testing indicates the conditional inference procedure achieves nominal type I rate,
 and does not appear to suffer from non-normality of returns.
 The conditional estimation test has low power under the alternative
 where there is little spread in the \txtSNRs of the assets, 
 and high power under the alternative where a single asset has high \txtSNR.
+Unlike the alternative procedures, it appears to enjoy rejection probabilities
+montonic in the \txtSNR of the selected asset.
 \end{abstract}%UNFOLD
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1217,10 +1223,11 @@ If $\tilde{\nstrat}=0$ fail to reject.
 Otherwise compute the chi-bar-square statistic $\bar{x}^2$ as in \eqnref{chibstat}
 and reject if
 \begin{equation*}
-  \sum_{i=0}^{\tilde{\nstrat}} w_i {\chisqcdf{\bar{x}^2}{i}} \ge 1-\typeI,\quad\mbox{where }
-  w_i = {\tilde{\nstrat} \choose i}{2^{-\tilde{\nstrat}}}.
+  \sum_{i=0}^{\tilde{\nstrat}} {\tilde{\nstrat} \choose i}{2^{-\tilde{\nstrat}}} {\chisqcdf{\bar{x}^2}{i}} \ge 1-\typeI.
 \end{equation*}
-We will refer to this as ``Hansen's chi-bar-square.''
+We will refer to this as ``Hansen's chi-bar-square.'' 
+It is the chi-bar-square test considered above, but with reduced degrees
+of freedom \emph{which depend on the observed}.
 
 The same correction is easily applied to the Bonferroni maximum test: again,
 compute \stvsr and $\tilde{\nstrat}$. 
@@ -1229,7 +1236,9 @@ Otherwise reject at the $\typeI$ level if
 \begin{equation*}
   \max_i \stvsr[i] - c\psnr[0] \ge \qnorm{1-\typeI/\tilde{\nstrat}}.
 \end{equation*}
-We will refer to this as ``Hansen's SPA.''
+We will refer to this as ``Hansen's SPA,'' although it does not
+use the bootstrap procedure to estimate the standard error
+as described by Hansen, it is similar in every other regard.  \cite{Hansen:2005}
 
 
 % WTAH is the test? ack...
@@ -1849,7 +1858,7 @@ print(ph)
 \clearpage
 
 \subsection{Simulations under the alternative}
-
+%FOLDUP
 We wish to test the power of the method under the alternative hypothesis.
 However, it is hard to state exactly what constitutes the alternative.
 One interpretation is that we condition on $\psnr[1] > 0$, where again
@@ -1899,7 +1908,7 @@ Under this assumption, one can use the distribution of the \tstat{} statistic
 to perform inference on the \txtSNR. \cite{pav_ssc}
 We then use the Bonferroni correction to account for the multiple tests performed.
 We also perform the one-sided test based on the chi-bar square statistic,
-and Follman's test.
+Follman's test, and the chi-bar and MHT tests with Hansen's $\log\log$ adjustment.
 
 Note that in the all-equal case, since every asset has the same \txtSNR,
 whichever we select will have the same \txtSNR, and the Bonferroni-corrected test should have the
@@ -1915,8 +1924,13 @@ in lower power.
 The chi-bar square test and Follman's test are also unlikely to reject.
 The conditional estimation procedure, however, should
 not suffer under this alternative.
+We also expect the $\log\log$ adjustment to have little effect
+when the \txtSRs are all nearly equal, and more effect
+when they are different.
 
-In fact, this is what we see. We perform simulations under all-equal, one-good,
+%In fact, this is what we see. 
+Our suspicions are born out by the simulations.
+We perform simulations under all-equal, one-good,
 and half-good configurations, letting the `good' \txtSNR vary from 
 $0$ to $\Sexpr{max(params$one_zeta)}\dayto{-\halff}$, which corresponds
 to an `annualized' \txtSNR of around
@@ -1932,6 +1946,7 @@ We hope our tests to have lower power when this occurs.
 
 In \figref{power_plotz_one}, we plot the power of the MHT Bonferroni
 test, the chi-bar square test, Follman's test, 
+Hansen's chi-bar square and MHT (``SPA''),
 and the conditional estimation procedure versus the \txtSNR
 of the selected asset. 
 We present facet columns for the three configurations, 
@@ -2012,18 +2027,33 @@ is greater than $0.05\dayto{-\halff}$ we do not observe this
 occuring even once over the $\Sexpr{mht_nsim}$ simulations performed
 for each setting. 
 
-We note that the chi-bar-square test appears to have higher power than either
-of the other tests for the all-equal and half-good populations,
+We note that the chi-bar-square test appears to have higher power than 
+the other tests for the all-equal and half-good populations,
 but fails to reject at all in the one-good case, except under the null.
 This is to be expected, since the chi-bar-square test depends strongly
 on all the observed \txtSRs, and in this case we expect many of them
 to be negative.
+The $\log\log$ adjustment has little effect in the all-equal and half-good case,
+but greatly improves the power of the MHT and chi-bar square tests
+in the one-good case. 
+For this sample size, Hansen's adjustment nearly maintains the nominal
+type I rate under the null, though this is unlikely to hold for smaller
+\ssiz.
+
+It is interesting to note that while the conditional estimation procedure
+generally has lower power than the other tests (except in the one-good case),
+it appears to have monotonic rejection probability with respect to the
+\txtSNR of the \emph{selected} asset.
+That is, in the half-good case, it has low rejection probability in the odd
+simulations where a `bad' asset is selected. 
 
 We doubt that the simple experiments performed here
 have revealed all the relevant differences between the various tests or when
 one dominates the others.
+%UNFOLD
 
 \subsubsection{Simulations under the null versus with correlated returns}
+%FOLDUP
 
 <<'correlation_sims_vs_mht',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs')>>=
 suppressMessages({
@@ -2049,7 +2079,7 @@ rhoresu <- params %>%
 #})
 @
 
-On the other hand, the na{\"i}ve MHT test cannot maintain the nominal type I rate in the face of correlated assets.
+The na{\"i}ve MHT test cannot maintain the nominal type I rate in the face of correlated assets.
 To demonstrate this, we repeat the experiments above, but setting 
 $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$
 and $\psnr=\vzero$.
@@ -2072,7 +2102,8 @@ yielding nominal rejection rates.
 <<'rho_plotz_one',dependson=c('correlation_sims_vs_mht'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0('The empirical type I rate under the null hypothesis is plotted versus $\\rho$ ',
                   'for the case where $\\RMAT=\\makerho{\\rho}{\\wrapParens{1-\\rho}}$, ',
-                  "for five testing procedures: the conditional estimation, the chi-bar square test, Follman's test, the vanilla Bonferroni correction, ",
+                  "for several testing procedures: the conditional estimation, the chi-bar square test, Follman's test, the vanilla Bonferroni correction, ",
+                  "Hansen's corrected chi-bar-square and SPA tests, ",
                   'and Bonferroni correction with fix for common correlation.  ',
                   'Tests are performed with Gaussian returns, for ',mht_nstrat,' assets over ',mht_nday,' days. ',
                   'Tests were performed at the $0.05$ level, which appears to be maintained by all procedures except the ',
@@ -2098,7 +2129,7 @@ ph <- rhoresu %>%
        title='rejection rate of tests under the null')
 print(ph)
 @
-
+%UNFOLD
 %UNFOLD
 
 \clearpage
@@ -2288,23 +2319,30 @@ kurtotic returns.
 The procedure can be used for other test configurations beyond the
 asset with the maximum \txtSR,
 and can be used to construct confidence intervals.
-However, it appears to have low power when many assets have the
-same \txtSNR.
+It appears to have low power when many assets have the
+same \txtSNR, 
+but appears to have low rejection probability when the selected
+asset has low \txtSNR, which sets it apart from all of the
+other procedures tested.
 
 Clearly the low power of the test gives us reason to seek improvements.
 Perhaps the conditioning procedure can be adapted to recognize
 that the strategist would have been testing another asset if the
 \txtSR of the currently selected asset had been lower. 
-Perhaps the power of the MHT, or the chi-bar square test for the case of equal \txtSNRs can
-be somehow ported to the conditional estimation procedure, maybe
-by testing multiple 
-assets\footnote{Note that White's Reality Check and Hansen's SPA
-appear to avoid this issue by comparing the maximum in-sample 
-predictive ability to the \emph{average} predictive ability of
-tested models.  \cite{White:2000,Hansen:2005}}.
-Finally, the fix for Bonferroni correction under rank-one updated
-correlation \RMAT can potentially be generalized to deal
-with more realistic correlation matrices.
+However, it would seem that in so doing, one would lose the
+desireable property of testing the \txtSNR of the selected
+asset, instead of testing the more general hypothesis of (\ref{hyp:eq_test}). 
+Perhaps its power can be increased using Hansen's $\log\log$ adjustment.
+%Perhaps the power of the MHT, or the chi-bar square test for the case of equal \txtSNRs can
+%be somehow ported to the conditional estimation procedure, maybe
+%by testing multiple 
+%assets\footnote{Note that White's Reality Check and Hansen's SPA
+%appear to avoid this issue by comparing the maximum in-sample 
+%predictive ability to the \emph{average} predictive ability of
+%tested models.  \cite{White:2000,Hansen:2005}}.
+%Finally, the fix for Bonferroni correction under rank-one updated
+%correlation \RMAT can potentially be generalized to deal
+%with more realistic correlation matrices.
 
 %Lastly we mention that when asset returns are well approximated
 %by a linear combination of $m$ `latent' returns, we can

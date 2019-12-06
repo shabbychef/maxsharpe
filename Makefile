@@ -32,6 +32,7 @@ PROJECT      = maxsharpe
 TEX_SOURCE   = $(PROJECT).tex
 BIB_SOURCE   = $(PROJECT).bib
 PDF_TARGET   = $(PROJECT).pdf
+TXT_TARGET   = $(PROJECT).txt
 BBLS         = $(PROJECT).bbl
 
 TIMEIT 			?= time 
@@ -98,6 +99,10 @@ doc : $(PROJECT).pdf  ## build the document by knitting source code
 
 %.pdf : %.tex
 	latexmk -f -bibtex -pdf -pdflatex="$(PDFLATEX)" -use-make $<
+
+# useful for getting the abstract into arxiv
+%.txt : %.pdf
+	pdftotext $< $@
 
 %.md : %.Rmd
 	r -l knitr -e 'setwd("$(<D)");if (require(knitr)) { knit("$(<F)") }'

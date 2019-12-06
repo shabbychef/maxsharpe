@@ -10,5 +10,6 @@ output/
 *.fdb_latexmk
 maxsharpe.log
 maxsharpe.out
+maxsharpe.txt
 maxsharpe_v*.tar.gz
 nohup.out

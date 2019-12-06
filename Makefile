@@ -16,32 +16,21 @@
 LATEX       := $(shell which latex)
 BIBTEX      := $(shell which bibtex)
 PDFLATEX    := $(shell which pdflatex)
-MAKEINDEX   := $(shell which makeindex)
 PAGER   		:= $(shell which less)
 ASPELL  		:= $(shell which aspell)
 
-RLIB         = /usr/lib64/R
+RLIB        ?= /usr/lib64/R
 
-TEXINPADD    = .:./Definitions:$(RLIB)/share/texmf/tex/latex
+TEXINPADD   ?= .:./Definitions:$(RLIB)/share/texmf/tex/latex
 
-PRETEX       = TEXINPUTS=$(TEXINPADD):$$TEXINPUTS
-PREBIB       = BSTINPUTS=$(TEXINPADD):$$BSTINPUTS \
+PREBIB      ?= BSTINPUTS=$(TEXINPADD):$$BSTINPUTS \
                BIBINPUTS=$(TEXINPADD):$$BIBINPUTS 
 
-PREIDX       = INDEXSTYLE=$(TEXINPADD):$$INDEXSTYLE
-
-#undoes psfrag for pdf
-UNPSFRAG		 = perl $(HOME)/sys/bin/unpsfrag.pl
-#unroll commands
-DETEXIFY		 = perl $(HOME)/sys/perl/detexify.pl
-
-SCREEN_SIZE  = normal
-#include	$(HOME)/sys/etc/.Makefile.local
+PREIDX      ?= INDEXSTYLE=$(TEXINPADD):$$INDEXSTYLE
 
 PROJECT      = maxsharpe
 TEX_SOURCE   = $(PROJECT).tex
 BIB_SOURCE   = $(PROJECT).bib
-DVI_TARGET   = $(PROJECT).dvi
 PDF_TARGET   = $(PROJECT).pdf
 BBLS         = $(PROJECT).bbl
 
@@ -53,24 +42,23 @@ PROJECTS     = $(PROJECT)
 #UNSAVE
 # add on dependencies (subchapters of maxsharpe)
 R_DEPS 			 = 
-TEX_EXTRAS   = SharpeR.sty SharpeR.bib 
+TEX_EXTRAS   = SharpeR.sty common.bib rauto.bib
 # nonlocal dependencies
 STY_FILES    = 
 
 #aspell
 ASPELL_FLAGS = 
 
-ARXIV_VERSION  			?= v6
+ARXIV_VERSION  			?= v7
 ARXIV_TAG 					 = $(PROJECT)_$(ARXIV_VERSION)
+# arxiv accepts tarfiles. this is great.
+ARXIV_TAR 					?= $(PROJECT)_$(ARXIV_VERSION).tar.gz
 
 # for running in docker this gets passed to the knit
 # and controls speed of build. larger is faster.
 RUNTIME_PARAM 		?= 1
 
 export RUNTIME_PARAM:=$(RUNTIME_PARAM)
-
-fooz :
-	env
 
 ############## DEFAULT ##############
 
@@ -155,7 +143,6 @@ doc : $(PROJECT).pdf  ## build the document by knitting source code
 
 ############### RULES ###############
 
-
 release.tex: maxsharpe.tex
 	perl -pe 's{figure/}{};' < $< > $@
 
@@ -199,6 +186,10 @@ untag : ## advice on github untagging
 	@-echo "git tag --delete $(ARXIV_TAG)"
 	@-echo "git push origin :$(ARXIV_TAG)"
 
+tarfile : $(ARXIV_TAR)  ## make tar file to upload to arxiv? experimental
+
+$(ARXIV_TAR) : $(TEX_SOURCE) $(BBLS) $(TEX_EXTRAS) $(R_DEPS) figure/ .git/gitHeadInfo.gin 
+	tar -czvf $@ $^
 
 #for vim modeline: (do not edit)
 # vim:ts=2:sw=2:tw=149:fdm=marker:fmr=FOLDUP,UNFOLD:cms=#%s:tags=tags;:syn=make:ft=make:ai:si:cin:nu:fo=croqt:cino=p0t0c5(0:

@@ -1,0 +1,260 @@
+\begin{thebibliography}{33}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Anderson(2003)]{anderson2003introduction}
+T.~W. Anderson.
+\newblock \emph{An Introduction to Multivariate Statistical Analysis}.
+\newblock Wiley Series in Probability and Statistics. Wiley, 2003.
+\newblock ISBN 9780471360919.
+\newblock URL \url{http://books.google.com/books?id=Cmm9QgAACAAJ}.
+
+\bibitem[Aronson(2006)]{Aronson2007}
+David~R. Aronson.
+\newblock \emph{Evidence-Based Technical Analysis: Applying the Scientific
+  Method and Statistical Inference to Trading Signals}.
+\newblock Wiley, Hoboken, NJ, nov 2006.
+\newblock URL \url{http://www.evidencebasedta.com/}.
+
+\bibitem[Bao(2009)]{baoestimation}
+Yong Bao.
+\newblock Estimation risk-adjusted {S}harpe ratio and fund performance ranking
+  under a general return distribution.
+\newblock \emph{Journal of Financial Econometrics}, 7\penalty0 (2):\penalty0
+  152--173, 2009.
+\newblock \doi{10.1093/jjfinec/nbn022}.
+\newblock URL \url{https://doi.org/10.1093/jjfinec/nbn022}.
+
+\bibitem[Bretz et~al.(2016)Bretz, Hothorn, and Westfall]{bretz2016multiple}
+Frank Bretz, Torsten Hothorn, and Peter Westfall.
+\newblock \emph{Multiple comparisons using {R}}.
+\newblock Chapman and Hall/CRC, 2016.
+\newblock URL
+  \url{http://www.ievbras.ru/ecostat/Kiril/R/Biblio_N/R_Eng/Bretz2011.pdf}.
+
+\bibitem[Chopra and Ziemba(1993)]{chopra1993effect}
+Vijay~Kumar Chopra and William~T. Ziemba.
+\newblock The effect of errors in means, variances, and covariances on optimal
+  portfolio choice.
+\newblock \emph{The Journal of Portfolio Management}, 19\penalty0 (2):\penalty0
+  6--11, 1993.
+\newblock URL
+  \url{http://faculty.fuqua.duke.edu/~charvey/Teaching/BA453_2006/Chopra_The_effect_of_1993.pdf}.
+
+\bibitem[Follmann(1996)]{10.2307/2291680}
+Dean Follmann.
+\newblock A simple multivariate test for one-sided alternatives.
+\newblock \emph{Journal of the American Statistical Association}, 91\penalty0
+  (434):\penalty0 854--861, 1996.
+\newblock ISSN 01621459.
+\newblock URL \url{http://www.jstor.org/stable/2291680}.
+
+\bibitem[French(2019)]{ind_5_def}
+Kenneth French.
+\newblock 5 industry portfolios.
+\newblock Privately Published, 2019.
+\newblock URL
+  \url{http://mba.tuck.dartmouth.edu/pages/faculty/ken.french/Data_Library/det_5_ind_port.html}.
+
+\bibitem[Haldane(1942)]{HaldaneMoments}
+J.~B.~S. Haldane.
+\newblock Moments of the distributions of powers and products of normal
+  variates.
+\newblock \emph{Biometrika}, 32\penalty0 (3/4):\penalty0 pp. 226--242, 04 1942.
+\newblock ISSN 0006-3444.
+\newblock \doi{10.1093/biomet/32.3-4.226}.
+\newblock URL \url{https://doi.org/10.1093/biomet/32.3-4.226}.
+
+\bibitem[Hansen(2005)]{Hansen:2005}
+P.~R. Hansen.
+\newblock A test for superior predictive ability.
+\newblock \emph{Journal of Business and Economic Statistics}, 23\penalty0 (4),
+  2005.
+\newblock \doi{10.1198/073500105000000063}.
+\newblock URL \url{http://pubs.amstat.org/doi/abs/10.1198/073500105000000063}.
+
+\bibitem[Hansen(2003)]{Hansen2003Asymptotic}
+Peter~Reinhard Hansen.
+\newblock Asymptotic tests of composite hypotheses.
+\newblock Working Paper 2003-09, Providence, RI, 2003.
+\newblock URL \url{http://hdl.handle.net/10419/80222}.
+
+\bibitem[Hsu et~al.(2010)Hsu, Hsu, and Kuan]{Hsu2010471}
+Po-Hsuan Hsu, Yu-Chin Hsu, and Chung-Ming Kuan.
+\newblock Testing the predictive ability of technical analysis using a new
+  stepwise test without data snooping bias.
+\newblock \emph{Journal of Empirical Finance}, 17\penalty0 (3):\penalty0 471 --
+  484, 2010.
+\newblock ISSN 0927-5398.
+\newblock \doi{10.1016/j.jempfin.2010.01.001}.
+\newblock URL \url{http://ssrn.com/abstract=1087044}.
+
+\bibitem[Isserlis(1918)]{Isserlis1918}
+L.~Isserlis.
+\newblock On a formula for the product-moment coefficient of any order of a
+  normal frequency distribution in any number of variables.
+\newblock \emph{Biometrika}, 12\penalty0 (1/2):\penalty0 pp. 134--139, 1918.
+\newblock ISSN 00063444.
+\newblock URL \url{http://www.jstor.org/stable/2331932}.
+
+\bibitem[Jobson and Korkie(1981)]{jobsonkorkie1981}
+J.~D. Jobson and Bob~M. Korkie.
+\newblock Performance hypothesis testing with the {S}harpe and {T}reynor
+  measures.
+\newblock \emph{The Journal of Finance}, 36\penalty0 (4):\penalty0 pp.
+  889--908, 1981.
+\newblock ISSN 00221082.
+\newblock URL \url{http://www.jstor.org/stable/2327554}.
+
+\bibitem[Kotz and Nadarajah(2004)]{kotz2004multivariate}
+S.~Kotz and S.~Nadarajah.
+\newblock \emph{Multivariate $t$-Distributions and Their Applications}.
+\newblock Cambridge University Press, 2004.
+\newblock ISBN 9780521826549.
+\newblock URL \url{http://drsmorey.org/bibtex/upload/Kotz:Nadarajah:2004.pdf}.
+
+\bibitem[Lee et~al.(2013)Lee, Sun, Sun, and Taylor]{lee2013exact}
+Jason~D. Lee, Dennis~L. Sun, Yuekai Sun, and Jonathan~E. Taylor.
+\newblock Exact post-selection inference, with application to the lasso, 2013.
+\newblock URL \url{http://arxiv.org/abs/1311.6238}.
+\newblock cite arxiv:1311.6238 Comment: Published at
+  http://dx.doi.org/10.1214/15-AOS1371 in the Annals of Statistics
+  (http://www.imstat.org/aos/) by the Institute of Mathematical Statistics
+  (http://www.imstat.org).
+
+\bibitem[Lin(1972)]{Lin1972339}
+Pi-Erh Lin.
+\newblock Some characterizations of the multivariate $t$ distribution.
+\newblock \emph{Journal of Multivariate Analysis}, 2\penalty0 (3):\penalty0 339
+  -- 344, 1972.
+\newblock ISSN 0047-259X.
+\newblock \doi{http://dx.doi.org/10.1016/0047-259X(72)90021-8}.
+\newblock URL
+  \url{http://www.sciencedirect.com/science/article/pii/0047259X72900218}.
+
+\bibitem[Lo(2002)]{lo2002}
+Andrew~W. Lo.
+\newblock The statistics of {S}harpe ratios.
+\newblock \emph{Financial Analysts Journal}, 58\penalty0 (4), July/August 2002.
+\newblock URL \url{http://ssrn.com/paper=377260}.
+
+\bibitem[L\'{o}pez~de Prado and Bailey(2018)]{lopezdeprado2018false}
+Marcos L\'{o}pez~de Prado and David~H. Bailey.
+\newblock The false strategy theorem: A financial application of experimental
+  mathematics.
+\newblock \emph{American Mathematical Monthly, forthcoming}, 2018.
+
+\bibitem[Marsaglia et~al.(2003)Marsaglia, Tsang, and
+  Wang]{Marsaglia:Tsang:Wang:2003:JSSOBK:v08i18}
+George Marsaglia, Wai~Wan Tsang, and Jingbo Wang.
+\newblock Evaluating {K}olmogorov's distribution.
+\newblock \emph{Journal of Statistical Software}, 8\penalty0 (18):\penalty0
+  1--4, 11 2003.
+\newblock ISSN 1548-7660.
+\newblock URL \url{http://www.jstatsoft.org/v08/i18}.
+
+\bibitem[Mertens(2002)]{mertens2002comments}
+Elmar Mertens.
+\newblock Comments on variance of the {IID} estimator in {Lo} (2002).
+\newblock Technical report, Working Paper University of Basel,
+  Wirtschaftswissenschaftliches Zentrum, Department of Finance, 2002.
+\newblock URL
+  \url{http://www.elmarmertens.com/research/discussion/soprano01.pdf}.
+
+\bibitem[Pav(2014-2019)]{SharpeR-Manual}
+Steven~E. Pav.
+\newblock \emph{SharpeR: Statistical significance of {Sharpe} ratio},
+  2014-2019.
+\newblock URL \url{https://github.com/shabbychef/SharpeR}.
+\newblock R package version 1.2.0.
+
+\bibitem[Pav(2017)]{pav_ssc}
+Steven~E. Pav.
+\newblock A short {S}harpe course.
+\newblock Privately Published, 2017.
+\newblock URL
+  \url{https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3036276}.
+
+\bibitem[Pav(2018)]{pav_maxsharpe_two}
+Steven~E. Pav.
+\newblock Distribution of maximal {S}harpe, the {M}arkowitz approximation.
+\newblock Privately Published, 2018.
+\newblock URL \url{http://www.sharperat.io/max-sharpe-two.html}.
+
+\bibitem[Press(2012)]{press2012applied}
+S.~J. Press.
+\newblock \emph{Applied Multivariate Analysis: Using {Bayesian} and Frequentist
+  Methods of Inference}.
+\newblock Dover Publications, Incorporated, 2012.
+\newblock ISBN 9780486139388.
+\newblock URL \url{http://books.google.com/books?id=WneJJEHYHLYC}.
+
+\bibitem[Romano and Wolf(2005)]{romano2005stepwise}
+Joseph~P Romano and Michael Wolf.
+\newblock Stepwise multiple testing as formalized data snooping.
+\newblock \emph{Econometrica}, 73\penalty0 (4):\penalty0 1237--1282, 2005.
+\newblock URL
+  \url{https://www.econ.uzh.ch/dam/jcr:ffffffff-935a-b0d6-ffff-ffffa286d4d1/etca.pdf}.
+
+\bibitem[Silvapulle and Sen(2005)]{nla.cat-vn3800977}
+Mervyn~J. Silvapulle and Pranab~Kumar Sen.
+\newblock \emph{Constrained statistical inference : inequality, order, and
+  shape restrictions}.
+\newblock Wiley-Interscience, Hoboken, N.J., 2005.
+\newblock ISBN 0471208272.
+\newblock URL \url{http://books.google.com/books?isbn=0471208272}.
+
+\bibitem[Slepian(1962)]{slepian1962one}
+David Slepian.
+\newblock The one-sided barrier problem for {G}aussian noise.
+\newblock \emph{Bell System Technical Journal}, 41\penalty0 (2):\penalty0
+  463--501, 1962.
+\newblock \doi{10.1002/j.1538-7305.1962.tb02419.x}.
+\newblock URL
+  \url{https://onlinelibrary.wiley.com/doi/abs/10.1002/j.1538-7305.1962.tb02419.x}.
+
+\bibitem[Vignat and Bhatnagar(2007)]{vignat2007extension}
+C.~Vignat and S.~Bhatnagar.
+\newblock An extension of {W}ick's theorem, 2007.
+\newblock URL \url{http://arxiv.org/abs/0709.1999}.
+
+\bibitem[Vock(2007)]{vock2007}
+Michael Vock.
+\newblock \emph{``One-sided'' Statistical Inference for a Multivariate Location
+  Parameter}.
+\newblock PhD thesis, University of Bern, 2007.
+\newblock URL
+  \url{http://www.imsv.unibe.ch/e19451/e226662/e309213/e309217/e309218/files309221/Diss_Vock_3rd_eng.pdf}.
+
+\bibitem[Wasserman(2004)]{wasserman2004all}
+Larry Wasserman.
+\newblock \emph{All of Statistics: A Concise Course in Statistical Inference}.
+\newblock Springer Texts in Statistics. Springer, 2004.
+\newblock ISBN 9780387402727.
+\newblock URL \url{http://books.google.com/books?id=th3fbFI1DaMC}.
+
+\bibitem[White(2000)]{White:2000}
+Halbert White.
+\newblock A reality check for data snooping.
+\newblock \emph{Econometrica}, 68:\penalty0 1097--1127, 2000.
+\newblock URL \url{https://www.ssc.wisc.edu/~bhansen/718/White2000.pdf}.
+
+\bibitem[Wolak(1987)]{wolak1987exact}
+Frank~A Wolak.
+\newblock An exact test for multiple inequality and equality constraints in the
+  linear regression model.
+\newblock \emph{Journal of the American Statistical Association}, 82\penalty0
+  (399):\penalty0 782--793, 1987.
+\newblock URL
+  \url{https://web.stanford.edu/group/fwolak/cgi-bin/sites/default/files/files/An%20Exact%20Test%20for%20Multiple%20Equality%20and%20Inequality%20Constraints%20in%20the%20Linear%20Regression%20Model_Wolak(1).pdf}.
+
+\bibitem[Zeitouni(2017)]{zeitouni2015gaussian}
+Ofer Zeitouni.
+\newblock {GAUSSIAN FIELDS} notes for lectures.
+\newblock unpublished notes, 2017.
+\newblock URL \url{http://www.wisdom.weizmann.ac.il/~zeitouni/notesGauss.pdf}.
+
+\end{thebibliography}

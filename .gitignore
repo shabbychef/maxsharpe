@@ -6,9 +6,9 @@ maxsharpe.R
 output/
 *.fls
 *.aux
-*.bbl
 *.blg
 *.fdb_latexmk
 maxsharpe.log
 maxsharpe.out
+maxsharpe_v*.tar.gz
 nohup.out

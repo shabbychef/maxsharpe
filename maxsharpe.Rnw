@@ -146,8 +146,7 @@ suppressMessages({
   library(ggplot2)
 })
 
-theme_set(theme_minimal(base_size=12))
-theme_update(legend.position="bottom")
+old_theme <- theme_set(theme_minimal(base_size=12) %+replace% theme(legend.position="bottom"))
 
 if (require(viridis,quietly=TRUE)) {
   scale_colour_discrete <- function(...) {
@@ -1782,7 +1781,7 @@ we cannot claim to have definitively established where our procedure breaks down
 but warn users that the $\nstrat \gg \ssiz$ cases are likely to be problematic
 in the sense that nominal type I rates may not be maintained.
 
-<<'many_sims_plotz',dependson=c('many_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'many_sims_plotz',dependson=c('many_sims','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0('Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\\ssiz$ with facets for $\\nstrat$ and $\\rho$.  ',
                   'Broadly we see that the test statistic is less uniform in the regime where $\\nstrat\\gg\\ssiz$, but that a large positive $\\rho$ perhaps reduces the number of assets in that relationship.')
 # 460af323-8484-4187-8af1-68b25eff11cb 
@@ -1837,7 +1836,7 @@ We remain cautiously optimistic that for large \ssiz, one need not correct
 \eqnref{apx_srdist_gaussian} to account for non-normal returns.
 
 
-<<'causal_tfive_sims_plotz',dependson=c('causal_tfive_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'causal_tfive_sims_plotz',dependson=c('causal_tfive_sims','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 alpha <- 0.05
 fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',nsim,
                   ' simulations are plotted using our sampled CDF procedure. ',
@@ -1979,7 +1978,7 @@ half-good case, as is to be expected since this is the probability that
 $\ssravg > 0$ in the half-good case.
 
 
-<<'power_plotz_one',dependson=c('sims_vs_mht'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'power_plotz_one',dependson=c('sims_vs_mht','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0("The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures ",
                   'are shown versus the \\txtSNR of the asset with maximum \\txtSR under different arrangements of the vector \\pvsnr. ',
                   "For the one-good case, the chi-bar-square and Follman's test have the same power, which is essentially zero under the alternative. ")
@@ -2113,7 +2112,7 @@ yielding nominal rejection rates.
 %Intuitively, the number of `pseudo assets' is reduced when returns have higher correlation, and
 %the Bonferroni correction is too conservative.
 
-<<'rho_plotz_one',dependson=c('correlation_sims_vs_mht'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'rho_plotz_one',dependson=c('correlation_sims_vs_mht','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0('The empirical type I rate under the null hypothesis is plotted versus $\\rho$ ',
                   'for the case where $\\RMAT=\\makerho{\\rho}{\\wrapParens{1-\\rho}}$, ',
                   "for several testing procedures: the conditional estimation, the chi-bar square test, Follman's test, the vanilla Bonferroni correction, ",

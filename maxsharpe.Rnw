@@ -137,12 +137,38 @@ FORCE_RECOMPUTE <- (toupper(Sys.getenv('FORCE_RECOMPUTE',unset='False')) == "TRU
 # or 1 if missing.
 
 RUNTIME_PARAM <- max(1,as.numeric(Sys.getenv('RUNTIME_PARAM')),na.rm=TRUE)
+# hack
+RUNTIME_PARAM <- 10
 @
 <<'plot_funcs',include=FALSE>>=
 suppressMessages({
 	library(dplyr)
   library(ggplot2)
 })
+
+theme_set(theme_minimal(base_size=12))
+theme_update(legend.position="bottom")
+
+if (require(viridis,quietly=TRUE)) {
+  scale_colour_discrete <- function(...) {
+    require(viridis,quietly=TRUE)
+    scale_color_viridis(discrete=TRUE,end=0.85,option='D',...)
+  }
+  scale_fill_discrete <- function(...) {
+    require(viridis,quietly=TRUE)
+    scale_fill_viridis(discrete=TRUE,end=0.85,option='D',...)
+  }
+  # wait, can I also default for continuous cases?
+  scale_colour_continuous <- function(...) {
+    require(viridis,quietly=TRUE)
+    scale_color_viridis(discrete=FALSE,end=0.85,option='D',...)
+  }
+  scale_fill_continuous <- function(...) {
+    require(viridis,quietly=TRUE)
+    scale_fill_viridis(discrete=FALSE,end=0.85,option='D',...)
+  }
+}
+
 
 modqq <- function(sample,qnt_func=qnorm,dens_func=dnorm,k=9,ppp=ppoints(k)) {
   require(dplyr,quietly=TRUE)
@@ -433,7 +459,7 @@ cdf_helper <- function(x,qts=c(0.001,0.005,0.01,0.05,0.1),alpha=0.05) {
 
 %\title{Conditional estimation on the \txtSNR of the asset with maximum \txtSR}
 \title{Conditional inference on the asset with maximum Sharpe ratio}
-\author{Steven E. Pav \thanks{\email{steven@gilgamath.com}.
+\author{Steven E. Pav \thanks{\href{https://orcid.org/0000-0002-4197-6195}{\normalfont\texttt{ORCID: 0000-0002-4197-6195}}; \email{steven@gilgamath.com}.
 The source code to build this document is available at
 \href{http://www.github.com/shabbychef/maxsharpe}{\normalfont\texttt{www.github.com/shabbychef/maxsharpe}}.
 The document you are reading was built from commit \texttt{\gitHash} of that repo.
@@ -1616,10 +1642,6 @@ fig_cap <- paste0('The computed p-values from the conditional estimation procedu
                   'Simulations use the exact \\RMAT and \\pvsnr to compute the covariance matrix. ',
                   'The plot supports uniformity of the putative p-values. ')
 
-suppressMessages({
-	library(dplyr)
-	library(ggplot2)
-})
 ph <- cdf_helper(sim$pvals,qts=10^seq(-3,-1,length.out=9),alpha=alpha) %>%
   mutate(Delta=emp_cdf-qts,ymin=ci_lo-qts,ymax=ci_hi-qts) %>%
   ggplot(aes(qts,Delta,ymin=ymin,ymax=ymax)) +
@@ -1677,11 +1699,6 @@ fig_cap <- paste0('The computed p-values from the conditional estimation procedu
                   'Using the binomial law, we plot approximate error bars around the $x$ axis that indicate where the points should fall with approximately $',100*(1-alpha),'\\%$ confidence. ',
                   'Simulations use the exact \\RMAT and \\pvsnr to compute the covariance matrix. ',
                   'The plot supports uniformity of the putative p-values. ')
-
-suppressMessages({
-	library(dplyr)
-	library(ggplot2)
-})
 
 ph <- cdf_helper(causim$pvals,qts=10^seq(-3,-1,length.out=9),alpha=alpha) %>%
   mutate(Delta=emp_cdf-qts,ymin=ci_lo-qts,ymax=ci_hi-qts) %>%
@@ -1832,10 +1849,6 @@ fig_cap <- paste0('The computed p-values from the conditional estimation procedu
                   'Without correcting for higher order moments, the procedure has higher than nominal type I rate; ',
                   'with the correction it has slightly smaller than the nominal rate. ')
 
-suppressMessages({
-	library(dplyr)
-	library(ggplot2)
-})
 ph <- rbind(ok_tsim %>% mutate(higher_order=TRUE),
             badtsim %>% mutate(higher_order=FALSE)) %>%
   group_by(higher_order) %>%
@@ -1972,7 +1985,6 @@ fig_cap <- paste0("The empirical power of the conditional estimation, MHT correc
                   "For the one-good case, the chi-bar-square and Follman's test have the same power, which is essentially zero under the alternative. ")
 # 482b4da5-36ad-45fe-9c8f-687625aa5cc7 
 #filter(grepl('equal|onegood',mutype)) %>%
-library(ggplot2)
 ph <- resu %>%
   filter(method!='norho_mht') %>%  # we are using rho=0, so should be the same
   mutate(method=case_when(grepl('^condest$',method)   ~ 'cond. est.',
@@ -2112,7 +2124,6 @@ fig_cap <- paste0('The empirical type I rate under the null hypothesis is plotte
                   'regular Bonferroni procedure, ',
                   "and Hansen's chi-bar-square test, which has slightly higher than nominal rejection rates for this \\ssiz. ",
                   'Empirical rates are over ',prettyNum(mht_null_nsim,big.mark=','),' simulations. The $y$ axis is in log scale.')
-library(ggplot2)
 ph <- rhoresu %>%
   mutate(method=case_when(grepl('^condest$',method)   ~ 'cond. est.',
                           grepl('^norho_mht$',method) ~ 'vanilla MHT',

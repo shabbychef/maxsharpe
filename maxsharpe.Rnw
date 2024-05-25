@@ -31,8 +31,8 @@
 % see http://tex.stackexchange.com/a/3034/2530
 \PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
 \usepackage{hyperref}
-%\usepackage[square,numbers]{natbib}
-\usepackage{apacite}
+\usepackage[square,numbers]{natbib}
+%\usepackage{apacite}
 %\usepackage[authoryear]{natbib}
 %\usepackage[iso]{datetime}
 %\usepackage{datetime}

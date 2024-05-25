@@ -114,6 +114,9 @@ doc : $(PROJECT).pdf  ## build the document by knitting source code
 %.md : %.Rmd
 	r -l knitr -e 'setwd("$(<D)");if (require(knitr)) { knit("$(<F)") }'
 
+%.count : %.tex
+	detex $< | wc -w > $@
+
 # tex extras
 %.bbl : %.bib
 	$(PREBIB) $(BIBTEX) $*

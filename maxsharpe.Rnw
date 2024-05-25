@@ -31,7 +31,8 @@
 % see http://tex.stackexchange.com/a/3034/2530
 \PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
 \usepackage{hyperref}
-\usepackage[square,numbers]{natbib}
+%\usepackage[square,numbers]{natbib}
+\usepackage{apacite}
 %\usepackage[authoryear]{natbib}
 %\usepackage[iso]{datetime}
 %\usepackage{datetime}
@@ -57,6 +58,9 @@
 
 %compactitem and such:
 \usepackage[newitem,newenum,increaseonly]{paralist}
+\usepackage{totcount}
+\regtotcounter{figure}
+\regtotcounter{table}
 
 \makeatletter
 \makeatother
@@ -144,6 +148,7 @@ RUNTIME_PARAM <- 10
 suppressMessages({
 	library(dplyr)
   library(ggplot2)
+  library(scales)
 })
 
 old_theme <- theme_set(theme_minimal(base_size=12) %+replace% theme(legend.position="bottom"))
@@ -469,6 +474,11 @@ The document you are reading was built from commit \texttt{\gitHash} of that rep
 
 \maketitle
 %UNFOLD
+
+Paper has \total{figure} figures, \total{table} tables, and approximately 
+\input{maxsharpe.count} words.
+
+\newpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}%FOLDUP
@@ -1615,7 +1625,7 @@ This is not, of course, how the test would be applied in practice since
 Moreover, we with to check coverage of the procedure under the null, so 
 we use the actual $\trAB{\etav}{\pvsnr}$ in our test.
 
-We repeat this experiment \Sexpr{nsim} times and collect the resultant putative p-values.
+We repeat this experiment \Sexpr{scales::comma(nsim)} times and collect the resultant putative p-values.
 We would like to Q-Q or P-P plot these p-values, 
 as evidence that they are near uniform, 
 but the large sample size presents some challenges.
@@ -1632,7 +1642,7 @@ near the selected $q$.
 
 <<'motherload_sims_hidden_plotz',dependson=c('motherload_sims_run','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 alpha <- 0.05
-fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',nsim,
+fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',scales::comma(nsim),
                   ' simulations are compared to a uniform law. ',
                   'Given the large sample size, a Q-Q plot is visually hard to interpret. ',
                   'Instead, for selected $q$, we compute the proportion of our putative p-values less than $q$. ',
@@ -1677,7 +1687,7 @@ So we repeat the experiments, but plug in the usual sample estimate of covarianc
 vector of \txtSRs into \eqnref{apx_srdist_gaussian} to estimate the covariance
 matrix of \svsr. 
 Other than this change, we repeat the previous experiment, 
-performing $\Sexpr{nsim}$ simulations, 
+performing $\Sexpr{scales::comma(nsim)}$ simulations, 
 setting $\nstrat=\Sexpr{nstrat}$,
 $\RMAT=\makerho{\Sexpr{rho}}{\Sexpr{1-rho}}$.
 $\ssiz=\Sexpr{nday}\dayto{}$, \etc
@@ -1692,7 +1702,7 @@ elements of the estimate of \RMAT.
 alpha <- 0.05
 fig_cap <- paste0('The computed p-values from the conditional estimation procedure using sample estimates of the covariance matrix, \\RMAT, ',
                   'and the vector of \\txtSNRs, \\pvsnr are used in this sampled CDF plot. ',
-                  'P values are computed over ',nsim,' simulations. ',
+                  'P values are computed over ',scales::comma(nsim),' simulations. ',
                   'For selected $q$, we compute the proportion of our putative p-values less than $q$. ',
                   'We then compute $\\Delta = \\wrapParens{\\mbox{Prop }\\le q} - q$ against $q$. ',
                   'Using the binomial law, we plot approximate error bars around the $x$ axis that indicate where the points should fall with approximately $',100*(1-alpha),'\\%$ confidence. ',
@@ -1765,7 +1775,7 @@ $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$;
 we take $\pvsnr$ to be a uniform sequence from $0$ to 
 $\Sexpr{unique(params$max_zeta)}\dayto{-\halff}$.
 For each setting of the parameters in the Cartesian product we perform
-$\Sexpr{ks_nsim}$ simulations, computing p values from the feasible estimator.
+$\Sexpr{scales::comma(ks_nsim)}$ simulations, computing p values from the feasible estimator.
 
 In \figref{many_sims_plotz} we plot those K-S statistics against $\ssiz$,
 with facets for $\rho$ and $\nstrat$. 
@@ -1817,7 +1827,7 @@ The simulations above were carried out assuming Gaussian returns, and using
 Gaussian returns are not a good model for real asset returns,
 so we repeat those simulations with returns drawn from a multivariate $\tstat{}$-distribution
 with $5$ degrees of freedom.  \cite{Lin1972339,kotz2004multivariate}
-Again we perform $\Sexpr{nsim}$ simulations with
+Again we perform $\Sexpr{scales::comma(nsim)}$ simulations with
 $\nstrat=\Sexpr{nstrat}$,
 $\RMAT=\makerho{\Sexpr{rho}}{\Sexpr{1-rho}}$,
 $\ssiz=\Sexpr{nday}\dayto{}$, \etc
@@ -1838,7 +1848,7 @@ We remain cautiously optimistic that for large \ssiz, one need not correct
 
 <<'causal_tfive_sims_plotz',dependson=c('causal_tfive_sims','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 alpha <- 0.05
-fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',nsim,
+fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',scales::comma(nsim),
                   ' simulations are plotted using our sampled CDF procedure. ',
                   'Returns are drawn from a $\\tstat{}\\wrapParens{5}$ distribution.  ',
                   'Sample estimates are used to construct the variance-covariance matrix of \\svsr.  ',
@@ -1949,7 +1959,7 @@ to an `annualized' \txtSNR of around
 $\Sexpr{signif(sqrt(252) * max(params$one_zeta),2)}\yrto{-\halff}$.
 We draw Gaussian returns with diagonal covariance for
 $\Sexpr{mht_nstrat}$ assets, with $\ssiz=\Sexpr{mht_nday}$.
-For each setting we perform $\Sexpr{mht_nsim}$ simulations then 
+For each setting we perform $\Sexpr{scales::comma(mht_nsim)}$ simulations then 
 compute the empirical rejection rate of the test at the $0.05$ level,
 conditional on the \txtSNR of the \emph{selected} asset, which is
 to say the one with the largest \txtSR. Note that in some simulations
@@ -2023,7 +2033,7 @@ and one-sided tests have greater
 than $0.05$ rejection rate for \emph{negative} \txtSNR. 
 The plot is somewhat misleading under this alternative, however.
 We have performed
-$\Sexpr{mht_nsim}$ simulations for each setting of the `good'
+$\Sexpr{scales::comma(mht_nsim)}$ simulations for each setting of the `good'
 \txtSNR; in some very small number of them for the half-good
 case, an asset with negative \txtSNR exhibits the maximum
 \txtSR. 
@@ -2035,7 +2045,7 @@ assets have zero or lower \txtSNR.
 We have not shown the probability that a `bad' asset has the
 highest \txtSR, but note that when the `good' \txtSNR
 is greater than $0.05\dayto{-\halff}$ we do not observe this
-occuring even once over the $\Sexpr{mht_nsim}$ simulations performed
+occuring even once over the $\Sexpr{scales::comma(mht_nsim)}$ simulations performed
 for each setting. 
 
 We note that the chi-bar-square test appears to have higher power than 
@@ -2097,7 +2107,7 @@ To demonstrate this, we repeat the experiments above, but setting
 $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$
 and $\psnr=\vzero$.
 Again we consider $\nstrat=\Sexpr{mht_nstrat}$, 
-$\ssiz=\Sexpr{mht_nday}$, and perform $\Sexpr{mht_null_nsim}$ simulations to estimate the 
+$\ssiz=\Sexpr{mht_nday}$, and perform $\Sexpr{scales::comma(mht_null_nsim)}$ simulations to estimate the 
 empirical rejection rate.
 In \figref{rho_plotz_one}, we plot the empirical rejection rate versus $\rho$ at the nominal
 $0.05$ type I level. 
@@ -2380,6 +2390,12 @@ Perhaps its power can be increased using Hansen's $\log\log$ adjustment.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix%FOLDUP
+
+\section{Declaration of Interests}
+
+No funding was received.
+The authors report no conflicts of interest.
+The authors alone are responsible for the content and writing of the paper.
 
 \section{Establishing \eqnref{apx_srdist_elliptical}.}
 

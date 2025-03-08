@@ -12,3 +12,8 @@ output/
 maxsharpe.log
 maxsharpe.out
 nohup.out
+*.vrb
+*.toc
+*.snm
+*.out
+*.nav

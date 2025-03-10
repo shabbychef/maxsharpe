@@ -297,33 +297,35 @@ suppressMessages({
   require(future,quietly=TRUE)
   require(future.apply,quietly=TRUE)
 })
+
+#gen_norm <- rnorm
+#lseq <- function(from,to,length.out) { exp(seq(log(from),log(to),length.out = length.out)) }
+@
+<<'plot_options',include=FALSE,warning=FALSE,message=FALSE>>=
 theme_set(theme_minimal())
 # theme_set(theme_minimal(base_size=12))
 theme_update(legend.position="bottom")
 
+VIRIDIS_COLOR_OPTION <- 'plasma'
 if (require(viridis,quietly=TRUE)) {
   scale_colour_discrete <- function(...) {
     require(viridis,quietly=TRUE)
-    scale_color_viridis(discrete=TRUE,end=0.85,option='D',...)
+    scale_color_viridis(discrete=TRUE,end=0.85,option=VIRIDIS_COLOR_OPTION,...)
   }
   scale_fill_discrete <- function(...) {
     require(viridis,quietly=TRUE)
-    scale_fill_viridis(discrete=TRUE,end=0.85,option='D',...)
+    scale_fill_viridis(discrete=TRUE,end=0.85,option=VIRIDIS_COLOR_OPTION,...)
   }
   # wait, can I also default for continuous cases?
   scale_colour_continuous <- function(...) {
     require(viridis,quietly=TRUE)
-    scale_color_viridis(discrete=FALSE,end=0.85,option='D',...)
+    scale_color_viridis(discrete=FALSE,end=0.85,option=VIRIDIS_COLOR_OPTION,...)
   }
   scale_fill_continuous <- function(...) {
     require(viridis,quietly=TRUE)
-    scale_fill_viridis(discrete=FALSE,end=0.85,option='D',...)
+    scale_fill_viridis(discrete=FALSE,end=0.85,option=VIRIDIS_COLOR_OPTION,...)
   }
 }
-
-
-#gen_norm <- rnorm
-#lseq <- function(from,to,length.out) { exp(seq(log(from),log(to),length.out = length.out)) }
 @
 %UNFOLD
 
@@ -748,16 +750,40 @@ $$
 \trAB{\vect{\nu}}{\vect{z}} \sim \condtwo{\normlaw{\mu,\sigma^2}}{\,l \le \trAB{\vect{\nu}}{\vect{z}} \le h}.
 $$
 
-<<'plot_ellipse',echo=FALSE,eval=TRUE,cache=TRUE,fig.width=0.78*14,fig.height=0.27*14,out.width="0.78\\textwidth",out.height="0.27\\textwidth">>=
+<<'plot_ellipse',echo=FALSE,eval=TRUE,cache=TRUE,fig.width=0.78*14,fig.height=0.27*14,out.width="0.78\\textwidth",out.height="0.27\\textwidth",dependson=c('plot_options')>>=
 library(ggforce)
 library(rlang)
 library(gridExtra)
 ph <- ggplot() 
-for (iii in qnorm(ppoints(40))) { 
+for (iii in qnorm(ppoints(70))) { 
 	if (iii > 0) {
-		ph <- ph + geom_ellipse(aes(x0=1,y0=0.5,angle=15,fill='red',a=!!iii*5,b=!!iii*2),alpha=0.15,color=NA)
+		ph <- ph + geom_ellipse(aes(x0=1,y0=0.5,angle=15,fill='red',a=!!iii*5,b=!!iii*2),alpha=0.07,color=NA)
 	}
 }
+theme_set(theme_minimal())
+# theme_set(theme_minimal(base_size=12))
+theme_update(legend.position="bottom")
+
+if (require(viridis,quietly=TRUE)) {
+  scale_colour_discrete <- function(...) {
+    require(viridis,quietly=TRUE)
+    scale_color_viridis(discrete=TRUE,end=0.85,option=VIRIDIS_COLOR_OPTION,...)
+  }
+  scale_fill_discrete <- function(...) {
+    require(viridis,quietly=TRUE)
+    scale_fill_viridis(discrete=TRUE,end=0.85,option=VIRIDIS_COLOR_OPTION,...)
+  }
+  # wait, can I also default for continuous cases?
+  scale_colour_continuous <- function(...) {
+    require(viridis,quietly=TRUE)
+    scale_color_viridis(discrete=FALSE,end=0.85,option=VIRIDIS_COLOR_OPTION,...)
+  }
+  scale_fill_continuous <- function(...) {
+    require(viridis,quietly=TRUE)
+    scale_fill_viridis(discrete=FALSE,end=0.85,option=VIRIDIS_COLOR_OPTION,...)
+  }
+}
+
 ph1 <- ph  +
 	guides(color=FALSE,alpha=FALSE,fill=FALSE) + 
 	labs(title='Normal Density',
@@ -1317,7 +1343,7 @@ resu <- params %>%
 plan(sequential)
 @
 
-<<'power_plotz_one',dependson=c('sims_vs_mht'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=0.87*10,fig.height=0.35*10,out.width="0.87\\textwidth",out.height="0.35\\textwidth">>=
+<<'power_plotz_one',dependson=c('sims_vs_mht','plot_options'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=0.87*10,fig.height=0.35*10,out.width="0.87\\textwidth",out.height="0.35\\textwidth">>=
 fig_cap <- paste0('The empirical power of the conditional estimation, MHT corrected test, ',
                   "Follman's test, ",
                   "the chi-bar-square test, ",

@@ -138,11 +138,36 @@ FORCE_RECOMPUTE <- (toupper(Sys.getenv('FORCE_RECOMPUTE',unset='False')) == "TRU
 
 RUNTIME_PARAM <- max(1,as.numeric(Sys.getenv('RUNTIME_PARAM')),na.rm=TRUE)
 @
-<<'plot_funcs',include=FALSE>>=
+<<'plot_funcs',include=FALSE,cache=FALSE>>=
 suppressMessages({
 	library(dplyr)
   library(ggplot2)
 })
+
+# set theme . again.
+theme_set(theme_minimal(base_size=12))
+theme_update(legend.position="bottom")
+
+if (require(viridis,quietly=TRUE)) {
+  scale_colour_discrete <- function(...) {
+    require(viridis,quietly=TRUE)
+    scale_color_viridis(discrete=TRUE,end=0.85,option='D',...)
+  }
+  scale_fill_discrete <- function(...) {
+    require(viridis,quietly=TRUE)
+    scale_fill_viridis(discrete=TRUE,end=0.85,option='D',...)
+  }
+  # wait, can I also default for continuous cases?
+  scale_colour_continuous <- function(...) {
+    require(viridis,quietly=TRUE)
+    scale_color_viridis(discrete=FALSE,end=0.85,option='D',...)
+  }
+  scale_fill_continuous <- function(...) {
+    require(viridis,quietly=TRUE)
+    scale_fill_viridis(discrete=FALSE,end=0.85,option='D',...)
+  }
+}
+
 
 modqq <- function(sample,qnt_func=qnorm,dens_func=dnorm,k=9,ppp=ppoints(k)) {
   require(dplyr,quietly=TRUE)
@@ -1413,6 +1438,7 @@ ks_sim <- function(rho,nday,nstrat,max_zeta,estimate_parms=FALSE,ret_dist='gauss
                 estimate_parms=estimate_parms,higher_order=higher_order)
   broom::tidy(ks.test(sim$pvals,punif))
 }
+## test it:
 #sim <- parsim(nsim,nday=nday,R=R,mu=mu,estimate_parms=FALSE,ret_dist='t5')
 #plot(ecdf(sim$pvals))
 
@@ -1563,7 +1589,7 @@ R <- pmin(diag(nstrat) + rho,1)
 mu <- seq(min(zetrange),max(zetrange),length.out=nrow(R))
 
 registerDoFuture()
-plan(multiprocess)
+plan(multicore)
 set.seed(4321)
 sim <- parsim(nsim,nday=nday,R=R,mu=mu,estimate_parms=FALSE)
 plan(sequential)
@@ -1623,8 +1649,8 @@ suppressMessages({
 ph <- cdf_helper(sim$pvals,qts=10^seq(-3,-1,length.out=9),alpha=alpha) %>%
   mutate(Delta=emp_cdf-qts,ymin=ci_lo-qts,ymax=ci_hi-qts) %>%
   ggplot(aes(qts,Delta,ymin=ymin,ymax=ymax)) +
+  geom_errorbar(alpha=0.125,width=0.03) + 
   geom_point() + 
-  geom_errorbar(alpha=0.5,width=0.03) + 
   geom_abline(slope=0,intercept=0,linetype=3,alpha=0.7) + 
   #scale_x_sqrt() + scale_y_sqrt() + 
   scale_x_log10() + 
@@ -1643,7 +1669,7 @@ print(ph)
 <<'causal_sims',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs')>>=
 # 160fee33-ad1d-4dc1-875e-04ff4cb8042c 
 registerDoFuture()
-plan(multiprocess)
+plan(multicore)
 set.seed(4321)
 causim <- parsim(nsim,nday=nday,R=R,mu=mu,estimate_parms=TRUE)
 plan(sequential)
@@ -1686,8 +1712,8 @@ suppressMessages({
 ph <- cdf_helper(causim$pvals,qts=10^seq(-3,-1,length.out=9),alpha=alpha) %>%
   mutate(Delta=emp_cdf-qts,ymin=ci_lo-qts,ymax=ci_hi-qts) %>%
   ggplot(aes(qts,Delta,ymin=ymin,ymax=ymax)) +
+  geom_errorbar(alpha=0.125,width=0.03) + 
   geom_point() + 
-  geom_errorbar(alpha=0.5,width=0.03) + 
   geom_abline(slope=0,intercept=0,linetype=3,alpha=0.7) + 
   scale_x_log10() + 
   labs(x='quantile q',y='Delta : (proportion of observed p-values <= q) - q',
@@ -1710,14 +1736,16 @@ suppressMessages({
   library(tibble)
 })
 params <- tidyr::crossing(tibble::tribble(~rho,0,0.4,0.8),
-                          tibble::tribble(~nday,round(0.5*ope),ope,2*ope,4*ope,8*ope),
+                          #tibble::tribble(~nday,round(0.5*ope),ope,2*ope,4*ope,8*ope),
+                          #tibble::tribble(~nday,63,125,250,500,1000,2000),
+                          tibble::tribble(~nday,63,125,250,500),
                           tibble::tribble(~nstrat,50,100,200),
                           tibble::tribble(~max_zeta,0.1))
 
-ks_nsim <- ceiling(5e4/max(1,RUNTIME_PARAM))
+ks_nsim <- ceiling(1e5/max(1,RUNTIME_PARAM))
 
 registerDoFuture()
-plan(multiprocess)
+plan(multicore)
 set.seed(1234)
 #system.time({
 resu <- params %>%
@@ -1765,19 +1793,26 @@ we cannot claim to have definitively established where our procedure breaks down
 but warn users that the $\nstrat \gg \ssiz$ cases are likely to be problematic
 in the sense that nominal type I rates may not be maintained.
 
-<<'many_sims_plotz',dependson=c('many_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'many_sims_plotz',dependson=c('many_sims', 'plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0('Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\\ssiz$ with facets for $\\nstrat$ and $\\rho$.  ',
                   'Broadly we see that the test statistic is less uniform in the regime where $\\nstrat\\gg\\ssiz$, but that a large positive $\\rho$ perhaps reduces the number of assets in that relationship.')
 # 460af323-8484-4187-8af1-68b25eff11cb 
+# 2FIX: want "\\rho" in the facet labels somehow. cf https://sahirbhatnagar.com/blog/2016/02/08/ggplot2-facet-wrap-labels/
+require(latex2exp)
+appender <- function(string) { TeX(paste("$\\rho = $", string)) }
 resu %>%
   mutate(raty=nday/nstrat) %>%
-  rename(p=nstrat) %>%
-  ggplot(aes(nday,statistic)) + 
+  rename(k=nstrat) %>%
+  #ggplot(aes(nday,statistic)) + 
+  ggplot(aes(nday,statistic,group=factor(k),color=factor(k))) + 
   geom_point() + geom_line() + 
   scale_x_log10() + 
-  facet_grid(p~rho,labeller=label_both) +
+  #facet_grid(.~rho,labeller=label_both) +
+  facet_grid(.~rho,labeller=as_labeller(appender, default=label_parsed)) + 
+  #facet_grid(k~rho,labeller=label_both) +
   labs(x='n (days)',
        y='K-S statistic',
+       color='k (assets)',
        title='K-S statistic for simulated p values')
 @
 %UNFOLD
@@ -1788,7 +1823,7 @@ resu %>%
 # 981f1d81-9dba-42e4-82c5-eac0baf80699 
 nsim <- ceiling(1e4/max(1,RUNTIME_PARAM))
 registerDoFuture()
-plan(multiprocess)
+plan(multicore)
 set.seed(4321)
 ok_tsim <- parsim(nsim,nday=nday,R=R,mu=mu,estimate_parms=FALSE,ret_dist='t5',higher_order=TRUE)
 set.seed(4321)
@@ -1820,7 +1855,7 @@ We remain cautiously optimistic that for large \ssiz, one need not correct
 \eqnref{apx_srdist_gaussian} to account for non-normal returns.
 
 
-<<'causal_tfive_sims_plotz',dependson=c('causal_tfive_sims'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'causal_tfive_sims_plotz',dependson=c('causal_tfive_sims','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 alpha <- 0.05
 fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',nsim,
                   ' simulations are plotted using our sampled CDF procedure. ',
@@ -1844,8 +1879,8 @@ ph <- rbind(ok_tsim %>% mutate(higher_order=TRUE),
   tidyr::unnest() %>%
   mutate(Delta=emp_cdf-qts,ymin=ci_lo-qts,ymax=ci_hi-qts) %>%
   ggplot(aes(qts,Delta,ymin=ymin,ymax=ymax,color=higher_order)) +
-  geom_point() + 
-  geom_errorbar(alpha=0.33,width=0.03,color='black') + 
+  geom_errorbar(alpha=0.125,width=0.03,color='black') + 
+  geom_point(position='dodge') + 
   geom_abline(slope=0,intercept=0,linetype=3,alpha=0.7) + 
   scale_x_log10() + 
   labs(x='quantile q',y='Delta : (proportion of observed p-values <= q) - q',
@@ -1888,7 +1923,7 @@ mht_nday <- ceiling(252 * (1 + (3/max(1,RUNTIME_PARAM))))
 mht_nstrat <- ceiling(20 + (80/max(1,RUNTIME_PARAM)))
 
 registerDoFuture()
-plan(multiprocess)
+plan(multicore)
 set.seed(1234)
 #system.time({
 resu <- params %>%
@@ -1966,7 +2001,7 @@ half-good case, as is to be expected since this is the probability that
 $\ssravg > 0$ in the half-good case.
 
 
-<<'power_plotz_one',dependson=c('sims_vs_mht'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'power_plotz_one',dependson=c('sims_vs_mht','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0("The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures ",
                   'are shown versus the \\txtSNR of the asset with maximum \\txtSR under different arrangements of the vector \\pvsnr. ',
                   "For the one-good case, the chi-bar-square and Follman's test have the same power, which is essentially zero under the alternative. ")
@@ -2069,7 +2104,7 @@ mht_nday <- 2*252
 mht_nstrat <- 20
 
 registerDoFuture()
-plan(multiprocess)
+plan(multicore)
 set.seed(4321)
 #system.time({
 rhoresu <- params %>%
@@ -2101,7 +2136,7 @@ yielding nominal rejection rates.
 %Intuitively, the number of `pseudo assets' is reduced when returns have higher correlation, and
 %the Bonferroni correction is too conservative.
 
-<<'rho_plotz_one',dependson=c('correlation_sims_vs_mht'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'rho_plotz_one',dependson=c('correlation_sims_vs_mht','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0('The empirical type I rate under the null hypothesis is plotted versus $\\rho$ ',
                   'for the case where $\\RMAT=\\makerho{\\rho}{\\wrapParens{1-\\rho}}$, ',
                   "for several testing procedures: the conditional estimation, the chi-bar square test, Follman's test, the vanilla Bonferroni correction, ",
@@ -2142,11 +2177,11 @@ print(ph)
 % 2FIX: start from here ... 
 <<'load_mind_data',echo=FALSE,eval=TRUE,cache=TRUE>>=
 # ack. 2018?
-if (!require(aqfb.data) && require(devtools)) {
-  stop('please install_githb("shabbychef/aqfb_data")')
-  #devtools::install_github("shabbychef/aqfb_data")
+if (!require(tsrsa) && require(remotes)) {
+  stop('please remotes::install_github("shabbychef/tsrsa/rpkg")')
+  #remotes::install_github("shabbychef/tsrsa/rpkg")
 }
-library(aqfb.data)
+library(tsrsa)
 data(mind5)
 svsr <- colMeans(mind5) / apply(mind5,2,sd)
 yord <- order(svsr,decreasing=TRUE)

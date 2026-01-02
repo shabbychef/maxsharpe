@@ -554,7 +554,7 @@ of \emph{conditional estimation}.  \cite{lee2013exact}
 The Lee procedure was originally devised for analysis of the Lasso,
 but is applicable in general to the case of selection from a 
 normally distributed vector conditional to a linear constraint.
-We simply give an multivariate normal approximation to the
+We simply give a multivariate normal approximation to the
 vector of \txtSRs of \nstrat assets, then appeal to the Lee
 \etal procedure.  
 

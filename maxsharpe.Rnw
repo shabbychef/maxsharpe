@@ -1543,16 +1543,26 @@ par_alt_test <- function(nday,mu,nsim=100,rho=0,psnr0=0,nnodes=7) {
   }
   retv
 }
+
+rescale_to <- function(x, minv=0, maxv=1) {
+  minv + (maxv - minv) / (diff(range(x))) * (x - min(x))
+}
+
 # spawn mu and call the sims
 bot_rawsim <- function(nday,nstrat,one_zeta,nsim=100,rho=0,
-                       mutype=c('equal','onegood','halfgood','spread')) {
+                       uni_chunks=14,  # for uniform
+                       bell_chunks=32,   # for bellshaped, but we get far fewer
+                       mutype=c('equal','onegood','halfgood','continuous_uniform','uniform','bellshaped')) {
 	mutype <- match.arg(mutype)
   mu <- switch(mutype,
                equal=rep(one_zeta,nstrat),
                onegood=c(one_zeta,rep(-one_zeta,nstrat-1)),
                halfgood=c(rep(one_zeta,floor(nstrat/2)),
                           rep(-one_zeta,ceiling(nstrat/2))),
-               spread=seq(-one_zeta,one_zeta,length.out=nstrat))
+               continuous_uniform=seq(-one_zeta,one_zeta,length.out=nstrat),
+               uniform=rescale_to(ceiling(qunif(ppoints(nstrat),min=-1,max=uni_chunks)), -one_zeta, one_zeta),
+               bellshaped=rescale_to(qbinom(ppoints(nstrat),size=bell_chunks,prob=0.5), -one_zeta, one_zeta))
+
   R <- pmin(diag(nstrat) + rho,1)  
   bind_rows(parsim(nsim=nsim,nday=nday,R=R,mu=mu,testmu=rep(0,nstrat)) %>%
             select(-simvals) %>% 
@@ -2032,6 +2042,69 @@ ph <- resu %>%
 print(ph)
 @
 
+
+% do it again, but let the maximum be normally distributed.
+<<'sims_vs_mht_two',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs','runtime')>>=
+suppressMessages({
+  library(tidyr)
+})
+
+# actual run the sims
+params <- data_frame(one_zeta=0.07) %>%
+  tidyr::crossing(data_frame(mutype=c('bellshaped','uniform'))) 
+
+mht_nsim <- ceiling(1e5/max(1,RUNTIME_PARAM))
+mht_nday <- ceiling(252 * (1 + (3/max(1,RUNTIME_PARAM))))
+mht_nstrat <- ceiling(20 + (80/max(1,RUNTIME_PARAM)))
+
+registerDoFuture()
+plan(multicore)
+set.seed(123)
+#system.time({
+resu_two <- params %>%
+  group_by(one_zeta,mutype) %>%
+    summarize(resu=list(mhtsim(nday=mht_nday,nstrat=mht_nstrat,one_zeta=one_zeta,nsim=mht_nsim,mutype=mutype))) %>%
+  ungroup() %>%
+  unnest()
+#})
+plan(sequential)
+@
+
+<<'power_plotz_two',dependson=c('sims_vs_mht_two','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+fig_cap <- paste0("The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures ",
+                  'are shown versus the \\txtSNR of the asset with maximum \\txtSR under different arrangements of the vector \\pvsnr. ',
+"2FIX: more here about uniform vs bell shaped")
+                  
+# 482b4da5-36ad-45fe-9c8f-687625aa5cc7 
+#filter(grepl('equal|onegood',mutype)) %>%
+library(ggplot2)
+ph <- resu_two %>%
+  filter(method!='norho_mht') %>%  # we are using rho=0, so should be the same
+  filter(tot_base > 8) %>%
+  mutate(method=case_when(grepl('^condest$',method)   ~ 'cond. est.',
+                          grepl('^mht$',method)       ~ 'MHT',
+                          grepl('^chibarsquare$',method)  ~ 'chi-bar^2',
+                          grepl('^follman$',method)   ~ 'Follman',
+                          grepl('^loglog$',method)    ~ 'Hansen chi-bar^2',
+                          grepl('^spa$',method)       ~ 'Hansen SPA',
+                          TRUE ~ 'ERROR')) %>%
+  mutate(mutype=case_when(mutype=='equal'     ~ 'all-equal',
+                          mutype=='halfgood'  ~ 'half-good',
+                          mutype=='onegood'   ~ 'one-good',
+                          mutype=='uniform'   ~ 'uniform',
+                          mutype=='bellshaped'   ~ 'bell-shaped',
+                          TRUE ~ 'ERROR')) %>%
+  ggplot(aes(popvals,rej_rate,color=method))  +
+  geom_line() + geom_point() +
+  facet_grid(.~mutype) + # ,scales='free_x') + 
+  geom_hline(yintercept=0.05,linetype=2,alpha=0.7) + 
+  geom_vline(xintercept=0.0,linetype=2,alpha=0.3) + 
+  labs(x='signal noise ratio',
+       y='rejection rate at nominal 0.05 level',
+       color='method',
+       title='power of tests')
+print(ph)
+@
 
 The power of the conditional estimation procedure for the all-equal
 case is rather disappointing. 

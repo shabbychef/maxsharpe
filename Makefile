@@ -18,6 +18,7 @@ BIBTEX      := $(shell which bibtex)
 PDFLATEX    := $(shell which pdflatex)
 PAGER   		:= $(shell which less)
 ASPELL  		:= $(shell which aspell)
+GITHASH 		 = $(shell git rev-parse HEAD)
 
 RLIB        ?= /usr/lib64/R
 
@@ -149,7 +150,7 @@ doc : $(PROJECT).pdf  ## build the document by knitting source code
 ############### RULES ###############
 
 release.tex: maxsharpe.tex
-	perl -pe 's{figure/}{};' < $< > $@
+	perl -pe 's{figure/}{};s{.gitHash}{$(GITHASH)};' < $< > $@
 
 release : release.tex  ## make a form of tex to upload to arxiv
 	mv release.tex maxsharpe.tex

@@ -1514,10 +1514,20 @@ $\ssravg > 0$ in the half-good case.
 \end{knitrout}
 
 
+% do it again, but let the maximum be normally distributed.
+
+
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_two-1} \caption[The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr]{The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr. 2FIX: more here about uniform vs bell shaped}\label{fig:power_plotz_two}
+\end{figure}
+
+\end{knitrout}
+
 The power of the conditional estimation procedure for the all-equal
 case is rather disappointing. 
 For the case where all assets have a \txtSNR of
-$2.4\yrto{-\halff}$,
+$1.1\yrto{-\halff}$,
 the test has a power of only around a half.
 The test suffers from low power because we are conditioning on
 ``\ssr[1] is the largest \txtSR'', where we should actually
@@ -1528,7 +1538,7 @@ and one-sided tests have greater
 than $0.05$ rejection rate for \emph{negative} \txtSNR. 
 The plot is somewhat misleading under this alternative, however.
 We have performed
-$\ensuremath{10^{4}}$ simulations for each setting of the `good'
+$\ensuremath{10^{5}}$ simulations for each setting of the `good'
 \txtSNR; in some very small number of them for the half-good
 case, an asset with negative \txtSNR exhibits the maximum
 \txtSR. 
@@ -1540,7 +1550,7 @@ assets have zero or lower \txtSNR.
 We have not shown the probability that a `bad' asset has the
 highest \txtSR, but note that when the `good' \txtSNR
 is greater than $0.05\dayto{-\halff}$ we do not observe this
-occuring even once over the $\ensuremath{10^{4}}$ simulations performed
+occuring even once over the $\ensuremath{10^{5}}$ simulations performed
 for each setting. 
 
 We note that the chi-bar-square test appears to have higher power than 

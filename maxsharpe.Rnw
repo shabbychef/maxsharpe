@@ -80,6 +80,7 @@
 \providecommand{\stsrUL}[2]{\mathUL{\hat{\altSNR}}{#1}{#2}}
 \providecommand{\stsr}[1][]{\stsrUL{}{#1}}
 \providecommand{\ssravg}[1][]{\mathUL{\bar{\prvSNR}}{}{#1}}
+\providecommand{\psnrone}{\psnr[1]}
 %\providecommand{\logof}[1]{\funcit{\operatorname{log}}{#1}}  
 %\providecommand{\minof}[1]{\funcit{\operatorname{min}}{#1}}  
 
@@ -1790,22 +1791,23 @@ For each setting of the parameters in the Cartesian product we perform
 $\Sexpr{ks_nsim}$ simulations, computing p values from the feasible estimator.
 
 In \figref{many_sims_plotz} we plot those K-S statistics against $\ssiz$,
-with facets for $\rho$ and $\nstrat$. 
+with different facets for $\rho$.
 All else equal, we expect the approximation to be worse, and thus the K-S statistics
 to be higher, for smaller \ssiz and larger \nstrat.
 %For the most part this does not seem born out, and there does not seem to be
 %a general pattern to the quality of our approximation.
 This pattern is somewhat visible in the plots, 
 although large $\rho$ seems to reduce the number of `pseudo-assets' in that
-relationship.
+relationship, and the number of observations, \ssiz, appears to have greater impact than the 
+number of assets \nstrat.
 However, with the given limited evidence,
 we cannot claim to have definitively established where our procedure breaks down,
 but warn users that the $\nstrat \gg \ssiz$ cases are likely to be problematic
 in the sense that nominal type I rates may not be maintained.
 
 <<'many_sims_plotz',dependson=c('many_sims', 'plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
-fig_cap <- paste0('Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\\ssiz$ with facets for $\\nstrat$ and $\\rho$.  ',
-                  'Broadly we see that the test statistic is less uniform in the regime where $\\nstrat\\gg\\ssiz$, but that a large positive $\\rho$ perhaps reduces the number of assets in that relationship.')
+fig_cap <- paste0('Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\\ssiz$ with facets for $\\rho$.  ',
+                  'Broadly we see that the test statistic is less uniform in the regime where $\\ssiz$ is small, but this is muted by a large positive correlation $\\rho$.')
 # 460af323-8484-4187-8af1-68b25eff11cb 
 # 2FIX: want "\\rho" in the facet labels somehow. cf https://sahirbhatnagar.com/blog/2016/02/08/ggplot2-facet-wrap-labels/
 require(latex2exp)
@@ -1905,19 +1907,21 @@ print(ph)
 \subsection{Simulations under the alternative}
 %FOLDUP
 We wish to test the power of the method under the alternative hypothesis.
-However, it is hard to state exactly what constitutes the alternative.
+However, it is hard to state exactly what constitutes \emph{the}} alternative.
 One interpretation is that we condition on $\psnr[1] > 0$, where again
 the indexing is such that $\ssr[1]$ was the maximum over $\nstrat$ assets;
 then we estimate the probability of (correctly) rejecting $\psnr[1] = 0$
 versus $\psnr[1]$. However, we suspect that the power, as described in 
 this way, would depend on the distribution of
-values of \pvsnr.
+values of \pvsnr, as well as the correlation of returns among the tested strategies.
 
 We will consider following alternatives: one where all \nstrat elements of \psnr are
 equal (``all-equal''), and two where $m$ of \nstrat elements of \psnr
 are equal to some positive value, and the remaining $\nstrat - m$ are negative
 that value. For $m=1$, we call this the ``one-good'' alternative; for $m=\nstrat/2$,
-the ``half-good'' alternative.
+the ``half-good'' alternative. We also consider the cases where the elements of \psnr are
+uniformly distributed across some finite set of values (``uniform'') or distributed like
+the density of a scaled and shifted binomial distribution (``bell-shaped'').
 
 <<'sims_vs_mht',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs','runtime')>>=
 suppressMessages({
@@ -1986,7 +1990,7 @@ For each setting we perform $\Sexpr{mht_nsim}$ simulations then
 compute the empirical rejection rate of the test at the $0.05$ level,
 conditional on the \txtSNR of the \emph{selected} asset, which is
 to say the one with the largest \txtSR. Note that in some simulations
-the largest \txtSR is observed in an asset with a negative \txtSNR.
+the largest \txtSR is observed for an asset with a negative \txtSNR.
 We hope our tests to have lower power when this occurs.
 
 In \figref{power_plotz_one}, we plot the power of the MHT Bonferroni
@@ -2000,7 +2004,7 @@ A horizontal line at $0.05$ gives the nominal rate under the null,
 which occurs as $x=0$ in these plots.
 As expected from the above explanation, 
 chi-bar square has the highest power for the all-equal alternative,
-followed by Follman'st test, 
+followed by Follman's test, 
 then the MHT, 
 then the conditional estimation test.
 These relationships are reversed for the one-good case.
@@ -2008,7 +2012,9 @@ The chi-bar square test and Follman's test have zero power against the one-good 
 All tests perform similarly in the half-good and all-equal alternatives,
 with the exception of Follman's test, which achieves a maximum power of $1/2$ in the
 half-good case, as is to be expected since this is the probability that
-$\ssravg > 0$ in the half-good case.
+$\ssravg > 0$ in the half-good case,
+and the conditional procedure, which has persistently lower power than the others
+for these two alternatives.
 
 
 <<'power_plotz_one',dependson=c('sims_vs_mht','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
@@ -2043,77 +2049,17 @@ print(ph)
 @
 
 
-% do it again, but let the maximum be normally distributed.
-<<'sims_vs_mht_two',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs','runtime')>>=
-suppressMessages({
-  library(tidyr)
-})
-
-# actual run the sims
-params <- data_frame(one_zeta=0.07) %>%
-  tidyr::crossing(data_frame(mutype=c('bellshaped','uniform'))) 
-
-mht_nsim <- ceiling(1e5/max(1,RUNTIME_PARAM))
-mht_nday <- ceiling(252 * (1 + (3/max(1,RUNTIME_PARAM))))
-mht_nstrat <- ceiling(20 + (80/max(1,RUNTIME_PARAM)))
-
-registerDoFuture()
-plan(multicore)
-set.seed(123)
-#system.time({
-resu_two <- params %>%
-  group_by(one_zeta,mutype) %>%
-    summarize(resu=list(mhtsim(nday=mht_nday,nstrat=mht_nstrat,one_zeta=one_zeta,nsim=mht_nsim,mutype=mutype))) %>%
-  ungroup() %>%
-  unnest()
-#})
-plan(sequential)
-@
-
-<<'power_plotz_two',dependson=c('sims_vs_mht_two','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
-fig_cap <- paste0("The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures ",
-                  'are shown versus the \\txtSNR of the asset with maximum \\txtSR under different arrangements of the vector \\pvsnr. ',
-"2FIX: more here about uniform vs bell shaped")
-                  
-# 482b4da5-36ad-45fe-9c8f-687625aa5cc7 
-#filter(grepl('equal|onegood',mutype)) %>%
-library(ggplot2)
-ph <- resu_two %>%
-  filter(method!='norho_mht') %>%  # we are using rho=0, so should be the same
-  filter(tot_base > 8) %>%
-  mutate(method=case_when(grepl('^condest$',method)   ~ 'cond. est.',
-                          grepl('^mht$',method)       ~ 'MHT',
-                          grepl('^chibarsquare$',method)  ~ 'chi-bar^2',
-                          grepl('^follman$',method)   ~ 'Follman',
-                          grepl('^loglog$',method)    ~ 'Hansen chi-bar^2',
-                          grepl('^spa$',method)       ~ 'Hansen SPA',
-                          TRUE ~ 'ERROR')) %>%
-  mutate(mutype=case_when(mutype=='equal'     ~ 'all-equal',
-                          mutype=='halfgood'  ~ 'half-good',
-                          mutype=='onegood'   ~ 'one-good',
-                          mutype=='uniform'   ~ 'uniform',
-                          mutype=='bellshaped'   ~ 'bell-shaped',
-                          TRUE ~ 'ERROR')) %>%
-  ggplot(aes(popvals,rej_rate,color=method))  +
-  geom_line() + geom_point() +
-  facet_grid(.~mutype) + # ,scales='free_x') + 
-  geom_hline(yintercept=0.05,linetype=2,alpha=0.7) + 
-  geom_vline(xintercept=0.0,linetype=2,alpha=0.3) + 
-  labs(x='signal noise ratio',
-       y='rejection rate at nominal 0.05 level',
-       color='method',
-       title='power of tests')
-print(ph)
-@
 
 The power of the conditional estimation procedure for the all-equal
-case is rather disappointing. 
+and half-good cases is rather disappointing. 
 For the case where all assets have a \txtSNR of
 $\Sexpr{signif(sqrt(252) * max(params$one_zeta),2)}\yrto{-\halff}$,
 the test has a power of only around a half.
 The test suffers from low power because we are conditioning on
 ``\ssr[1] is the largest \txtSR'', where we should actually
 be conditioning on ``the asset with the largest \txtSR.''
+That is, there is no recognition here that if another asset 
+had exhibited higher \txtSR, we would have selected that one instead.
 
 Note the odd plot in the half-good facet: the MHT correction
 and one-sided tests have greater
@@ -2155,12 +2101,186 @@ it appears to have monotonic rejection probability with respect to the
 That is, in the half-good case, it has low rejection probability in the odd
 simulations where a `bad' asset is selected. 
 
+% do it again, but let the pvsnr be weirdly distributed.
+<<'sims_vs_mht_two',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs','runtime')>>=
+suppressMessages({
+  library(tidyr)
+})
+
+# actual run the sims
+params <- data_frame(one_zeta=0.07) %>%
+  tidyr::crossing(data_frame(mutype=c('bellshaped','uniform'))) 
+
+mht_nsim <- ceiling(5e4/max(1,RUNTIME_PARAM))
+mht_nday <- ceiling(252 * (1 + (3/max(1,RUNTIME_PARAM))))
+mht_nstrat <- ceiling(25 + (80/max(1,RUNTIME_PARAM)))
+
+registerDoFuture()
+plan(multicore)
+set.seed(123)
+#system.time({
+resu_two <- params %>%
+  group_by(one_zeta,mutype) %>%
+    summarize(resu=list(mhtsim(nday=mht_nday,nstrat=mht_nstrat,one_zeta=one_zeta,nsim=mht_nsim,mutype=mutype))) %>%
+  ungroup() %>%
+  unnest()
+#})
+plan(sequential)
+@
+<<'resu_two_summary',dependson=c('sims_vs_mht_two'),echo=FALSE>>=
+one_zeta <- resu_two %>%
+  summarize(max_z=max(one_zeta)) %>%
+  pull(max_z)
+one_zeta_an <- sqrt(252)*one_zeta
+
+gen_mu <- function(nstrat,one_zeta,
+                       uni_chunks=14,  # for uniform
+                       bell_chunks=32,   # for bellshaped, but we get far fewer
+                       mutype=c('equal','onegood','twogood','halfgood','continuous_uniform','uniform','bellshaped')) {
+	mutype <- match.arg(mutype)
+  mu <- switch(mutype,
+               equal=rep(one_zeta,nstrat),
+               onegood=c(one_zeta,rep(-one_zeta,nstrat-1)),
+               twogood=c(one_zeta,one_zeta,rep(-one_zeta,nstrat-2)),
+               halfgood=c(rep(one_zeta,floor(nstrat/2)),
+                          rep(-one_zeta,ceiling(nstrat/2))),
+               continuous_uniform=seq(-one_zeta,one_zeta,length.out=nstrat),
+               uniform=rescale_to(ceiling(qunif(ppoints(nstrat),min=-1,max=uni_chunks)), -one_zeta, one_zeta),
+               bellshaped=rescale_to(qbinom(ppoints(nstrat),size=bell_chunks,prob=0.5), -one_zeta, one_zeta))
+}
+
+uni_sim <- tibble(mu=gen_mu(nstrat=mht_nstrat,one_zeta=one_zeta,mutype='uniform'),mutype='uniform')
+bel_sim <- tibble(mu=gen_mu(nstrat=mht_nstrat,one_zeta=one_zeta,mutype='bellshaped'),mutype='bellshaped')
+@
+
+It is clear from these simulations that there are many different configurations of the alternative:
+we should be concerned about \ssiz, \nstrat, the correlation of returns (which we do not even consider here),
+and the \txtSNR of the selected strategy, but also the distribution of the elements of \pvsnr.
+It is unlikely that the three distributions of $\pvsnr$ considered above will be encountered in real world applications;
+rather we anticipate that the elements of \pvsnr will have be bell-shaped or even flat.
+We simulate these cases, estimating the power of the various tests as a function of the \txtSNR of the selected strategy.
+
+We set $\nstrat=\Sexpr{mht_nstrat}$, and $\ssiz=\Sexpr{mht_nday}$.
+The elements of \pvsnr are set to fixed values shown in \figref{power_plotz_pvsnr_distribution}.
+Namely for the uniform case, the \pvsnr takes uniform values from $\Sexpr{min(uni_sim$mu)}\dayto{-\halff}$ to $\Sexpr{max(uni_sim$mu)}\dayto{-\halff}$,
+or in annualized units $\ccinterval{\Sexpr{signif(sqrt(252)*min(uni_sim$mu),2)}}{\Sexpr{signif(sqrt(252)*max(uni_sim$mu),2)}}\dayto{-\halff}$.
+Under the bell-shaped simulations, the \pvsnr takes the same range but with more mass around zero.
+
+<<'power_plotz_pvsnr_distribution',dependson=c('resu_two_summary','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+fig_cap <- paste0("The counts of the values of \\pvsnr are shown for the uniform and bell-shaped simulations under the alternative. ",
+                  "The \\txtSNR is given in daily units, $\\dayto{-\\halff}$.")
+                  #"The simulations set $\\nstrat=",mht_nstrat,"$ to achieve uniformity.")
+
+# 66fc499b-66e3-49cd-b24a-f651b8dc9601 
+library(ggplot2)
+ph <- bind_rows(bel_sim,uni_sim) %>%
+  ggplot(aes(x=mu,group=mutype,color=mutype,fill=mutype)) + 
+  geom_bar(position='dodge') +
+  #scale_x_continuous(labels=scales::comma_format(suffix=' /sqrt(day)')) + 
+  labs(x=expression(zeta),
+       y='count',
+       color='distribution',fill='distribution',
+       title='distribution of signal-noise ratio of assets',
+       subtitle='testing under the alternative')
+print(ph)
+@
+In \figref{power_plotz_two} we plot the empirical rejection rates for the various tests 
+under these two distributions of \pvsnr.
+The rejection rate is plotted against the \txtSNR of the selected strategy, \psnr[1].
+We note that in some unlucky cases $\psnr[1] \le 0$ even though the maximum element of \pvsnr is
+significantly positive.
+As seen above, the conditional procedure maintains the near nominal type I rate of 0.05 when $\psnr[1] = 0$.
+The other tests exhibit much higher rejection rates, even when $\psnr[1] \le 0$.
+This is not unexpected, as the null \emph{is} violated in this case and rejecting it is the right decision.
+We reiterate that tests based on the MHT can, in some minority of cases, correctly reject the null, but the 
+selected strategy has unacceptable \txtSNR.
+In \figref{power_plotz_two_sel_prob} we plot the empirical probability under our simulations that the
+asset with maximum \txtSR has a given \txtSNR.
+For both the uniform and bell-shaped \pvsnr, the probability that $\psnr[1] \le 0$ appears to be less than 10\%,
+with smaller chance under the uniform distribution.
+Thus the likelihood of making this kind of meta type I error when using MHT tests is perhaps low,
+it is not zero.
+
+<<'power_plotz_two',dependson=c('sims_vs_mht_two','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+fig_cap <- paste0("The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures ",
+                  'are shown versus the \\txtSNR of the asset with maximum \\txtSR for the uniform and bell-shaped arrangements of the vector \\pvsnr. ',
+                  "We perform ",mht_nsim," simulations with $\\ssiz=",mht_nday,"$, $\\nstrat=",mht_nstrat,"$. ",
+                  "Cases with low incidence were removed as the simulated rejection rates are not representative. ")
+
+# 482b4da5-36ad-45fe-9c8f-687625aa5cc7 
+#filter(grepl('equal|onegood',mutype)) %>%
+library(ggplot2)
+ph <- resu_two %>%
+  filter(method!='norho_mht') %>%  # we are using rho=0, so should be the same
+  filter(tot_base > 8) %>%
+  mutate(method=case_when(grepl('^condest$',method)   ~ 'cond. est.',
+                          grepl('^mht$',method)       ~ 'MHT',
+                          grepl('^chibarsquare$',method)  ~ 'chi-bar^2',
+                          grepl('^follman$',method)   ~ 'Follman',
+                          grepl('^loglog$',method)    ~ 'Hansen chi-bar^2',
+                          grepl('^spa$',method)       ~ 'Hansen SPA',
+                          TRUE ~ 'ERROR')) %>%
+  mutate(mutype=case_when(mutype=='equal'     ~ 'all-equal',
+                          mutype=='halfgood'  ~ 'half-good',
+                          mutype=='onegood'   ~ 'one-good',
+                          mutype=='uniform'   ~ 'uniform',
+                          mutype=='bellshaped'   ~ 'bell-shaped',
+                          TRUE ~ 'ERROR')) %>%
+  ggplot(aes(popvals,rej_rate,color=method))  +
+  geom_line() + geom_point() +
+  facet_grid(.~mutype) + # ,scales='free_x') + 
+  geom_hline(yintercept=0.05,linetype=2,alpha=0.7) + 
+  geom_vline(xintercept=0.0,linetype=2,alpha=0.3) + 
+  labs(x='signal noise ratio',
+       y='rejection rate at nominal 0.05 level',
+       color='method',
+       title='power of tests')
+print(ph)
+@
+<<'power_plotz_two_sel_prob',dependson=c('sims_vs_mht_two','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+#fig_cap <- paste0('The probability that $\\psnr[1]$, the \\txtSNR of the asset selected for having the maximum \\txtSR, takes a given value in our simulations is shown. ',
+fig_cap <- paste0('The probability that $\\psnrone$, the \\txtSNR of the asset selected for having the maximum \\txtSR, takes a given value in our simulations is shown. ',
+                  'The $y$ axis is in square root space to show detail.')
+                  
+# 482b4da5-36ad-45fe-9c8f-687625aa5cc7 
+#filter(grepl('equal|onegood',mutype)) %>%
+library(ggplot2)
+ph <- resu_two %>%
+  filter(method!='norho_mht') %>%  # we are using rho=0, so should be the same
+  filter(method=='condest') %>%
+  arrange(popvals) %>%
+  group_by(mutype) %>%
+    mutate(prop=tot_base / sum(tot_base),
+           cumprop=cumsum(prop)) %>%
+  ungroup() %>%
+  mutate(mutype=case_when(mutype=='equal'     ~ 'all-equal',
+                          mutype=='halfgood'  ~ 'half-good',
+                          mutype=='onegood'   ~ 'one-good',
+                          mutype=='uniform'   ~ 'uniform',
+                          mutype=='bellshaped'   ~ 'bell-shaped',
+                          TRUE ~ 'ERROR')) %>%
+  ggplot(aes(x=popvals,y=prop,group=mutype,color=mutype,fill=mutype)) + 
+  geom_col(position='dodge') +
+  #geom_line() + 
+  scale_y_sqrt(labels=scales::percent) +
+  #scale_y_continuous(labels=scales::percent) +
+  labs(x='signal noise ratio',
+       y='probability of selection',
+       color='distribution',fill='distribution',
+       title='probability of selecting a given signal-noise ratio')
+print(ph)
+@
+
+
+
 We doubt that the simple experiments performed here
 have revealed all the relevant differences between the various tests or when
 one dominates the others.
 %UNFOLD
 
-\subsubsection{Simulations under the null versus with correlated returns}
+\clearpage
+
+\subsection{Simulations under the null with correlated returns}
 %FOLDUP
 
 <<'correlation_sims_vs_mht',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs')>>=
@@ -2190,12 +2310,11 @@ plan(sequential)
 @
 
 The na{\"i}ve MHT test cannot maintain the nominal type I rate in the face of correlated assets.
-To demonstrate this, we repeat the experiments above, but setting 
+To demonstrate this, we repeat the simulations above, testing the various statistical tests, but with
 $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$
 and $\psnr=\vzero$.
-Again we consider $\nstrat=\Sexpr{mht_nstrat}$, 
-$\ssiz=\Sexpr{mht_nday}$, and perform $\Sexpr{mht_null_nsim}$ simulations to estimate the 
-empirical rejection rate.
+We set $\nstrat=\Sexpr{mht_nstrat}$, $\ssiz=\Sexpr{mht_nday}$, 
+and perform $\Sexpr{mht_null_nsim}$ simulations to estimate the empirical rejection rate.
 In \figref{rho_plotz_one}, we plot the empirical rejection rate versus $\rho$ at the nominal
 $0.05$ type I level. 
 While the conditional estimation procedure and one-sided tests appear to maintain the nominal rejection
@@ -2245,7 +2364,7 @@ print(ph)
 
 \clearpage
 
-\subsection{Five Industry Portfolios}%FOLDUP
+\subsection{Example: Five Industry Portfolios}%FOLDUP
 
 % 2FIX: start from here ... 
 <<'load_mind_data',echo=FALSE,eval=TRUE,cache=TRUE>>=
@@ -2264,7 +2383,7 @@ R <- cov2cor(cov(X))
 medrho <- median(R[row(R) < col(R)])
 ssiz <- nrow(X)
 nstrat <- ncol(X)
-TEO <- time(mind5)
+TEO <- as.character(time(mind5))
 TEO_0 <- TEO[1]
 TEO_f <- TEO[length(TEO)]
 
@@ -2277,7 +2396,7 @@ We download the monthly returns of five industry portfolios
 from Ken French's data library. \cite{ind_5_def}
 %These consist of 
 We consider the \Sexpr{ssiz} months of data on five industries
-from \Sexpr{TEO_0} to \Sexpr{TEO_f}.
+from \Sexpr{TEO_0} through \Sexpr{TEO_f}.
 We compute the \txtSR of the returns of each, and present them
 in \tabref{mind_sr}. 
 We have reordered the industries in decreasing \txtSR.
@@ -2416,6 +2535,9 @@ Finally we use the conditional estimation procedure, inverting
 the hypothesis test to find the corresponding population value.
 This yields the confidence interval 
 $\left[\Sexpr{conde}\,\moto{-\halff}, \infty\right)$.
+This is a much wider interval which encompasses zero.
+The extra width is not surprising given the results of our simulations,
+and is the price we pay for testing the selected asset conditionally on the observed.
 %UNFOLD
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

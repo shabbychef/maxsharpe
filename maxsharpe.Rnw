@@ -1907,7 +1907,7 @@ print(ph)
 \subsection{Simulations under the alternative}
 %FOLDUP
 We wish to test the power of the method under the alternative hypothesis.
-However, it is hard to state exactly what constitutes \emph{the}} alternative.
+However, it is hard to state exactly what constitutes \emph{the} alternative.
 One interpretation is that we condition on $\psnr[1] > 0$, where again
 the indexing is such that $\ssr[1]$ was the maximum over $\nstrat$ assets;
 then we estimate the probability of (correctly) rejecting $\psnr[1] = 0$

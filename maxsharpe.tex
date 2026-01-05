@@ -130,6 +130,7 @@
 \providecommand{\stsrUL}[2]{\mathUL{\hat{\altSNR}}{#1}{#2}}
 \providecommand{\stsr}[1][]{\stsrUL{}{#1}}
 \providecommand{\ssravg}[1][]{\mathUL{\bar{\prvSNR}}{}{#1}}
+\providecommand{\psnrone}{\psnr[1]}
 %\providecommand{\logof}[1]{\funcit{\operatorname{log}}{#1}}  
 %\providecommand{\minof}[1]{\funcit{\operatorname{min}}{#1}}  
 
@@ -1362,14 +1363,15 @@ For each setting of the parameters in the Cartesian product we perform
 $\ensuremath{10^{5}}$ simulations, computing p values from the feasible estimator.
 
 In \figref{many_sims_plotz} we plot those K-S statistics against $\ssiz$,
-with facets for $\rho$ and $\nstrat$. 
+with different facets for $\rho$.
 All else equal, we expect the approximation to be worse, and thus the K-S statistics
 to be higher, for smaller \ssiz and larger \nstrat.
 %For the most part this does not seem born out, and there does not seem to be
 %a general pattern to the quality of our approximation.
 This pattern is somewhat visible in the plots, 
 although large $\rho$ seems to reduce the number of `pseudo-assets' in that
-relationship.
+relationship, and the number of observations, \ssiz, appears to have greater impact than the 
+number of assets \nstrat.
 However, with the given limited evidence,
 we cannot claim to have definitively established where our procedure breaks down,
 but warn users that the $\nstrat \gg \ssiz$ cases are likely to be problematic
@@ -1377,7 +1379,7 @@ in the sense that nominal type I rates may not be maintained.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_many_sims_plotz-1} \caption[Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\ssiz$ with facets for $\nstrat$ and $\rho$]{Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\ssiz$ with facets for $\nstrat$ and $\rho$.  Broadly we see that the test statistic is less uniform in the regime where $\nstrat\gg\ssiz$, but that a large positive $\rho$ perhaps reduces the number of assets in that relationship.}\label{fig:many_sims_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_many_sims_plotz-1} \caption[Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\ssiz$ with facets for $\rho$]{Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\ssiz$ with facets for $\rho$.  Broadly we see that the test statistic is less uniform in the regime where $\ssiz$ is small, but this is muted by a large positive correlation $\rho$.}\label{fig:many_sims_plotz}
 \end{figure}
 
 \end{knitrout}
@@ -1424,19 +1426,21 @@ We remain cautiously optimistic that for large \ssiz, one need not correct
 \subsection{Simulations under the alternative}
 %FOLDUP
 We wish to test the power of the method under the alternative hypothesis.
-However, it is hard to state exactly what constitutes the alternative.
+However, it is hard to state exactly what constitutes \emph{the} alternative.
 One interpretation is that we condition on $\psnr[1] > 0$, where again
 the indexing is such that $\ssr[1]$ was the maximum over $\nstrat$ assets;
 then we estimate the probability of (correctly) rejecting $\psnr[1] = 0$
 versus $\psnr[1]$. However, we suspect that the power, as described in 
 this way, would depend on the distribution of
-values of \pvsnr.
+values of \pvsnr, as well as the correlation of returns among the tested strategies.
 
 We will consider following alternatives: one where all \nstrat elements of \psnr are
 equal (``all-equal''), and two where $m$ of \nstrat elements of \psnr
 are equal to some positive value, and the remaining $\nstrat - m$ are negative
 that value. For $m=1$, we call this the ``one-good'' alternative; for $m=\nstrat/2$,
-the ``half-good'' alternative.
+the ``half-good'' alternative. We also consider the cases where the elements of \psnr are
+uniformly distributed across some finite set of values (``uniform'') or distributed like
+the density of a scaled and shifted binomial distribution (``bell-shaped'').
 
 
 
@@ -1481,7 +1485,7 @@ For each setting we perform $\ensuremath{10^{4}}$ simulations then
 compute the empirical rejection rate of the test at the $0.05$ level,
 conditional on the \txtSNR of the \emph{selected} asset, which is
 to say the one with the largest \txtSR. Note that in some simulations
-the largest \txtSR is observed in an asset with a negative \txtSNR.
+the largest \txtSR is observed for an asset with a negative \txtSNR.
 We hope our tests to have lower power when this occurs.
 
 In \figref{power_plotz_one}, we plot the power of the MHT Bonferroni
@@ -1495,7 +1499,7 @@ A horizontal line at $0.05$ gives the nominal rate under the null,
 which occurs as $x=0$ in these plots.
 As expected from the above explanation, 
 chi-bar square has the highest power for the all-equal alternative,
-followed by Follman'st test, 
+followed by Follman's test, 
 then the MHT, 
 then the conditional estimation test.
 These relationships are reversed for the one-good case.
@@ -1503,7 +1507,9 @@ The chi-bar square test and Follman's test have zero power against the one-good 
 All tests perform similarly in the half-good and all-equal alternatives,
 with the exception of Follman's test, which achieves a maximum power of $1/2$ in the
 half-good case, as is to be expected since this is the probability that
-$\ssravg > 0$ in the half-good case.
+$\ssravg > 0$ in the half-good case,
+and the conditional procedure, which has persistently lower power than the others
+for these two alternatives.
 
 
 \begin{knitrout}\small
@@ -1514,31 +1520,24 @@ $\ssravg > 0$ in the half-good case.
 \end{knitrout}
 
 
-% do it again, but let the maximum be normally distributed.
-
-
-\begin{knitrout}\small
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_two-1} \caption[The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr]{The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr. 2FIX: more here about uniform vs bell shaped}\label{fig:power_plotz_two}
-\end{figure}
-
-\end{knitrout}
 
 The power of the conditional estimation procedure for the all-equal
-case is rather disappointing. 
+and half-good cases is rather disappointing. 
 For the case where all assets have a \txtSNR of
-$1.1\yrto{-\halff}$,
+$2.4\yrto{-\halff}$,
 the test has a power of only around a half.
 The test suffers from low power because we are conditioning on
 ``\ssr[1] is the largest \txtSR'', where we should actually
 be conditioning on ``the asset with the largest \txtSR.''
+That is, there is no recognition here that if another asset 
+had exhibited higher \txtSR, we would have selected that one instead.
 
 Note the odd plot in the half-good facet: the MHT correction
 and one-sided tests have greater
 than $0.05$ rejection rate for \emph{negative} \txtSNR. 
 The plot is somewhat misleading under this alternative, however.
 We have performed
-$\ensuremath{10^{5}}$ simulations for each setting of the `good'
+$\ensuremath{10^{4}}$ simulations for each setting of the `good'
 \txtSNR; in some very small number of them for the half-good
 case, an asset with negative \txtSNR exhibits the maximum
 \txtSR. 
@@ -1550,7 +1549,7 @@ assets have zero or lower \txtSNR.
 We have not shown the probability that a `bad' asset has the
 highest \txtSR, but note that when the `good' \txtSNR
 is greater than $0.05\dayto{-\halff}$ we do not observe this
-occuring even once over the $\ensuremath{10^{5}}$ simulations performed
+occuring even once over the $\ensuremath{10^{4}}$ simulations performed
 for each setting. 
 
 We note that the chi-bar-square test appears to have higher power than 
@@ -1573,23 +1572,79 @@ it appears to have monotonic rejection probability with respect to the
 That is, in the half-good case, it has low rejection probability in the odd
 simulations where a `bad' asset is selected. 
 
+% do it again, but let the pvsnr be weirdly distributed.
+
+
+
+It is clear from these simulations that there are many different configurations of the alternative:
+we should be concerned about \ssiz, \nstrat, the correlation of returns (which we do not even consider here),
+and the \txtSNR of the selected strategy, but also the distribution of the elements of \pvsnr.
+It is unlikely that the three distributions of $\pvsnr$ considered above will be encountered in real world applications;
+rather we anticipate that the elements of \pvsnr will have be bell-shaped or even flat.
+We simulate these cases, estimating the power of the various tests as a function of the \txtSNR of the selected strategy.
+
+We set $\nstrat=105$, and $\ssiz=1008$.
+The elements of \pvsnr are set to fixed values shown in \figref{power_plotz_pvsnr_distribution}.
+Namely for the uniform case, the \pvsnr takes uniform values from $-0.07\dayto{-\halff}$ to $0.07\dayto{-\halff}$,
+or in annualized units $\ccinterval{-1.1}{1.1}\dayto{-\halff}$.
+Under the bell-shaped simulations, the \pvsnr takes the same range but with more mass around zero.
+
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_pvsnr_distribution-1} \caption[The counts of the values of \pvsnr are shown for the uniform and bell-shaped simulations under the alternative]{The counts of the values of \pvsnr are shown for the uniform and bell-shaped simulations under the alternative. The \txtSNR is given in daily units, $\dayto{-\halff}$.}\label{fig:power_plotz_pvsnr_distribution}
+\end{figure}
+
+\end{knitrout}
+In \figref{power_plotz_two} we plot the empirical rejection rates for the various tests 
+under these two distributions of \pvsnr.
+The rejection rate is plotted against the \txtSNR of the selected strategy, \psnr[1].
+We note that in some unlucky cases $\psnr[1] \le 0$ even though the maximum element of \pvsnr is
+significantly positive.
+As seen above, the conditional procedure maintains the near nominal type I rate of 0.05 when $\psnr[1] = 0$.
+The other tests exhibit much higher rejection rates, even when $\psnr[1] \le 0$.
+This is not unexpected, as the null \emph{is} violated in this case and rejecting it is the right decision.
+We reiterate that tests based on the MHT can, in some minority of cases, correctly reject the null, but the 
+selected strategy has unacceptable \txtSNR.
+In \figref{power_plotz_two_sel_prob} we plot the empirical probability under our simulations that the
+asset with maximum \txtSR has a given \txtSNR.
+For both the uniform and bell-shaped \pvsnr, the probability that $\psnr[1] \le 0$ appears to be less than 10\%,
+with smaller chance under the uniform distribution.
+Thus the likelihood of making this kind of meta type I error when using MHT tests is perhaps low,
+it is not zero.
+
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_two-1} \caption[The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR for the uniform and bell-shaped arrangements of the vector \pvsnr]{The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR for the uniform and bell-shaped arrangements of the vector \pvsnr. We perform 50000 simulations with $\ssiz=1008$, $\nstrat=105$. Cases with low incidence were removed as the simulated rejection rates are not representative. }\label{fig:power_plotz_two}
+\end{figure}
+
+\end{knitrout}
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_two_sel_prob-1} \caption[The probability that $\psnrone$, the \txtSNR of the asset selected for having the maximum \txtSR, takes a given value in our simulations is shown]{The probability that $\psnrone$, the \txtSNR of the asset selected for having the maximum \txtSR, takes a given value in our simulations is shown. The $y$ axis is in square root space to show detail.}\label{fig:power_plotz_two_sel_prob}
+\end{figure}
+
+\end{knitrout}
+
+
+
 We doubt that the simple experiments performed here
 have revealed all the relevant differences between the various tests or when
 one dominates the others.
 %UNFOLD
 
-\subsubsection{Simulations under the null versus with correlated returns}
+\clearpage
+
+\subsection{Simulations under the null with correlated returns}
 %FOLDUP
 
 
 
 The na{\"i}ve MHT test cannot maintain the nominal type I rate in the face of correlated assets.
-To demonstrate this, we repeat the experiments above, but setting 
+To demonstrate this, we repeat the simulations above, testing the various statistical tests, but with
 $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$
 and $\psnr=\vzero$.
-Again we consider $\nstrat=20$, 
-$\ssiz=504$, and perform $\ensuremath{10^{4}}$ simulations to estimate the 
-empirical rejection rate.
+We set $\nstrat=20$, $\ssiz=504$, 
+and perform $\ensuremath{10^{4}}$ simulations to estimate the empirical rejection rate.
 In \figref{rho_plotz_one}, we plot the empirical rejection rate versus $\rho$ at the nominal
 $0.05$ type I level. 
 While the conditional estimation procedure and one-sided tests appear to maintain the nominal rejection
@@ -1614,7 +1669,7 @@ yielding nominal rejection rates.
 
 \clearpage
 
-\subsection{Five Industry Portfolios}%FOLDUP
+\subsection{Example: Five Industry Portfolios}%FOLDUP
 
 % 2FIX: start from here ... 
 
@@ -1623,7 +1678,7 @@ We download the monthly returns of five industry portfolios
 from Ken French's data library. \cite{ind_5_def}
 %These consist of 
 We consider the 1187 months of data on five industries
-from Jan 1927 to Nov 2025.
+from Jan 1927 through Nov 2025.
 We compute the \txtSR of the returns of each, and present them
 in \tabref{mind_sr}. 
 We have reordered the industries in decreasing \txtSR.
@@ -1633,7 +1688,7 @@ around $0.193\,\moto{-\halff}$ which is approximately
 $0.669\,\yrto{-\halff}$.
 
 % latex table generated in R 4.5.0 by xtable 1.8-4 package
-% Fri Jan  2 08:50:13 2026
+% Sun Jan  4 17:21:53 2026
 \begin{table}[ht]
 \centering
 \begin{tabular}{r|c}
@@ -1704,6 +1759,9 @@ Finally we use the conditional estimation procedure, inverting
 the hypothesis test to find the corresponding population value.
 This yields the confidence interval 
 $\left[-0.056\,\moto{-\halff}, \infty\right)$.
+This is a much wider interval which encompasses zero.
+The extra width is not surprising given the results of our simulations,
+and is the price we pay for testing the selected asset conditionally on the observed.
 %UNFOLD
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

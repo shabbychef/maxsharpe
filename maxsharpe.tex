@@ -1528,17 +1528,18 @@ $2.4\yrto{-\halff}$,
 the test has a power of only around a half.
 The test suffers from low power because we are conditioning on
 ``\ssr[1] is the largest \txtSR'', where we should actually
-be conditioning on ``the asset with the largest \txtSR.''
+be conditioning on ``the asset with the largest \txtSR, whichever one that is.''
 That is, there is no recognition here that if another asset 
 had exhibited higher \txtSR, we would have selected that one instead.
 
 Note the odd plot in the half-good facet: the MHT correction
 and one-sided tests have greater
 than $0.05$ rejection rate for \emph{negative} \txtSNR. 
-The plot is somewhat misleading under this alternative, however.
+Some clarification is required here.
+%The plot is somewhat misleading under this alternative, however.
 We have performed
 $\ensuremath{10^{4}}$ simulations for each setting of the `good'
-\txtSNR; in some very small number of them for the half-good
+\txtSNR; in some small number of them for the half-good
 case, an asset with negative \txtSNR exhibits the maximum
 \txtSR. 
 We are plotting the rejection rate for the test in this case.
@@ -1546,6 +1547,10 @@ But note that the null hypothesis that MHT and the one-sided test are testing
 \emph{is} violated in this case, because half the assets
 have positive \txtSNR, and the alternative procedures test the null that all
 assets have zero or lower \txtSNR.
+This is the down side of the apparently higher power of the tests based on the MHT:
+they do not maintain the nominal rate for the conditional null and thus can exhibit 
+higher than nominal type I rate.
+However, it should be rare that the selected asset is `bad' while other assets are actually `good'.
 We have not shown the probability that a `bad' asset has the
 highest \txtSR, but note that when the `good' \txtSNR
 is greater than $0.05\dayto{-\halff}$ we do not observe this
@@ -1571,17 +1576,18 @@ it appears to have monotonic rejection probability with respect to the
 \txtSNR of the \emph{selected} asset.
 That is, in the half-good case, it has low rejection probability in the odd
 simulations where a `bad' asset is selected. 
+This pattern is repeated in the following set of simulations under the alternative.
 
 % do it again, but let the pvsnr be weirdly distributed.
 
 
 
 It is clear from these simulations that there are many different configurations of the alternative:
-we should be concerned about \ssiz, \nstrat, the correlation of returns (which we do not even consider here),
+we should be concerned about \ssiz, \nstrat, the correlation of returns (we have made returns independent here),
 and the \txtSNR of the selected strategy, but also the distribution of the elements of \pvsnr.
 It is unlikely that the three distributions of $\pvsnr$ considered above will be encountered in real world applications;
-rather we anticipate that the elements of \pvsnr will have be bell-shaped or even flat.
-We simulate these cases, estimating the power of the various tests as a function of the \txtSNR of the selected strategy.
+rather we anticipate that the elements of \pvsnr will have a distribution which is bell-shaped or even flat.
+We simulate these cases, estimating the power of the various tests as a function of the \txtSNR of the selected asset.
 
 We set $\nstrat=105$, and $\ssiz=1008$.
 The elements of \pvsnr are set to fixed values shown in \figref{power_plotz_pvsnr_distribution}.
@@ -1600,21 +1606,23 @@ under these two distributions of \pvsnr.
 The rejection rate is plotted against the \txtSNR of the selected strategy, \psnr[1].
 We note that in some unlucky cases $\psnr[1] \le 0$ even though the maximum element of \pvsnr is
 significantly positive.
-As seen above, the conditional procedure maintains the near nominal type I rate of 0.05 when $\psnr[1] = 0$.
+As seen above, the conditional procedure maintains the near nominal type I rate of 0.05 when $\psnr[1] = 0$,
+with modest power when $\psnr[1] > 0$.
 The other tests exhibit much higher rejection rates, even when $\psnr[1] \le 0$.
-This is not unexpected, as the null \emph{is} violated in this case and rejecting it is the right decision.
+This is not unexpected, as the null \emph{is} violated in this case and rejecting it is the right decision
+for tests based on the MHT null.
 We reiterate that tests based on the MHT can, in some minority of cases, correctly reject the null, but the 
 selected strategy has unacceptable \txtSNR.
 In \figref{power_plotz_two_sel_prob} we plot the empirical probability under our simulations that the
 asset with maximum \txtSR has a given \txtSNR.
 For both the uniform and bell-shaped \pvsnr, the probability that $\psnr[1] \le 0$ appears to be less than 10\%,
 with smaller chance under the uniform distribution.
-Thus the likelihood of making this kind of meta type I error when using MHT tests is perhaps low,
+Thus the likelihood of making this kind of conditional type I error when using MHT tests is perhaps low,
 it is not zero.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_two-1} \caption[The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR for the uniform and bell-shaped arrangements of the vector \pvsnr]{The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR for the uniform and bell-shaped arrangements of the vector \pvsnr. We perform 50000 simulations with $\ssiz=1008$, $\nstrat=105$. Cases with low incidence were removed as the simulated rejection rates are not representative. }\label{fig:power_plotz_two}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_two-1} \caption[The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR for the uniform and bell-shaped arrangements of the vector \pvsnr]{The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR for the uniform and bell-shaped arrangements of the vector \pvsnr. We perform 50,000 simulations with $\ssiz=1008$, $\nstrat=105$. Cases with low incidence were removed as the simulated rejection rates are not representative. }\label{fig:power_plotz_two}
 \end{figure}
 
 \end{knitrout}
@@ -1781,6 +1789,8 @@ same \txtSNR,
 but appears to have low rejection probability when the selected
 asset has low \txtSNR, which sets it apart from all of the
 other procedures tested.
+
+2FIX: \emph{rewrite this a little...}
 
 Clearly the low power of the test gives us reason to seek improvements.
 Perhaps the conditioning procedure can be adapted to recognize

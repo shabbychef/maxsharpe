@@ -137,7 +137,7 @@ FORCE_RECOMPUTE <- (toupper(Sys.getenv('FORCE_RECOMPUTE',unset='False')) == "TRU
 # takes the value from the environment variable of the same name,
 # or 1 if missing.
 
-RUNTIME_PARAM <- max(1,as.numeric(Sys.getenv('RUNTIME_PARAM')),na.rm=TRUE)
+RUNTIME_PARAM <- max(10,as.numeric(Sys.getenv('RUNTIME_PARAM')),na.rm=TRUE)
 @
 <<'plot_funcs',include=FALSE,cache=FALSE>>=
 suppressMessages({
@@ -1350,11 +1350,18 @@ suppressMessages({
   library(epsiwal)
 })
 
+#' multivariate (shifted, scaled) t generation with the given mean and covariance.
 tgen <- function(n,mu,sigma,df) {
   rescal <- sqrt((df-2)/df)
   rescal * mvtnorm::rmvt(n,df=df,delta=mu/rescal,sigma=sigma,type='shifted')
 }
 
+#' Generates return series according to some certain distribution with the given mean
+#' and sd 1, and a given common correlation.
+#' Then computes the Sharpe ratios and returns those.
+#' Optionally estimates the correlation matrix from the returns series.
+#' Runs the conditional estimation procedure on the asset with maximum SR, return the p-value under the null.
+#' repeats this nsim times.
 dosim <- function(nsim,nday,R,mu,testmu=mu,ret_dist=c('gaussian','t4','t5','t6','t20'),
                   estimate_parms=FALSE,higher_order=FALSE) { 
 	ret_dist <- match.arg(ret_dist)
@@ -1416,6 +1423,7 @@ dosim <- function(nsim,nday,R,mu,testmu=mu,ret_dist=c('gaussian','t4','t5','t6',
              pvals=as.numeric(these_sims[2,]),
              popvals=as.numeric(these_sims[3,]))
 }
+#' calls dosim, but in parallel across nodes.
 parsim <- function(nsim,nday,R,mu,testmu=mu,estimate_parms=FALSE,ret_dist='gaussian',higher_order=FALSE,nnodes=7) {
   if (nsim > 2*nnodes) {
     # do in parallel.
@@ -1432,17 +1440,14 @@ parsim <- function(nsim,nday,R,mu,testmu=mu,estimate_parms=FALSE,ret_dist='gauss
   }
   retv
 }
-ks_sim <- function(rho,nday,nstrat,max_zeta,estimate_parms=FALSE,ret_dist='gaussian',higher_order=FALSE,nsim=100) {
-  R <- pmin(diag(nstrat) + rho,1)  
-  mu <- seq(0,max_zeta,length.out=nrow(R))
-  sim <- parsim(nsim,nday=nday,R=R,mu=mu,ret_dist=ret_dist,
-                estimate_parms=estimate_parms,higher_order=higher_order)
-  broom::tidy(ks.test(sim$pvals,punif))
-}
 ## test it:
 #sim <- parsim(nsim,nday=nday,R=R,mu=mu,estimate_parms=FALSE,ret_dist='t5')
 #plot(ecdf(sim$pvals))
+@
+<<'mhtsim_func',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs')>>=
+# MHT based procedures.
 
+#' performs the chi-bar-square test.
 chib_test <- function(xbar2,nstrat,lower.tail=FALSE) {
   cwts <- exp(lchoose(nstrat,0:nstrat) - nstrat * log(2))
   okwt <- (cwts > 1e-9)
@@ -1452,7 +1457,7 @@ chib_test <- function(xbar2,nstrat,lower.tail=FALSE) {
   #stopifnot(abs(sum(sbwt) - 1) < 1e-5)
   sum(sbwt * pchisq(xbar2,df=sbdf,lower.tail=lower.tail))
 }
-# call a bunch of testing procedures
+#' call a bunch of testing procedures, including MHT and conditional
 alt_test <- function(nday,mu,nsim=100,rho=0,psnr0=0) {
   nstrat <- length(mu)
   R <- pmin(diag(nstrat) + rho,1)  
@@ -1531,6 +1536,7 @@ alt_test <- function(nday,mu,nsim=100,rho=0,psnr0=0) {
 
   retv
 }
+#' call alt_test in parallel across nodes.
 par_alt_test <- function(nday,mu,nsim=100,rho=0,psnr0=0,nnodes=7) {
   if (nsim > 2*nnodes) {
     # do in parallel.
@@ -1544,26 +1550,33 @@ par_alt_test <- function(nday,mu,nsim=100,rho=0,psnr0=0,nnodes=7) {
   }
   retv
 }
-
 rescale_to <- function(x, minv=0, maxv=1) {
   minv + (maxv - minv) / (diff(range(x))) * (x - min(x))
 }
 
-# spawn mu and call the sims
-bot_rawsim <- function(nday,nstrat,one_zeta,nsim=100,rho=0,
+#' generate the mu (zeta really) for testing under the alternative.
+gen_mu <- function(nstrat,one_zeta,
                        uni_chunks=14,  # for uniform
                        bell_chunks=32,   # for bellshaped, but we get far fewer
-                       mutype=c('equal','onegood','halfgood','continuous_uniform','uniform','bellshaped')) {
+                       mutype=c('equal','onegood','twogood','threegood',
+                                'halfgood','continuous_uniform','uniform','bellshaped')) {
 	mutype <- match.arg(mutype)
   mu <- switch(mutype,
                equal=rep(one_zeta,nstrat),
                onegood=c(one_zeta,rep(-one_zeta,nstrat-1)),
+               twogood=c(one_zeta,one_zeta,rep(-one_zeta,nstrat-2)),
+               threegood=c(one_zeta,one_zeta,one_zeta,rep(-one_zeta,nstrat-3)),
                halfgood=c(rep(one_zeta,floor(nstrat/2)),
                           rep(-one_zeta,ceiling(nstrat/2))),
                continuous_uniform=seq(-one_zeta,one_zeta,length.out=nstrat),
                uniform=rescale_to(ceiling(qunif(ppoints(nstrat),min=-1,max=uni_chunks)), -one_zeta, one_zeta),
                bellshaped=rescale_to(qbinom(ppoints(nstrat),size=bell_chunks,prob=0.5), -one_zeta, one_zeta))
+}
 
+#' spawn mu and call the MHT sims
+bot_rawsim <- function(nday,nstrat,one_zeta,nsim=100,rho=0,
+                       ...) { 
+  mu <- gen_mu(nstrat=nstrat,one_zeta=one_zeta,...)
   R <- pmin(diag(nstrat) + rho,1)  
   bind_rows(parsim(nsim=nsim,nday=nday,R=R,mu=mu,testmu=rep(0,nstrat)) %>%
             select(-simvals) %>% 
@@ -1571,7 +1584,7 @@ bot_rawsim <- function(nday,nstrat,one_zeta,nsim=100,rho=0,
             mutate(method='condest'),
           par_alt_test(nday=nday,mu=mu,nsim=nsim,rho=rho))
 }
-# compute the rejection rates
+#' do the simulations but also compute the rejection rates
 mhtsim <- function(alpha=0.05,...) {
   bot_rawsim(...) %>%
     group_by(method,popvals) %>%
@@ -1579,6 +1592,16 @@ mhtsim <- function(alpha=0.05,...) {
                 tot_base=n()) %>%
     ungroup() %>%
     arrange(method,popvals)
+}
+@
+<<'ks_sim_func',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs')>>=
+#' simulate the returns, then compute the K-S statistic on them.
+ks_sim <- function(rho,nday,nstrat,max_zeta,estimate_parms=FALSE,ret_dist='gaussian',higher_order=FALSE,nsim=100) {
+  R <- pmin(diag(nstrat) + rho,1)  
+  mu <- seq(0,max_zeta,length.out=nrow(R))
+  sim <- parsim(nsim,nday=nday,R=R,mu=mu,ret_dist=ret_dist,
+                estimate_parms=estimate_parms,higher_order=higher_order)
+  broom::tidy(ks.test(sim$pvals,punif))
 }
 @
 
@@ -1739,7 +1762,7 @@ print(ph)
 
 % many sims with K-S stat?%FOLDUP
 
-<<'many_sims',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs','runtime')>>=
+<<'many_sims',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('ks_sim_func','runtime')>>=
 # 5b3a9d41-2751-45b6-b6af-a4e43db1f298 
 
 suppressMessages({
@@ -1923,14 +1946,14 @@ the ``half-good'' alternative. We also consider the cases where the elements of 
 uniformly distributed across some finite set of values (``uniform'') or distributed like
 the density of a scaled and shifted binomial distribution (``bell-shaped'').
 
-<<'sims_vs_mht',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs','runtime')>>=
+<<'sims_vs_mht',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('mhtsim_func','runtime')>>=
 suppressMessages({
   library(tidyr)
 })
 
 # actual run the sims
 params <- data_frame(one_zeta=seq(0,0.15,length.out=13)) %>%
-  tidyr::crossing(data_frame(mutype=c('onegood','halfgood','equal'))) 
+  tidyr::crossing(data_frame(mutype=c('onegood','twogood','halfgood','equal'))) 
 
 mht_nsim <- ceiling(1e4/max(1,RUNTIME_PARAM))
 mht_nday <- ceiling(252 * (1 + (3/max(1,RUNTIME_PARAM))))
@@ -2036,6 +2059,7 @@ ph <- resu %>%
   mutate(mutype=case_when(mutype=='equal'     ~ 'all-equal',
                           mutype=='halfgood'  ~ 'half-good',
                           mutype=='onegood'   ~ 'one-good',
+                          mutype=='twogood'   ~ 'two-good',
                           TRUE ~ 'ERROR')) %>%
   ggplot(aes(popvals,rej_rate,color=method))  +
   geom_line() + geom_point() +
@@ -2108,7 +2132,7 @@ simulations where a `bad' asset is selected.
 This pattern is repeated in the following set of simulations under the alternative.
 
 % do it again, but let the pvsnr be weirdly distributed.
-<<'sims_vs_mht_two',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs','runtime')>>=
+<<'sims_vs_mht_two',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('mhtsim_func','runtime')>>=
 suppressMessages({
   library(tidyr)
 })
@@ -2133,27 +2157,11 @@ resu_two <- params %>%
 #})
 plan(sequential)
 @
-<<'resu_two_summary',dependson=c('sims_vs_mht_two'),echo=FALSE>>=
+<<'resu_two_summary',dependson=c('sims_vs_mht_two','mhtsim_func'),echo=FALSE>>=
 one_zeta <- resu_two %>%
   summarize(max_z=max(one_zeta)) %>%
   pull(max_z)
 one_zeta_an <- sqrt(252)*one_zeta
-
-gen_mu <- function(nstrat,one_zeta,
-                       uni_chunks=14,  # for uniform
-                       bell_chunks=32,   # for bellshaped, but we get far fewer
-                       mutype=c('equal','onegood','twogood','halfgood','continuous_uniform','uniform','bellshaped')) {
-	mutype <- match.arg(mutype)
-  mu <- switch(mutype,
-               equal=rep(one_zeta,nstrat),
-               onegood=c(one_zeta,rep(-one_zeta,nstrat-1)),
-               twogood=c(one_zeta,one_zeta,rep(-one_zeta,nstrat-2)),
-               halfgood=c(rep(one_zeta,floor(nstrat/2)),
-                          rep(-one_zeta,ceiling(nstrat/2))),
-               continuous_uniform=seq(-one_zeta,one_zeta,length.out=nstrat),
-               uniform=rescale_to(ceiling(qunif(ppoints(nstrat),min=-1,max=uni_chunks)), -one_zeta, one_zeta),
-               bellshaped=rescale_to(qbinom(ppoints(nstrat),size=bell_chunks,prob=0.5), -one_zeta, one_zeta))
-}
 
 uni_sim <- tibble(mu=gen_mu(nstrat=mht_nstrat,one_zeta=one_zeta,mutype='uniform'),mutype='uniform')
 bel_sim <- tibble(mu=gen_mu(nstrat=mht_nstrat,one_zeta=one_zeta,mutype='bellshaped'),mutype='bellshaped')
@@ -2231,6 +2239,7 @@ ph <- resu_two %>%
   mutate(mutype=case_when(mutype=='equal'     ~ 'all-equal',
                           mutype=='halfgood'  ~ 'half-good',
                           mutype=='onegood'   ~ 'one-good',
+                          mutype=='twogood'   ~ 'two-good',
                           mutype=='uniform'   ~ 'uniform',
                           mutype=='bellshaped'   ~ 'bell-shaped',
                           TRUE ~ 'ERROR')) %>%
@@ -2264,6 +2273,7 @@ ph <- resu_two %>%
   mutate(mutype=case_when(mutype=='equal'     ~ 'all-equal',
                           mutype=='halfgood'  ~ 'half-good',
                           mutype=='onegood'   ~ 'one-good',
+                          mutype=='twogood'   ~ 'two-good',
                           mutype=='uniform'   ~ 'uniform',
                           mutype=='bellshaped'   ~ 'bell-shaped',
                           TRUE ~ 'ERROR')) %>%
@@ -2291,7 +2301,7 @@ one dominates the others.
 \subsection{Simulations under the null with correlated returns}
 %FOLDUP
 
-<<'correlation_sims_vs_mht',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('motherload_sim_funcs')>>=
+<<'correlation_sims_vs_mht',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('mhtsim_func','runtime')>>=
 suppressMessages({
   library(tidyr)
 })

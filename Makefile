@@ -150,11 +150,11 @@ doc : $(PROJECT).pdf  ## build the document by knitting source code
 ############### RULES ###############
 
 release.tex: maxsharpe.tex
-	perl -pe 's{figure/}{};s{.gitHash}{$(GITHASH)};' < $< > $@
+	perl -pe 's{.gitHash}{$(GITHASH)};' < $< > $@
 
 release : release.tex  ## make a form of tex to upload to arxiv
 	mv release.tex maxsharpe.tex
-	@-echo "upload to arxiv"
+	@-echo "make tarfile and upload to arxiv"
 
 # check it
 

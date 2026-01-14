@@ -69,7 +69,7 @@
 %\input{sr_defs.tex}
 \usepackage[notheorems]{SharpeR}
 
-\providecommand{\sideWarning}[1][0.5]{\marginpar{\hfill\includegraphics[width=#1\marginparwidth]{warning}}}
+% \providecommand{\sideWarning}[1][0.5]{\marginpar{\hfill\includegraphics[width=#1\marginparwidth]{warning}}}
 
 % transformed... 
 \providecommand{\altSNR}[0]{\xi}

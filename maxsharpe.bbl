@@ -1,4 +1,4 @@
-\begin{thebibliography}{33}
+\begin{thebibliography}{34}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -183,6 +183,14 @@ Steven~E. Pav.
 \newblock Distribution of maximal {S}harpe, the {M}arkowitz approximation.
 \newblock Privately Published, 2018.
 \newblock URL \url{http://www.sharperat.io/max-sharpe-two.html}.
+
+\bibitem[Pav(2021)]{pav_the_book}
+Steven~E. Pav.
+\newblock \emph{The {S}harpe Ratio: Statistics and Applications}.
+\newblock CRC Press, 2021.
+\newblock ISBN 9781000442762.
+\newblock URL
+  \url{https://www.google.com/books/edition/The_Sharpe_Ratio/Zww8EAAAQBAJ}.
 
 \bibitem[Press(2012)]{press2012applied}
 S.~J. Press.

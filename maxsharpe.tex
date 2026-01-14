@@ -587,7 +587,7 @@ is good enough to use the procedure of Lee \etal for testing the
 
 Here we derive the asymptotic distribution of \txtSR, following
 Jobson and Korkie 
-\emph{inter alia}. \cite{jobsonkorkie1981,lo2002,mertens2002comments,pav_ssc}
+\emph{inter alia}. \cite{jobsonkorkie1981,lo2002,mertens2002comments,pav_ssc,pav_the_book}
 Consider the case of \nstrat possibly correlated returns streams,
 with each observation denoted by the $\nstrat$-vector \vreti.
 Let \pvmu be the \nstrat-vector of population means, and let
@@ -716,7 +716,7 @@ Then using the \pvvar given in \eqnref{elliptical_variances},
 Note how in the case of scalar Gaussian returns, this reduces to the well
 known standard error estimate of 
 $\sqrt{\oneby{\ssiz}\wrapParens{1 + \half[\psnrsq]}}$.  
-\cite{lo2002,mertens2002comments,baoestimation,pav_ssc}
+\cite{lo2002,mertens2002comments,baoestimation,pav_the_book}
 In practice the correlation matrix \RMAT and the vector of \txtSNRs, \pvsnr,
 have to be estimated and plugged in.
 
@@ -1455,7 +1455,7 @@ simple MHT correction, and the one-sided test.
 In our experiments, we 
 draw returns from a Gaussian distribution with diagonal covariance.
 Under this assumption, one can use the distribution of the \tstat{} statistic
-to perform inference on the \txtSNR. \cite{pav_ssc}
+to perform inference on the \txtSNR. \cite{pav_ssc,pav_the_book}
 We then use the Bonferroni correction to account for the multiple tests performed.
 We also perform the one-sided test based on the chi-bar square statistic,
 Follman's test, and the chi-bar and MHT tests with Hansen's $\log\log$ adjustment.
@@ -1759,7 +1759,7 @@ If we had been interested in testing
 Healthcare 
 without our conditional selection, we would compute the confidence interval
 $\left[0.145\,\moto{-\halff}, \infty\right)$ based on inverting the non-central
-\tstat{}-distribution. \cite{pav_ssc,SharpeR-Manual}
+\tstat{}-distribution. \cite{pav_ssc,pav_the_book,SharpeR-Manual}
 If instead we approximate the standard error by plugging in 
 $0.193\,\moto{-\halff}$ as the \txtSNR of 
 Healthcare 
@@ -1857,6 +1857,7 @@ Perhaps its power can be increased using Hansen's $\log\log$ adjustment.
 %\bibliographystyle{jss}
 %\bibliographystyle{siam}
 %\bibliographystyle{ieeetr}
+\nocite{pav_the_book}
 \bibliographystyle{plainnat}
 %\bibliographystyle{acm}
 %\bibliography{SharpeR,rauto}

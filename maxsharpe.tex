@@ -408,7 +408,8 @@ The conditional estimation test has low power under the alternative
 where there is little spread in the \txtSNRs of the assets, 
 and high power under the alternative where a single asset has high \txtSNR.
 Unlike the alternative procedures, it appears to enjoy rejection probabilities
-montonic in the \txtSNR of the selected asset.
+montonic in the \txtSNR of the selected asset, 
+and actually maintains near-nominal rejection rates under the conditional null.
 \end{abstract}%UNFOLD
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1278,7 +1279,7 @@ This is not, of course, how the test would be applied in practice since
 Moreover, we with to check coverage of the procedure under the null, so 
 we use the actual $\trAB{\etav}{\pvsnr}$ in our test.
 
-We repeat this experiment \ensuremath{10^{4}} times and collect the resultant putative p-values.
+We repeat this experiment \ensuremath{10^{5}} times and collect the resultant putative p-values.
 We would like to Q-Q or P-P plot these p-values, 
 as evidence that they are near uniform, 
 but the large sample size presents some challenges.
@@ -1295,7 +1296,7 @@ near the selected $q$.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_hidden_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 10000 simulations are compared to a uniform law]{The computed p-values from the conditional estimation procedure over 10000 simulations are compared to a uniform law. Given the large sample size, a Q-Q plot is visually hard to interpret. Instead, for selected $q$, we compute the proportion of our putative p-values less than $q$. We then compute $\Delta = \wrapParens{\mbox{Prop }\le q} - q$ against $q$. Using the binomial law, we plot approximate error bars around the $x$ axis that indicate where the points should fall with approximately $95\%$ confidence. Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:motherload_sims_hidden_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_hidden_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law]{The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law. Given the large sample size, a Q-Q plot is visually hard to interpret. Instead, for selected $q$, we compute the proportion of our putative p-values less than $q$. We then compute $\Delta = \wrapParens{\mbox{Prop }\le q} - q$ against $q$. Using the binomial law, we plot approximate error bars around the $x$ axis that indicate where the points should fall with approximately $95\%$ confidence. Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:motherload_sims_hidden_plotz}
 \end{figure}
 
 \end{knitrout}
@@ -1315,7 +1316,7 @@ So we repeat the experiments, but plug in the usual sample estimate of covarianc
 vector of \txtSRs into \eqnref{apx_srdist_gaussian} to estimate the covariance
 matrix of \svsr. 
 Other than this change, we repeat the previous experiment, 
-performing $\ensuremath{10^{4}}$ simulations, 
+performing $\ensuremath{10^{5}}$ simulations, 
 setting $\nstrat=100$,
 $\RMAT=\makerho{0.7}{0.3}$.
 $\ssiz=1260\dayto{}$, \etc
@@ -1362,7 +1363,7 @@ $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$;
 we take $\pvsnr$ to be a uniform sequence from $0$ to 
 $0.1\dayto{-\halff}$.
 For each setting of the parameters in the Cartesian product we perform
-$\ensuremath{10^{4}}$ simulations, computing p values from the feasible estimator.
+$\ensuremath{10^{5}}$ simulations, computing p values from the feasible estimator.
 
 In \figref{many_sims_plotz} we plot those K-S statistics against $\ssiz$,
 with different facets for $\rho$.
@@ -1396,7 +1397,7 @@ The simulations above were carried out assuming Gaussian returns, and using
 Gaussian returns are not a good model for real asset returns,
 so we repeat those simulations with returns drawn from a multivariate $\tstat{}$-distribution
 with $5$ degrees of freedom.  \cite{Lin1972339,kotz2004multivariate}
-Again we perform $1000$ simulations with
+Again we perform $\ensuremath{10^{4}}$ simulations with
 $\nstrat=100$,
 $\RMAT=\makerho{0.7}{0.3}$,
 $\ssiz=1260\dayto{}$, \etc
@@ -1417,7 +1418,7 @@ We remain cautiously optimistic that for large \ssiz, one need not correct
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 1000 simulations are plotted using our sampled CDF procedure]{The computed p-values from the conditional estimation procedure over 1000 simulations are plotted using our sampled CDF procedure. Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Without correcting for higher order moments, the procedure has higher than nominal type I rate; with the correction it has slightly smaller than the nominal rate. }\label{fig:causal_tfive_sims_plotz}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 10000 simulations are plotted using our sampled CDF procedure]{The computed p-values from the conditional estimation procedure over 10000 simulations are plotted using our sampled CDF procedure. Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Without correcting for higher order moments, the procedure has higher than nominal type I rate; with the correction it has slightly smaller than the nominal rate. }\label{fig:causal_tfive_sims_plotz}
 \end{figure}
 
 \end{knitrout}
@@ -1437,10 +1438,13 @@ this way, would depend on the distribution of
 values of \pvsnr, as well as the correlation of returns among the tested strategies.
 
 We will consider following alternatives: one where all \nstrat elements of \psnr are
-equal (``all-equal''), and two where $m$ of \nstrat elements of \psnr
+equal (``all-equal''), and three others where $m$ of \nstrat elements of \psnr
 are equal to some positive value, and the remaining $\nstrat - m$ are negative
-that value. For $m=1$, we call this the ``one-good'' alternative; for $m=\nstrat/2$,
-the ``half-good'' alternative. We also consider the cases where the elements of \psnr are
+that value. 
+For $m=1$, we call this the ``one-good'' alternative; 
+for $m=2$, the ``two-good'' alternative; 
+for $m=\nstrat/2$, the ``half-good'' alternative. 
+Later we also consider the cases where the elements of \psnr are
 uniformly distributed across some finite set of values (``uniform'') or distributed like
 the density of a scaled and shifted binomial distribution (``bell-shaped'').
 
@@ -1476,72 +1480,103 @@ when they are different.
 
 %In fact, this is what we see. 
 Our suspicions are born out by the simulations.
-We perform simulations under all-equal, one-good,
-and half-good configurations, letting the `good' \txtSNR vary from 
+We perform simulations under all-equal, half-good, two-good and one-good configurations, 
+letting the `good' \txtSNR vary from 
 $0$ to $0.212\dayto{-\halff}$, which corresponds
 to an `annualized' \txtSNR of around
 $3.4\yrto{-\halff}$.
 We draw Gaussian returns with diagonal covariance for
-$28$ assets, with $\ssiz=328$.
-For each setting we perform $1000$ simulations then 
+$100$ assets, with $\ssiz=1008$.
+For each setting we perform $\ensuremath{10^{4}}$ simulations then 
 compute the empirical rejection rate of the test at the $0.05$ level,
 conditional on the \txtSNR of the \emph{selected} asset, which is
 to say the one with the largest \txtSR. Note that in some simulations
 the largest \txtSR is observed for an asset with a negative \txtSNR.
 We hope our tests to have lower power when this occurs.
 
-In \figref{power_plotz_one}, we plot the power of the MHT Bonferroni
-test, the chi-bar square test, Follman's test, 
-Hansen's chi-bar square and MHT (``SPA''),
+In \figref{power_plotz_one_a}, we plot the power of 
+% the MHT Bonferroni test, 
+% the chi-bar square test, 
+Follman's test, 
+Hansen's chi-bar square and MHT (``SPA'') tests,
 and the conditional estimation procedure versus the \txtSNR
 of the selected asset. 
-We present facet columns for the three configurations, 
-\viz all-equal, one-good, half-good.
+We present facet columns for the configurations of \pvsnr,
+\viz all-equal, half-good, two-good and one-good.
 A horizontal line at $0.05$ gives the nominal rate under the null,
 which occurs as $x=0$ in these plots.
-As expected from the above explanation, 
-chi-bar square has the highest power for the all-equal alternative,
+
+As expected from the above explanation, the
+chi-bar square (with Hansen's correction) has the highest power for the all-equal alternative,
 followed by Follman's test, 
 then the MHT, 
 then the conditional estimation test.
-These relationships are reversed for the one-good case.
-The chi-bar square test and Follman's test have zero power against the one-good alternative.
-All tests perform similarly in the half-good and all-equal alternatives,
+These relationships are nearly exactly reversed for the one-good case:
+Follman's test has zero power against the one-good alternative, 
+while the conditional procedure has the highest power
+Each test considered here shows similar performance in the half-good as in the all-equal alternative,
 with the exception of Follman's test, which achieves a maximum power of $1/2$ in the
 half-good case, as is to be expected since this is the probability that
-$\ssravg > 0$ in the half-good case,
-and the conditional procedure, which has persistently lower power than the others
-for these two alternatives.
+$\ssravg > 0$ in the half-good case.
+
+In \figref{power_plotz_one_b}, we plot the power of the MHT and chi-bar square procedures,
+with and without Hansen's log-log corrections.
+The correction has essentially no effect in the all-equal and half-good cases,
+but increases power considerably for the chi-bar square test in the two-good and one-good
+alternatives, and increases power modestly for the MHT test under those same alternatives.
+Thus we mostly consider using the log-log correction when possible.
+We note that this correction may result in slightly higher than nominal type I rate,
+as evidenced later in \figref{rho_plotz_one}.
+
+
+
+
+
 
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_one-1} \caption[The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr]{The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr. For the one-good case, the chi-bar-square and Follman's test have the same power, which is essentially zero under the alternative. }\label{fig:power_plotz_one}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_one_a-1} \caption[The empirical power of the conditional estimation test, Follman's test, and the chi-bar-square and MHT tests with Hansen's $\log\log$ correction are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr]{The empirical power of the conditional estimation test, Follman's test, and the chi-bar-square and MHT tests with Hansen's $\log\log$ correction are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr. For the one- and two-good cases, Follman's test has essentially zero power under the alternative. }\label{fig:power_plotz_one_a}
+\end{figure}
+
+\end{knitrout}
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_one_b-1} \caption[The empirical power of the MHT corrected test, the chi-bar-square test, with and without Hansen's $\log\log$ correction, are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr]{The empirical power of the MHT corrected test, the chi-bar-square test, with and without Hansen's $\log\log$ correction, are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr. }\label{fig:power_plotz_one_b}
 \end{figure}
 
 \end{knitrout}
 
 
 
+
 The power of the conditional estimation procedure for the all-equal
 and half-good cases is rather disappointing. 
 For the case where all assets have a \txtSNR of
-$3.4\yrto{-\halff}$,
-the test has a power of only around a half.
+$3.4\yrto{-\halff}$, 
+which should be considered very very large, the test has a power of only around a half.
 The test suffers from low power because we are conditioning on
-``\ssr[1] is the largest \txtSR'', where we should actually
-be conditioning on ``the asset with the largest \txtSR, whichever one that is.''
+``\ssr[1] is the largest \txtSR'', but we should actually
+like to condition on ``the asset with the largest \txtSR, whichever one that is.''
 That is, there is no recognition here that if another asset 
 had exhibited higher \txtSR, we would have selected that one instead.
+It is not clear if that distinction can be meaningfully integrated
+into this testing procedure.
 
-Note the odd plot in the half-good facet: the MHT correction
+However, we caution that the apparent low power of the conditional inference
+test in comparison to tests based on MHT is that the latter are rejecting
+a different null, and can actually have much higher type I rate under
+the conditional null.
+Among these tested alternatives, this effects is most visible in the
+half-good facet, where
+the MHT correction
 and one-sided tests have greater
 than $0.05$ rejection rate for \emph{negative} \txtSNR. 
 Some clarification is required here.
 %The plot is somewhat misleading under this alternative, however.
 We have performed
-$1000$ simulations for each setting of the `good'
-\txtSNR; in some small number of them for the half-good
+$\ensuremath{10^{4}}$ simulations for each setting of the `good'
+\txtSNR; in some number of them for the half-good
 case, an asset with negative \txtSNR exhibits the maximum
 \txtSR. 
 We are plotting the rejection rate for the test in this case.
@@ -1549,49 +1584,45 @@ But note that the null hypothesis that MHT and the one-sided test are testing
 \emph{is} violated in this case, because half the assets
 have positive \txtSNR, and the alternative procedures test the null that all
 assets have zero or lower \txtSNR.
-This is the down side of the apparently higher power of the tests based on the MHT:
-they do not maintain the nominal rate for the conditional null and thus can exhibit 
-higher than nominal type I rate.
-However, it should be rare that the selected asset is `bad' while other assets are actually `good'.
-We have not shown the probability that a `bad' asset has the
-highest \txtSR, but note that when the `good' \txtSNR
-is greater than $0.05\dayto{-\halff}$ we do not observe this
-occuring even once over the $1000$ simulations performed
-for each setting. 
+Tests based on the MHT do not maintain the nominal type I rate under the conditional null.
+While the probability of selecting a `bad' asset instead of a `good' one is going to be very
+low, especially when there is a large gap between the \txtSNRs of the good and the bad assets,
+it is troubling that when this occurs, tests based on the MHT can fail with high probability.
 
-We note that the chi-bar-square test appears to have higher power than 
-the other tests for the all-equal and half-good populations,
-but fails to reject at all in the one-good case, except under the null.
-This is to be expected, since the chi-bar-square test depends strongly
-on all the observed \txtSRs, and in this case we expect many of them
-to be negative.
-The $\log\log$ adjustment has little effect in the all-equal and half-good case,
-but greatly improves the power of the MHT and chi-bar square tests
-in the one-good case. 
-For this sample size, Hansen's adjustment nearly maintains the nominal
-type I rate under the null, though this is unlikely to hold for smaller
-\ssiz.
+%We note that the chi-bar-square test appears to have higher power than 
+%the other tests for the all-equal and half-good populations,
+%but fails to reject at all in the one-good case, except under the null.
+%This is to be expected, since the chi-bar-square test depends strongly
+%on all the observed \txtSRs, and in this case we expect many of them
+%to be negative.
+%The $\log\log$ adjustment has little effect in the all-equal and half-good case,
+%but greatly improves the power of the MHT and chi-bar square tests
+%in the one-good case. 
+%For this sample size, Hansen's adjustment nearly maintains the nominal
+%type I rate under the null, though this is unlikely to hold for smaller
+%\ssiz.
 
-It is interesting to note that while the conditional estimation procedure
-generally has lower power than the other tests (except in the one-good case),
+On the other hand, while the conditional estimation procedure exhibits
+lower power than the other tests (except in the one-good case),
 it appears to have monotonic rejection probability with respect to the
-\txtSNR of the \emph{selected} asset.
+\txtSNR of the \emph{selected} asset in all configurations tested.
 That is, in the half-good case, it has low rejection probability in the odd
-simulations where a `bad' asset is selected. 
+simulations where a `bad' asset is selected because it is actually designed
+for testing the conditional null.
 This pattern is repeated in the following set of simulations under the alternative.
 
 % do it again, but let the pvsnr be weirdly distributed.
 
 
 
-It is clear from these simulations that there are many different configurations of the alternative:
-we should be concerned about \ssiz, \nstrat, the correlation of returns (we have made returns independent here),
-and the \txtSNR of the selected strategy, but also the distribution of the elements of \pvsnr.
-It is unlikely that the three distributions of $\pvsnr$ considered above will be encountered in real world applications;
+%It is clear from these simulations that there are many different configurations of the alternative:
+%we should be concerned about \ssiz, \nstrat, the correlation of returns (we have made returns independent here),
+%and the \txtSNR of the selected strategy, but also the distribution of the elements of \pvsnr.
+It is unlikely that the four distributions of $\pvsnr$ considered above will be encountered in real world applications;
 rather we anticipate that the elements of \pvsnr will have a distribution which is bell-shaped or even flat.
 We simulate these cases, estimating the power of the various tests as a function of the \txtSNR of the selected asset.
 
-We set $\nstrat=33$, and $\ssiz=328$.
+We set $\nstrat=105$, and $\ssiz=1008$.
 The elements of \pvsnr are set to fixed values shown in \figref{power_plotz_pvsnr_distribution}.
 Namely for the uniform case, the \pvsnr takes uniform values from $-0.07\dayto{-\halff}$ to $0.07\dayto{-\halff}$,
 or in annualized units $\ccinterval{-1.1}{1.1}\dayto{-\halff}$.
@@ -1606,7 +1637,7 @@ Under the bell-shaped simulations, the \pvsnr takes the same range but with more
 In \figref{power_plotz_two} we plot the empirical rejection rates for the various tests 
 under these two distributions of \pvsnr.
 The rejection rate is plotted against the \txtSNR of the selected strategy, \psnr[1].
-We note that in some unlucky cases $\psnr[1] \le 0$ even though the maximum element of \pvsnr is
+We note that in some unlucky cases $\psnr[1]$ is small or even negative even though the maximum element of \pvsnr is
 significantly positive.
 As seen above, the conditional procedure maintains the near nominal type I rate of 0.05 when $\psnr[1] = 0$,
 with modest power when $\psnr[1] > 0$.
@@ -1621,10 +1652,11 @@ For both the uniform and bell-shaped \pvsnr, the probability that $\psnr[1] \le 
 with smaller chance under the uniform distribution.
 Thus the likelihood of making this kind of conditional type I error when using MHT tests is perhaps low,
 it is not zero.
+However, if a conditional type I error rate must be maintained, the MHT tests should be considered unacceptable.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_two-1} \caption[The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR for the uniform and bell-shaped arrangements of the vector \pvsnr]{The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR for the uniform and bell-shaped arrangements of the vector \pvsnr. We perform 5,000 simulations with $\ssiz=328$, $\nstrat=33$. Cases with low incidence were removed as the simulated rejection rates are not representative. }\label{fig:power_plotz_two}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_two-1} \caption[The empirical power of the conditional estimation, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR for the uniform and bell-shaped arrangements of the vector \pvsnr]{The empirical power of the conditional estimation, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR for the uniform and bell-shaped arrangements of the vector \pvsnr. We perform 50,000 simulations with $\ssiz=1008$, $\nstrat=105$. Cases with low incidence were removed as the simulated rejection rates are not representative. }\label{fig:power_plotz_two}
 \end{figure}
 
 \end{knitrout}
@@ -1654,7 +1686,7 @@ To demonstrate this, we repeat the simulations above, testing the various statis
 $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$
 and $\psnr=\vzero$.
 We set $\nstrat=20$, $\ssiz=504$, 
-and perform $1000$ simulations to estimate the empirical rejection rate.
+and perform $\ensuremath{10^{4}}$ simulations to estimate the empirical rejection rate.
 In \figref{rho_plotz_one}, we plot the empirical rejection rate versus $\rho$ at the nominal
 $0.05$ type I level. 
 While the conditional estimation procedure and one-sided tests appear to maintain the nominal rejection
@@ -1670,7 +1702,7 @@ yielding nominal rejection rates.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for several testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for several testing procedures: the conditional estimation, the chi-bar square test, Follman's test, the vanilla Bonferroni correction, Hansen's corrected chi-bar-square and SPA tests, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 20 assets over 504 days. Tests were performed at the $0.05$ level, which appears to be maintained by all procedures except the regular Bonferroni procedure, and Hansen's chi-bar-square test, which has slightly higher than nominal rejection rates for this \ssiz. Empirical rates are over 1,000 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
+\includegraphics[width=0.975\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for several testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for several testing procedures: the conditional estimation, the chi-bar square test, Follman's test, the vanilla Bonferroni correction, Hansen's corrected chi-bar-square and SPA tests, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 20 assets over 504 days. Tests were performed at the $0.05$ level, which appears to be maintained by all procedures except the regular Bonferroni procedure, and Hansen's chi-bar-square test, which has slightly higher than nominal rejection rates for this \ssiz. Empirical rates are over 10,000 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
 \end{figure}
 
 \end{knitrout}
@@ -1786,15 +1818,13 @@ kurtotic returns.
 The procedure can be used for other test configurations beyond the
 asset with the maximum \txtSR,
 and can be used to construct confidence intervals.
-It appears to have low power when many assets have the
-same \txtSNR, 
-but appears to have low rejection probability when the selected
-asset has low \txtSNR, which sets it apart from all of the
-other procedures tested.
+It appears to have low power compared to tests based on the MHT for
+some test configurations.
+However MHT tests can have very high conditional type I rates in those unlikely 
+cases where an asset with low \txtSNR is selected,
+while the conditional estimation procedure maintains the type I rate in this case.
 
-2FIX: \emph{rewrite this a little...}
-
-Clearly the low power of the test gives us reason to seek improvements.
+The low power of the test gives us reason to seek improvements.
 Perhaps the conditioning procedure can be adapted to recognize
 that the strategist would have been testing another asset if the
 \txtSR of the currently selected asset had been lower. 

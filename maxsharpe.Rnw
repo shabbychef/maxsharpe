@@ -137,7 +137,7 @@ FORCE_RECOMPUTE <- (toupper(Sys.getenv('FORCE_RECOMPUTE',unset='False')) == "TRU
 # takes the value from the environment variable of the same name,
 # or 1 if missing.
 
-RUNTIME_PARAM <- max(10,as.numeric(Sys.getenv('RUNTIME_PARAM')),na.rm=TRUE)
+RUNTIME_PARAM <- max(1,as.numeric(Sys.getenv('RUNTIME_PARAM')),na.rm=TRUE)
 @
 <<'plot_funcs',include=FALSE,cache=FALSE>>=
 suppressMessages({
@@ -492,7 +492,8 @@ The conditional estimation test has low power under the alternative
 where there is little spread in the \txtSNRs of the assets, 
 and high power under the alternative where a single asset has high \txtSNR.
 Unlike the alternative procedures, it appears to enjoy rejection probabilities
-montonic in the \txtSNR of the selected asset.
+montonic in the \txtSNR of the selected asset, 
+and actually maintains near-nominal rejection rates under the conditional null.
 \end{abstract}%UNFOLD
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1832,7 +1833,7 @@ in the sense that nominal type I rates may not be maintained.
 fig_cap <- paste0('Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\\ssiz$ with facets for $\\rho$.  ',
                   'Broadly we see that the test statistic is less uniform in the regime where $\\ssiz$ is small, but this is muted by a large positive correlation $\\rho$.')
 # 460af323-8484-4187-8af1-68b25eff11cb 
-# 2FIX: want "\\rho" in the facet labels somehow. cf https://sahirbhatnagar.com/blog/2016/02/08/ggplot2-facet-wrap-labels/
+# get "\\rho" in the facet labels somehow. cf https://sahirbhatnagar.com/blog/2016/02/08/ggplot2-facet-wrap-labels/
 require(latex2exp)
 appender <- function(string) { TeX(paste("$\\rho = $", string)) }
 resu %>%
@@ -1939,10 +1940,13 @@ this way, would depend on the distribution of
 values of \pvsnr, as well as the correlation of returns among the tested strategies.
 
 We will consider following alternatives: one where all \nstrat elements of \psnr are
-equal (``all-equal''), and two where $m$ of \nstrat elements of \psnr
+equal (``all-equal''), and three others where $m$ of \nstrat elements of \psnr
 are equal to some positive value, and the remaining $\nstrat - m$ are negative
-that value. For $m=1$, we call this the ``one-good'' alternative; for $m=\nstrat/2$,
-the ``half-good'' alternative. We also consider the cases where the elements of \psnr are
+that value. 
+For $m=1$, we call this the ``one-good'' alternative; 
+for $m=2$, the ``two-good'' alternative; 
+for $m=\nstrat/2$, the ``half-good'' alternative. 
+Later we also consider the cases where the elements of \psnr are
 uniformly distributed across some finite set of values (``uniform'') or distributed like
 the density of a scaled and shifted binomial distribution (``bell-shaped'').
 
@@ -2006,8 +2010,8 @@ when they are different.
 
 %In fact, this is what we see. 
 Our suspicions are born out by the simulations.
-We perform simulations under all-equal, one-good,
-and half-good configurations, letting the `good' \txtSNR vary from 
+We perform simulations under all-equal, half-good, two-good and one-good configurations, 
+letting the `good' \txtSNR vary from 
 $0$ to $\Sexpr{max(params$one_zeta)}\dayto{-\halff}$, which corresponds
 to an `annualized' \txtSNR of around
 $\Sexpr{signif(sqrt(252) * max(params$one_zeta),2)}\yrto{-\halff}$.
@@ -2020,31 +2024,90 @@ to say the one with the largest \txtSR. Note that in some simulations
 the largest \txtSR is observed for an asset with a negative \txtSNR.
 We hope our tests to have lower power when this occurs.
 
-In \figref{power_plotz_one}, we plot the power of the MHT Bonferroni
-test, the chi-bar square test, Follman's test, 
-Hansen's chi-bar square and MHT (``SPA''),
+In \figref{power_plotz_one_a}, we plot the power of 
+% the MHT Bonferroni test, 
+% the chi-bar square test, 
+Follman's test, 
+Hansen's chi-bar square and MHT (``SPA'') tests,
 and the conditional estimation procedure versus the \txtSNR
 of the selected asset. 
-We present facet columns for the three configurations, 
-\viz all-equal, one-good, half-good.
+We present facet columns for the configurations of \pvsnr,
+\viz all-equal, half-good, two-good and one-good.
 A horizontal line at $0.05$ gives the nominal rate under the null,
 which occurs as $x=0$ in these plots.
-As expected from the above explanation, 
-chi-bar square has the highest power for the all-equal alternative,
+
+As expected from the above explanation, the
+chi-bar square (with Hansen's correction) has the highest power for the all-equal alternative,
 followed by Follman's test, 
 then the MHT, 
 then the conditional estimation test.
-These relationships are reversed for the one-good case.
-The chi-bar square test and Follman's test have zero power against the one-good alternative.
-All tests perform similarly in the half-good and all-equal alternatives,
+These relationships are nearly exactly reversed for the one-good case:
+Follman's test has zero power against the one-good alternative, 
+while the conditional procedure has the highest power
+Each test considered here shows similar performance in the half-good as in the all-equal alternative,
 with the exception of Follman's test, which achieves a maximum power of $1/2$ in the
 half-good case, as is to be expected since this is the probability that
-$\ssravg > 0$ in the half-good case,
-and the conditional procedure, which has persistently lower power than the others
-for these two alternatives.
+$\ssravg > 0$ in the half-good case.
+
+In \figref{power_plotz_one_b}, we plot the power of the MHT and chi-bar square procedures,
+with and without Hansen's log-log corrections.
+The correction has essentially no effect in the all-equal and half-good cases,
+but increases power considerably for the chi-bar square test in the two-good and one-good
+alternatives, and increases power modestly for the MHT test under those same alternatives.
+Thus we mostly consider using the log-log correction when possible.
+We note that this correction may result in slightly higher than nominal type I rate,
+as evidenced later in \figref{rho_plotz_one}.
+
+<<'proc_sims_vs',dependson=c('sims_vs_mht'),echo=FALSE>>=
+plotresu <- resu %>%
+  filter(method!='norho_mht') %>%  # we are using rho=0, so should be the same
+  mutate(shapel=case_when(grepl('^condest$',method)   ~ 'Cond. est.',
+                          grepl('^mht|spa$',method)   ~ 'MHT',
+                          grepl('^(chibarsquare|loglog)$',method)  ~ 'Chi-bar^2',
+                          grepl('^follman$',method)   ~ 'Follman',
+                          TRUE ~ 'ERROR')) %>%
+  mutate(gmethod=case_when(grepl('^condest$',method)   ~ 'Cond. est.',
+                          grepl('^mht$',method)       ~ 'MHT (+/-)',
+                          grepl('^chibarsquare$',method)  ~ 'Chi-bar^2 (+/-)',
+                          grepl('^follman$',method)   ~ 'Follman',
+                          grepl('^loglog$',method)    ~ 'Chi-bar^2 (+/-)',
+                          grepl('^spa$',method)       ~ 'MHT (+/-)',
+                          TRUE ~ 'ERROR')) %>%
+  mutate(method=case_when(grepl('^condest$',method)   ~ 'Cond. est.',
+                          grepl('^mht$',method)       ~ 'MHT',
+                          grepl('^chibarsquare$',method)  ~ 'Chi-bar^2',
+                          grepl('^follman$',method)   ~ 'Follman',
+                          grepl('^loglog$',method)    ~ 'Chi-bar^2 + loglog',
+                          grepl('^spa$',method)       ~ 'MHT + loglog',
+                          TRUE ~ 'ERROR')) %>%
+  mutate(fmethod=factor(method,
+                        levels=c('Cond. est.',
+                                 'MHT',
+                                 'MHT + loglog',  
+                                 'Chi-bar^2',
+                                 'Chi-bar^2 + loglog',
+                                 'Follman',
+                                 'ERROR'))) %>%
+  mutate(gmethod=factor(gmethod,
+                        levels=c('Cond. est.',
+                                 'MHT (+/-)',
+                                 'Chi-bar^2 (+/-)',
+                                 'Follman',
+                                 'ERROR'))) %>%
+  mutate(mutype=case_when(mutype=='equal'     ~ 'all-equal',
+                          mutype=='halfgood'  ~ 'half-good',
+                          mutype=='onegood'   ~ 'one-good',
+                          mutype=='twogood'   ~ 'two-good',
+                          TRUE ~ 'ERROR')) %>%
+  mutate(mutype=factor(mutype,levels=c('all-equal','half-good','two-good','one-good'))) %>%
+  mutate(lt=ifelse(grepl('loglog$',method),'yes','no')) %>%
+  mutate(mp=sqrt(ope)*popvals) # in years
+@
 
 
-<<'power_plotz_one',dependson=c('sims_vs_mht','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+
+
+<<'power_plotz_old_one',dependson=c('proc_sims_vs','plot_funcs'),echo=FALSE,eval=FALSE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0("The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures ",
                   'are shown versus the \\txtSNR of the asset with maximum \\txtSR under different arrangements of the vector \\pvsnr. ',
                   "For the one-good case, the chi-bar-square and Follman's test have the same power, which is essentially zero under the alternative. ")
@@ -2076,28 +2139,100 @@ ph <- resu %>%
        title='power of tests')
 print(ph)
 @
+<<'power_plotz_one_a',dependson=c('proc_sims_vs','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+fig_cap <- paste0("The empirical power of the conditional estimation test, ",
+                  #"MHT corrected test, ",
+                  "Follman's test, ",
+                  #"the chi-bar-square test, ",
+                  "and the chi-bar-square and MHT tests with Hansen's $\\log\\log$ correction ",
+                  "are shown versus the \\txtSNR of the asset with maximum \\txtSR under ",
+                  "different arrangements of the vector \\pvsnr. ",
+                  "For the one- and two-good cases, Follman's test has essentially zero power under the alternative. ")
+
+
+library(ggplot2)
+set.seed(1234)
+ph <- plotresu %>%
+  filter(method %in% c('Cond. est.','MHT + loglog','Chi-bar^2 + loglog','Follman')) %>%
+  #ggplot(aes(mp,rej_rate,color=method,linetype=lt))  +
+  #ggplot(aes(mp,rej_rate,color=fmethod)) + 
+  ggplot(aes(popvals,rej_rate,color=fmethod)) + 
+  geom_line(alpha=0.8) + 
+  #geom_jitter(aes(shape=fmethod),height=0,width=0.005) + 
+  geom_point(aes(shape=fmethod)) + 
+  facet_grid(.~mutype,scales='free_x') + 
+  geom_hline(yintercept=0.05,linetype=2,alpha=0.7) + 
+  scale_y_continuous(labels=scales::percent) + 
+  labs(x=expression('Signal noise ratio ('~day^{-1/2}~')'),
+       y='Rejection rate at nominal 0.05 level',
+       color='Method',
+       shape='Method', #shape='statistic',
+       #linetype='Hansen correction?',
+       title='Rejection rate of tests')
+print(ph)
+@
+<<'power_plotz_one_b',dependson=c('proc_sims_vs','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+fig_cap <- paste0("The empirical power of the ",
+                  "MHT corrected test, ",
+                  #"Follman's test, ",
+                  "the chi-bar-square test, ",
+                  # "and the chi-bar-square and MHT tests with Hansen's $\\log\\log$ correction ",
+                  "with and without Hansen's $\\log\\log$ correction, ",
+                  "are shown versus the \\txtSNR of the asset with maximum \\txtSR under ",
+                  'different arrangements of the vector \\pvsnr. ')
+                  #'We jitter the points horizontally to distinguish tests with very similar rejection rates. ')
+
+library(ggplot2)
+set.seed(1234)
+ph <- plotresu %>%
+  filter(method %in% c('MHT','MHT + loglog','Chi-bar^2','Chi-bar^2 + loglog')) %>%
+  # ggplot(aes(mp,rej_rate,group=interaction(gmethod,lt),color=gmethod)) + 
+  ggplot(aes(popvals,rej_rate,group=interaction(gmethod,lt),color=gmethod)) + 
+  geom_line(aes(linetype=lt),alpha=0.8) + 
+  #geom_jitter(aes(shape=fmethod),height=0,width=0.005) + 
+  geom_point(aes(shape=gmethod)) + 
+  facet_grid(.~mutype,scales='free_x') + 
+  geom_hline(yintercept=0.05,linetype=2,alpha=0.7) + 
+  scale_y_continuous(labels=scales::percent) + 
+  labs(x=expression('Signal noise ratio ('~day^{-1/2}~')'),
+       y='Rejection rate at nominal 0.05 level',
+       color='Method',
+       shape='Method', #shape='statistic',
+       linetype='Hansen correction?',
+       title='Rejection rate of tests')
+print(ph)
+@
+
 
 
 
 The power of the conditional estimation procedure for the all-equal
 and half-good cases is rather disappointing. 
 For the case where all assets have a \txtSNR of
-$\Sexpr{signif(sqrt(252) * max(params$one_zeta),2)}\yrto{-\halff}$,
-the test has a power of only around a half.
+$\Sexpr{signif(sqrt(252) * max(params$one_zeta),2)}\yrto{-\halff}$, 
+which should be considered very very large, the test has a power of only around a half.
 The test suffers from low power because we are conditioning on
-``\ssr[1] is the largest \txtSR'', where we should actually
-be conditioning on ``the asset with the largest \txtSR, whichever one that is.''
+``\ssr[1] is the largest \txtSR'', but we should actually
+like to condition on ``the asset with the largest \txtSR, whichever one that is.''
 That is, there is no recognition here that if another asset 
 had exhibited higher \txtSR, we would have selected that one instead.
+It is not clear if that distinction can be meaningfully integrated
+into this testing procedure.
 
-Note the odd plot in the half-good facet: the MHT correction
+However, we caution that the apparent low power of the conditional inference
+test in comparison to tests based on MHT is that the latter are rejecting
+a different null, and can actually have much higher type I rate under
+the conditional null.
+Among these tested alternatives, this effects is most visible in the
+half-good facet, where
+the MHT correction
 and one-sided tests have greater
 than $0.05$ rejection rate for \emph{negative} \txtSNR. 
 Some clarification is required here.
 %The plot is somewhat misleading under this alternative, however.
 We have performed
 $\Sexpr{mht_nsim}$ simulations for each setting of the `good'
-\txtSNR; in some small number of them for the half-good
+\txtSNR; in some number of them for the half-good
 case, an asset with negative \txtSNR exhibits the maximum
 \txtSR. 
 We are plotting the rejection rate for the test in this case.
@@ -2105,35 +2240,31 @@ But note that the null hypothesis that MHT and the one-sided test are testing
 \emph{is} violated in this case, because half the assets
 have positive \txtSNR, and the alternative procedures test the null that all
 assets have zero or lower \txtSNR.
-This is the down side of the apparently higher power of the tests based on the MHT:
-they do not maintain the nominal rate for the conditional null and thus can exhibit 
-higher than nominal type I rate.
-However, it should be rare that the selected asset is `bad' while other assets are actually `good'.
-We have not shown the probability that a `bad' asset has the
-highest \txtSR, but note that when the `good' \txtSNR
-is greater than $0.05\dayto{-\halff}$ we do not observe this
-occuring even once over the $\Sexpr{mht_nsim}$ simulations performed
-for each setting. 
+Tests based on the MHT do not maintain the nominal type I rate under the conditional null.
+While the probability of selecting a `bad' asset instead of a `good' one is going to be very
+low, especially when there is a large gap between the \txtSNRs of the good and the bad assets,
+it is troubling that when this occurs, tests based on the MHT can fail with high probability.
 
-We note that the chi-bar-square test appears to have higher power than 
-the other tests for the all-equal and half-good populations,
-but fails to reject at all in the one-good case, except under the null.
-This is to be expected, since the chi-bar-square test depends strongly
-on all the observed \txtSRs, and in this case we expect many of them
-to be negative.
-The $\log\log$ adjustment has little effect in the all-equal and half-good case,
-but greatly improves the power of the MHT and chi-bar square tests
-in the one-good case. 
-For this sample size, Hansen's adjustment nearly maintains the nominal
-type I rate under the null, though this is unlikely to hold for smaller
-\ssiz.
+%We note that the chi-bar-square test appears to have higher power than 
+%the other tests for the all-equal and half-good populations,
+%but fails to reject at all in the one-good case, except under the null.
+%This is to be expected, since the chi-bar-square test depends strongly
+%on all the observed \txtSRs, and in this case we expect many of them
+%to be negative.
+%The $\log\log$ adjustment has little effect in the all-equal and half-good case,
+%but greatly improves the power of the MHT and chi-bar square tests
+%in the one-good case. 
+%For this sample size, Hansen's adjustment nearly maintains the nominal
+%type I rate under the null, though this is unlikely to hold for smaller
+%\ssiz.
 
-It is interesting to note that while the conditional estimation procedure
-generally has lower power than the other tests (except in the one-good case),
+On the other hand, while the conditional estimation procedure exhibits
+lower power than the other tests (except in the one-good case),
 it appears to have monotonic rejection probability with respect to the
-\txtSNR of the \emph{selected} asset.
+\txtSNR of the \emph{selected} asset in all configurations tested.
 That is, in the half-good case, it has low rejection probability in the odd
-simulations where a `bad' asset is selected. 
+simulations where a `bad' asset is selected because it is actually designed
+for testing the conditional null.
 This pattern is repeated in the following set of simulations under the alternative.
 
 % do it again, but let the pvsnr be weirdly distributed.
@@ -2170,12 +2301,58 @@ one_zeta_an <- sqrt(252)*one_zeta
 
 uni_sim <- tibble(mu=gen_mu(nstrat=mht_nstrat,one_zeta=one_zeta,mutype='uniform'),mutype='uniform')
 bel_sim <- tibble(mu=gen_mu(nstrat=mht_nstrat,one_zeta=one_zeta,mutype='bellshaped'),mutype='bellshaped')
+
+plotresu_two <- resu_two %>%
+  filter(method!='norho_mht') %>%  # we are using rho=0, so should be the same
+  mutate(shapel=case_when(grepl('^condest$',method)   ~ 'Cond. est.',
+                          grepl('^mht|spa$',method)   ~ 'MHT',
+                          grepl('^(chibarsquare|loglog)$',method)  ~ 'Chi-bar^2',
+                          grepl('^follman$',method)   ~ 'Follman',
+                          TRUE ~ 'ERROR')) %>%
+  mutate(gmethod=case_when(grepl('^condest$',method)   ~ 'Cond. est.',
+                          grepl('^mht$',method)       ~ 'MHT (+/-)',
+                          grepl('^chibarsquare$',method)  ~ 'Chi-bar^2 (+/-)',
+                          grepl('^follman$',method)   ~ 'Follman',
+                          grepl('^loglog$',method)    ~ 'Chi-bar^2 (+/-)',
+                          grepl('^spa$',method)       ~ 'MHT (+/-)',
+                          TRUE ~ 'ERROR')) %>%
+  mutate(method=case_when(grepl('^condest$',method)   ~ 'Cond. est.',
+                          grepl('^mht$',method)       ~ 'MHT',
+                          grepl('^chibarsquare$',method)  ~ 'Chi-bar^2',
+                          grepl('^follman$',method)   ~ 'Follman',
+                          grepl('^loglog$',method)    ~ 'Chi-bar^2 + loglog',
+                          grepl('^spa$',method)       ~ 'MHT + loglog',
+                          TRUE ~ 'ERROR')) %>%
+  mutate(fmethod=factor(method,
+                        levels=c('Cond. est.',
+                                 'MHT',
+                                 'MHT + loglog',  
+                                 'Chi-bar^2',
+                                 'Chi-bar^2 + loglog',
+                                 'Follman',
+                                 'ERROR'))) %>%
+  mutate(gmethod=factor(gmethod,
+                        levels=c('Cond. est.',
+                                 'MHT (+/-)',
+                                 'Chi-bar^2 (+/-)',
+                                 'Follman',
+                                 'ERROR'))) %>%
+  mutate(mutype=case_when(mutype=='equal'     ~ 'all-equal',
+                          mutype=='halfgood'  ~ 'half-good',
+                          mutype=='onegood'   ~ 'one-good',
+                          mutype=='twogood'   ~ 'two-good',
+                          mutype=='uniform'   ~ 'uniform',
+                          mutype=='bellshaped'   ~ 'bell-shaped',
+                          TRUE ~ 'ERROR')) %>%
+  mutate(mutype=factor(mutype,levels=c('uniform','bell-shaped'))) %>%
+  mutate(lt=ifelse(grepl('loglog$',method),'yes','no')) %>%
+  mutate(mp=sqrt(ope)*popvals) # in years
 @
 
-It is clear from these simulations that there are many different configurations of the alternative:
-we should be concerned about \ssiz, \nstrat, the correlation of returns (we have made returns independent here),
-and the \txtSNR of the selected strategy, but also the distribution of the elements of \pvsnr.
-It is unlikely that the three distributions of $\pvsnr$ considered above will be encountered in real world applications;
+%It is clear from these simulations that there are many different configurations of the alternative:
+%we should be concerned about \ssiz, \nstrat, the correlation of returns (we have made returns independent here),
+%and the \txtSNR of the selected strategy, but also the distribution of the elements of \pvsnr.
+It is unlikely that the four distributions of $\pvsnr$ considered above will be encountered in real world applications;
 rather we anticipate that the elements of \pvsnr will have a distribution which is bell-shaped or even flat.
 We simulate these cases, estimating the power of the various tests as a function of the \txtSNR of the selected asset.
 
@@ -2193,6 +2370,13 @@ fig_cap <- paste0("The counts of the values of \\pvsnr are shown for the uniform
 # 66fc499b-66e3-49cd-b24a-f651b8dc9601 
 library(ggplot2)
 ph <- bind_rows(bel_sim,uni_sim) %>%
+  mutate(mutype=case_when(mutype=='equal'     ~ 'all-equal',
+                          mutype=='halfgood'  ~ 'half-good',
+                          mutype=='onegood'   ~ 'one-good',
+                          mutype=='twogood'   ~ 'two-good',
+                          mutype=='uniform'   ~ 'uniform',
+                          mutype=='bellshaped'   ~ 'bell-shaped',
+                          TRUE ~ 'ERROR')) %>%
   ggplot(aes(x=mu,group=mutype,color=mutype,fill=mutype)) + 
   geom_bar(position='dodge') +
   #scale_x_continuous(labels=scales::comma_format(suffix=' /sqrt(day)')) + 
@@ -2206,7 +2390,7 @@ print(ph)
 In \figref{power_plotz_two} we plot the empirical rejection rates for the various tests 
 under these two distributions of \pvsnr.
 The rejection rate is plotted against the \txtSNR of the selected strategy, \psnr[1].
-We note that in some unlucky cases $\psnr[1] \le 0$ even though the maximum element of \pvsnr is
+We note that in some unlucky cases $\psnr[1]$ is small or even negative even though the maximum element of \pvsnr is
 significantly positive.
 As seen above, the conditional procedure maintains the near nominal type I rate of 0.05 when $\psnr[1] = 0$,
 with modest power when $\psnr[1] > 0$.
@@ -2221,9 +2405,15 @@ For both the uniform and bell-shaped \pvsnr, the probability that $\psnr[1] \le 
 with smaller chance under the uniform distribution.
 Thus the likelihood of making this kind of conditional type I error when using MHT tests is perhaps low,
 it is not zero.
+However, if a conditional type I error rate must be maintained, the MHT tests should be considered unacceptable.
 
 <<'power_plotz_two',dependson=c('sims_vs_mht_two','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
-fig_cap <- paste0("The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures ",
+fig_cap <- paste0("The empirical power of ",
+                  "the conditional estimation, ",
+                  #"MHT corrected test, ",
+                  #"chi-bar-square test, ",
+                  "Follman's test, ",
+                  "Hansen's SPA and corrected chi-bar-square procedures ",
                   'are shown versus the \\txtSNR of the asset with maximum \\txtSR for the uniform and bell-shaped arrangements of the vector \\pvsnr. ',
                   "We perform ",scales::comma(mht_nsim)," simulations with $\\ssiz=",mht_nday,"$, $\\nstrat=",mht_nstrat,"$. ",
                   "Cases with low incidence were removed as the simulated rejection rates are not representative. ")
@@ -2248,6 +2438,19 @@ ph <- resu_two %>%
                           mutype=='uniform'   ~ 'uniform',
                           mutype=='bellshaped'   ~ 'bell-shaped',
                           TRUE ~ 'ERROR')) %>%
+  ggplot(aes(popvals,rej_rate,color=method))  +
+  geom_line() + geom_point() +
+  facet_grid(.~mutype) + # ,scales='free_x') + 
+  geom_hline(yintercept=0.05,linetype=2,alpha=0.7) + 
+  geom_vline(xintercept=0.0,linetype=2,alpha=0.3) + 
+  labs(x='signal noise ratio',
+       y='rejection rate at nominal 0.05 level',
+       color='method',
+       title='power of tests')
+#print(ph)
+ph <- plotresu_two %>%
+  filter(method %in% c('Cond. est.','MHT + loglog','Chi-bar^2 + loglog','Follman')) %>%
+  filter(tot_base > 8) %>%
   ggplot(aes(popvals,rej_rate,color=method))  +
   geom_line() + geom_point() +
   facet_grid(.~mutype) + # ,scales='free_x') + 
@@ -2364,14 +2567,15 @@ fig_cap <- paste0('The empirical type I rate under the null hypothesis is plotte
                   'Empirical rates are over ',prettyNum(mht_null_nsim,big.mark=','),' simulations. The $y$ axis is in log scale.')
 library(ggplot2)
 ph <- rhoresu %>%
-  mutate(method=case_when(grepl('^condest$',method)   ~ 'cond. est.',
-                          grepl('^norho_mht$',method) ~ 'vanilla MHT',
-                          grepl('^mht$',method)       ~ 'fixed MHT',
-                          grepl('^chibarsquare$',method)  ~ 'chi-bar^2',
+  mutate(method=case_when(grepl('^condest$',method)   ~ 'Cond. est.',
+                          grepl('^norho_mht$',method) ~ 'Vanilla MHT',
+                          grepl('^mht$',method)       ~ 'Fixed MHT',
+                          grepl('^chibarsquare$',method)  ~ 'Chi-bar^2',
                           grepl('^follman$',method)   ~ 'Follman',
-                          grepl('^loglog$',method)    ~ 'Hansen chi-bar^2',
-                          grepl('^spa$',method)       ~ 'Hansen SPA',
+                          grepl('^loglog$',method)    ~ 'Chi-bar^2 + loglog',
+                          grepl('^spa$',method)       ~ 'MHT + loglog',
                           TRUE ~ 'ERROR')) %>%
+  filter(method %in% c('Vanilla MHT','Cond. est.','MHT + loglog','Chi-bar^2 + loglog','Follman')) %>%
   ggplot(aes(rho,rej_rate,color=method))  +
   geom_line() + geom_point() +
   geom_hline(yintercept=0.05,linetype=2,alpha=0.7) + 
@@ -2575,15 +2779,13 @@ kurtotic returns.
 The procedure can be used for other test configurations beyond the
 asset with the maximum \txtSR,
 and can be used to construct confidence intervals.
-It appears to have low power when many assets have the
-same \txtSNR, 
-but appears to have low rejection probability when the selected
-asset has low \txtSNR, which sets it apart from all of the
-other procedures tested.
+It appears to have low power compared to tests based on the MHT for
+some test configurations.
+However MHT tests can have very high conditional type I rates in those unlikely 
+cases where an asset with low \txtSNR is selected,
+while the conditional estimation procedure maintains the type I rate in this case.
 
-2FIX: \emph{rewrite this a little...}
-
-Clearly the low power of the test gives us reason to seek improvements.
+The low power of the test gives us reason to seek improvements.
 Perhaps the conditioning procedure can be adapted to recognize
 that the strategist would have been testing another asset if the
 \txtSR of the currently selected asset had been lower. 

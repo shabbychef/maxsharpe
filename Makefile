@@ -51,7 +51,7 @@ STY_FILES    =
 #aspell
 ASPELL_FLAGS = 
 
-ARXIV_VERSION  			?= v7
+ARXIV_VERSION  			?= v8
 ARXIV_TAG 					 = $(PROJECT)_$(ARXIV_VERSION)
 # arxiv accepts tarfiles. this is great.
 ARXIV_TAR 					?= $(PROJECT)_$(ARXIV_VERSION).tar.gz

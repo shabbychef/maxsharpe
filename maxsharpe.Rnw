@@ -492,7 +492,7 @@ The conditional estimation test has low power under the alternative
 where there is little spread in the \txtSNRs of the assets, 
 and high power under the alternative where a single asset has high \txtSNR.
 Unlike the alternative procedures, it appears to enjoy rejection probabilities
-montonic in the \txtSNR of the selected asset, 
+monotonic in the \txtSNR of the selected asset, 
 and actually maintains near-nominal rejection rates under the conditional null.
 \end{abstract}%UNFOLD
 

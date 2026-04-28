@@ -2506,6 +2506,103 @@ one dominates the others.
 
 \clearpage
 
+\subsection{Simulations of false discovery rate}
+% 2FIX
+% HERE
+
+Something something False Discovery Rate...
+
+<<'sims_fdr',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('mhtsim_func','runtime')>>=
+suppressMessages({
+  library(tidyr)
+  library(dplyr)
+  library(doFuture)
+})
+
+#check_types <- c('onegood','halfgood','uniform','bellshaped')
+#check_types <- c('uniform','bellshaped')
+check_types <- c('onegood','uniform','bellshaped')
+
+# actual run the sims
+params <- data_frame(one_zeta=seq(0.0025,0.045,length.out=9)) %>%
+  tidyr::crossing(data_frame(mutype=check_types))
+
+mht_fdr_nsim <- ceiling(2e4/max(1,RUNTIME_PARAM))
+mht_nday <- ceiling(252 * (1 + (3/max(1,RUNTIME_PARAM))))
+mht_nstrat <- ceiling(25 + (80/max(1,RUNTIME_PARAM)))
+
+# for testing:
+mht_fdr_nsim <- 20000
+
+registerDoFuture()
+plan(multicore)
+set.seed(123)
+
+resu_fdr <- params %>%
+  group_by(one_zeta,mutype) %>%
+    summarize(resu=list(bot_rawsim(nday=mht_nday,nstrat=mht_nstrat,one_zeta=one_zeta,nsim=mht_fdr_nsim,mutype=mutype))) %>%
+  ungroup() %>%
+  unnest()
+plan(sequential)
+@
+
+<<'collect_sims_fdr',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('sims_fdr')>>=
+# calculate FDR
+alpha <- 0.05
+fdr_data <- resu_fdr %>%
+  mutate(is_rej = pvals < alpha,
+         is_null = popvals <= 0) %>%
+  group_by(one_zeta, mutype, method) %>%
+  summarize(fp_count = sum(is_rej & is_null),
+            tp_count = sum(is_rej & !is_null),
+            rej_count = sum(is_rej)) %>%
+  ungroup() %>%
+  mutate(fdr = (fp_count + 0.5)/(rej_count + 1.0)) %>%
+  mutate(one_zeta_an = one_zeta * sqrt(252)) %>%
+  mutate(method_lab=case_when(method=='condest'  ~ 'Cond. est.',
+                              method=='mht'  ~ 'MHT',
+                              method=='chibarsquare'  ~ 'chi-bar^2',
+                              method=='follman' ~ 'Follman',
+                              method=='loglog'  ~ 'Hansen chi-bar^2',
+                              method=='spa'     ~ 'Hansen SPA',
+                              method=='norho_mht' ~ 'Vanilla MHT',   # assumed independent.
+                              TRUE ~ 'ERROR')) %>%
+  mutate(mutype_lab=case_when(mutype=='equal'     ~ 'all-equal',
+                          mutype=='halfgood'  ~ 'half-good',
+                          mutype=='onegood'   ~ 'one-good',
+                          mutype=='twogood'   ~ 'two-good',
+                          mutype=='uniform'   ~ 'uniform',
+                          mutype=='bellshaped'   ~ 'bell-shaped',
+                          TRUE ~ 'ERROR'))
+@
+
+<<'plot_fdr',dependson=c('collect_sims_fdr','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+fig_cap <- paste0("The empirical False Discovery Rate (FDR) of the ",
+                  "conditional estimation and MHT procedures ",
+                  "are shown versus the maximum population \\txtSNR for various arrangements of the true \\txtSNR. ",
+                  "The FDR is defined as the probability that the asset with maximum \\txtSR is null ($\\zeta \\le 0$) ",
+                  "conditional on the test rejecting the null, ",
+                  "in other words, the false positive rate divided by the rejection rate. ",
+                  "We perform ",scales::comma(mht_fdr_nsim)," simulations with $\\ssiz=",mht_nday,"$, $\\nstrat=",mht_nstrat,"$. ")
+
+  #filter(method %in% c('condest','mht','loglog')) %>%
+  #filter(method %in% c('condest','mht','follman','spa')) %>%
+  #filter(method %in% c('condest','mht','norho_mht','chibarsquare')) %>%
+  #geom_hline(yintercept=0.05,linetype=2,alpha=0.7) +
+fdr_data %>%
+  filter(method %in% c('condest','mht','chibarsquare')) %>%
+  ggplot(aes(x=one_zeta_an, y=fdr, color=method_lab, shape=method_lab)) +
+  geom_line() + geom_point() +
+  facet_grid(.~mutype_lab) +
+  labs(x='maximum population signal noise ratio',
+       y='False Discovery Rate',
+       color='method', shape='method',
+       title='False Discovery Rate of tests')
+@
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
 \subsection{Simulations under the null with correlated returns}
 %FOLDUP
 

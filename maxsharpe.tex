@@ -378,7 +378,7 @@
 \author{Steven E. Pav \thanks{\email{steven@gilgamath.com}.
 The source code to build this document is available at
 \href{http://www.github.com/shabbychef/maxsharpe}{\normalfont\texttt{www.github.com/shabbychef/maxsharpe}}.
-The document you are reading was built from commit \texttt{f550f045c1ffa218ec4360a2a4be63535f87571f} of that repo.
+The document you are reading was built from commit \texttt{\gitHash} of that repo.
 }}
 %The code to build this document is available at
 %\href{http://www.github.com/shabbychef/qbound}{\normalfont\texttt{www.github.com/shabbychef/qbound}}.
@@ -1296,7 +1296,7 @@ near the selected $q$.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_motherload_sims_hidden_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law]{The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law. Given the large sample size, a Q-Q plot is visually hard to interpret. Instead, for selected $q$, we compute the proportion of our putative p-values less than $q$. We then compute $\Delta = \wrapParens{\mbox{Prop }\le q} - q$ against $q$. Using the binomial law, we plot approximate error bars around the $x$ axis that indicate where the points should fall with approximately $95\%$ confidence. Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:motherload_sims_hidden_plotz}
+\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_motherload_sims_hidden_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law]{The computed p-values from the conditional estimation procedure over 1e+05 simulations are compared to a uniform law. Given the large sample size, a Q-Q plot is visually hard to interpret. Instead, for selected $q$, we compute the proportion of our putative p-values less than $q$. We then compute $\Delta = \wrapParens{\mbox{Prop }\le q} - q$ against $q$. Using the binomial law, we plot approximate error bars around the $x$ axis that indicate where the points should fall with approximately $95\%$ confidence. Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:motherload_sims_hidden_plotz}
 \end{figure}
 
 \end{knitrout}
@@ -1329,7 +1329,7 @@ elements of the estimate of \RMAT.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_sims_log_plotz-1} \caption[The computed p-values from the conditional estimation procedure using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr are used in this sampled CDF plot]{The computed p-values from the conditional estimation procedure using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr are used in this sampled CDF plot. P values are computed over 10000 simulations. For selected $q$, we compute the proportion of our putative p-values less than $q$. We then compute $\Delta = \wrapParens{\mbox{Prop }\le q} - q$ against $q$. Using the binomial law, we plot approximate error bars around the $x$ axis that indicate where the points should fall with approximately $95\%$ confidence. Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:causal_sims_log_plotz}
+\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_causal_sims_log_plotz-1} \caption[The computed p-values from the conditional estimation procedure using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr are used in this sampled CDF plot]{The computed p-values from the conditional estimation procedure using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr are used in this sampled CDF plot. P values are computed over 1e+05 simulations. For selected $q$, we compute the proportion of our putative p-values less than $q$. We then compute $\Delta = \wrapParens{\mbox{Prop }\le q} - q$ against $q$. Using the binomial law, we plot approximate error bars around the $x$ axis that indicate where the points should fall with approximately $95\%$ confidence. Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:causal_sims_log_plotz}
 \end{figure}
 
 \end{knitrout}
@@ -1382,7 +1382,7 @@ in the sense that nominal type I rates may not be maintained.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_many_sims_plotz-1} \caption[Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\ssiz$ with facets for $\rho$]{Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\ssiz$ with facets for $\rho$.  Broadly we see that the test statistic is less uniform in the regime where $\ssiz$ is small, but this is muted by a large positive correlation $\rho$.}\label{fig:many_sims_plotz}
+\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_many_sims_plotz-1} \caption[Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\ssiz$ with facets for $\rho$]{Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\ssiz$ with facets for $\rho$.  Broadly we see that the test statistic is less uniform in the regime where $\ssiz$ is small, but this is muted by a large positive correlation $\rho$.}\label{fig:many_sims_plotz}
 \end{figure}
 
 \end{knitrout}
@@ -1418,7 +1418,7 @@ We remain cautiously optimistic that for large \ssiz, one need not correct
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 10000 simulations are plotted using our sampled CDF procedure]{The computed p-values from the conditional estimation procedure over 10000 simulations are plotted using our sampled CDF procedure. Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Without correcting for higher order moments, the procedure has higher than nominal type I rate; with the correction it has slightly smaller than the nominal rate. }\label{fig:causal_tfive_sims_plotz}
+\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 10000 simulations are plotted using our sampled CDF procedure]{The computed p-values from the conditional estimation procedure over 10000 simulations are plotted using our sampled CDF procedure. Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Without correcting for higher order moments, the procedure has higher than nominal type I rate; with the correction it has slightly smaller than the nominal rate. }\label{fig:causal_tfive_sims_plotz}
 \end{figure}
 
 \end{knitrout}
@@ -1536,13 +1536,13 @@ as evidenced later in \figref{rho_plotz_one}.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_one_a-1} \caption[The empirical power of the conditional estimation test, Follman's test, and the chi-bar-square and MHT tests with Hansen's $\log\log$ correction are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr]{The empirical power of the conditional estimation test, Follman's test, and the chi-bar-square and MHT tests with Hansen's $\log\log$ correction are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr. For the one- and two-good cases, Follman's test has essentially zero power under the alternative. }\label{fig:power_plotz_one_a}
+\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_power_plotz_one_a-1} \caption[The empirical power of the conditional estimation test, Follman's test, and the chi-bar-square and MHT tests with Hansen's $\log\log$ correction are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr]{The empirical power of the conditional estimation test, Follman's test, and the chi-bar-square and MHT tests with Hansen's $\log\log$ correction are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr. For the one- and two-good cases, Follman's test has essentially zero power under the alternative. }\label{fig:power_plotz_one_a}
 \end{figure}
 
 \end{knitrout}
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_one_b-1} \caption[The empirical power of the MHT corrected test, the chi-bar-square test, with and without Hansen's $\log\log$ correction, are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr]{The empirical power of the MHT corrected test, the chi-bar-square test, with and without Hansen's $\log\log$ correction, are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr. }\label{fig:power_plotz_one_b}
+\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_power_plotz_one_b-1} \caption[The empirical power of the MHT corrected test, the chi-bar-square test, with and without Hansen's $\log\log$ correction, are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr]{The empirical power of the MHT corrected test, the chi-bar-square test, with and without Hansen's $\log\log$ correction, are shown versus the \txtSNR of the asset with maximum \txtSR under different arrangements of the vector \pvsnr. }\label{fig:power_plotz_one_b}
 \end{figure}
 
 \end{knitrout}
@@ -1630,7 +1630,7 @@ Under the bell-shaped simulations, the \pvsnr takes the same range but with more
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_pvsnr_distribution-1} \caption[The counts of the values of \pvsnr are shown for the uniform and bell-shaped simulations under the alternative]{The counts of the values of \pvsnr are shown for the uniform and bell-shaped simulations under the alternative. The \txtSNR is given in daily units, $\dayto{-\halff}$.}\label{fig:power_plotz_pvsnr_distribution}
+\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_power_plotz_pvsnr_distribution-1} \caption[The counts of the values of \pvsnr are shown for the uniform and bell-shaped simulations under the alternative]{The counts of the values of \pvsnr are shown for the uniform and bell-shaped simulations under the alternative. The \txtSNR is given in daily units, $\dayto{-\halff}$.}\label{fig:power_plotz_pvsnr_distribution}
 \end{figure}
 
 \end{knitrout}
@@ -1656,13 +1656,13 @@ However, if a conditional type I error rate must be maintained, the MHT tests sh
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_two-1} \caption[The empirical power of the conditional estimation, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR for the uniform and bell-shaped arrangements of the vector \pvsnr]{The empirical power of the conditional estimation, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR for the uniform and bell-shaped arrangements of the vector \pvsnr. We perform 50,000 simulations with $\ssiz=1008$, $\nstrat=105$. Cases with low incidence were removed as the simulated rejection rates are not representative. }\label{fig:power_plotz_two}
+\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_power_plotz_two-1} \caption[The empirical power of the conditional estimation, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR for the uniform and bell-shaped arrangements of the vector \pvsnr]{The empirical power of the conditional estimation, Follman's test, Hansen's SPA and corrected chi-bar-square procedures are shown versus the \txtSNR of the asset with maximum \txtSR for the uniform and bell-shaped arrangements of the vector \pvsnr. We perform 50,000 simulations with $\ssiz=1008$, $\nstrat=105$. Cases with low incidence were removed as the simulated rejection rates are not representative. }\label{fig:power_plotz_two}
 \end{figure}
 
 \end{knitrout}
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_power_plotz_two_sel_prob-1} \caption[The probability that $\psnrone$, the \txtSNR of the asset selected for having the maximum \txtSR, takes a given value in our simulations is shown]{The probability that $\psnrone$, the \txtSNR of the asset selected for having the maximum \txtSR, takes a given value in our simulations is shown. The $y$ axis is in square root space to show detail.}\label{fig:power_plotz_two_sel_prob}
+\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_power_plotz_two_sel_prob-1} \caption[The probability that $\psnrone$, the \txtSNR of the asset selected for having the maximum \txtSR, takes a given value in our simulations is shown]{The probability that $\psnrone$, the \txtSNR of the asset selected for having the maximum \txtSR, takes a given value in our simulations is shown. The $y$ axis is in square root space to show detail.}\label{fig:power_plotz_two_sel_prob}
 \end{figure}
 
 \end{knitrout}
@@ -1676,6 +1676,33 @@ one dominates the others.
 
 \clearpage
 
+\subsection{Simulations of false discovery rate}
+% 2FIX
+% HERE
+
+Something something False Discovery Rate...
+
+
+
+
+
+% go.
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
+\includegraphics[width=0.975\textwidth,height=0.682\textwidth]{figure/maxsharpe_plot_fdr-1} \caption{The empirical positive False Discovery Rate (pFDR) of the conditional estimation and MHT procedures are shown versus the maximum population \txtSNR for various arrangements of the true \txtSNR. The pFDR is defined as the probability that the asset with maximum \txtSR is null ($\zeta \le 0$) conditional on the test rejecting the null, in other words, the false positive rate divided by the rejection rate. \cite{10.1111/1467-9868.00346} We perform 50,000 simulations with $\ssiz=1008$, $\nstrat=105$. }\label{fig:plot_fdr}
+\end{figure}
+
+\end{knitrout}
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
+\includegraphics[width=0.975\textwidth,height=0.682\textwidth]{figure/maxsharpe_plot_fdr_II-1} \caption{The empirical positive False Discovery Rate (pFDR) of the conditional estimation and MHT procedures are shown versus the maximum population \txtSNR for various arrangements of the true \txtSNR. The pFDR is defined as the probability that the asset with maximum \txtSR is null ($\zeta \le 0$) conditional on the test rejecting the null, in other words, the false positive rate divided by the rejection rate. \cite{10.1111/1467-9868.00346} We perform 50,000 simulations with $\ssiz=1008$, $\nstrat=105$. }\label{fig:plot_fdr_II}
+\end{figure}
+
+\end{knitrout}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
 \subsection{Simulations under the null with correlated returns}
 %FOLDUP
 
@@ -1702,7 +1729,7 @@ yielding nominal rejection rates.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for several testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for several testing procedures: the conditional estimation, the chi-bar square test, Follman's test, the vanilla Bonferroni correction, Hansen's corrected chi-bar-square and SPA tests, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 20 assets over 504 days. Tests were performed at the $0.05$ level, which appears to be maintained by all procedures except the regular Bonferroni procedure, and Hansen's chi-bar-square test, which has slightly higher than nominal rejection rates for this \ssiz. Empirical rates are over 10,000 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
+\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for several testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for several testing procedures: the conditional estimation, the chi-bar square test, Follman's test, the vanilla Bonferroni correction, Hansen's corrected chi-bar-square and SPA tests, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 20 assets over 504 days. Tests were performed at the $0.05$ level, which appears to be maintained by all procedures except the regular Bonferroni procedure, and Hansen's chi-bar-square test, which has slightly higher than nominal rejection rates for this \ssiz. Empirical rates are over 10,000 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
 \end{figure}
 
 \end{knitrout}
@@ -1729,8 +1756,8 @@ Healthcare with a \txtSR of
 around $0.193\,\moto{-\halff}$ which is approximately
 $0.669\,\yrto{-\halff}$.
 
-% latex table generated in R 4.5.0 by xtable 1.8-4 package
-% Sun Jan  4 17:21:53 2026
+% latex table generated in R 4.5.2 by xtable 1.8-4 package
+% Sat May  2 07:40:49 2026
 \begin{table}[ht]
 \centering
 \begin{tabular}{r|c}

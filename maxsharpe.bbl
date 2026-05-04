@@ -1,4 +1,4 @@
-\begin{thebibliography}{34}
+\begin{thebibliography}{35}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -223,6 +223,15 @@ David Slepian.
 \newblock \doi{10.1002/j.1538-7305.1962.tb02419.x}.
 \newblock URL
   \url{https://onlinelibrary.wiley.com/doi/abs/10.1002/j.1538-7305.1962.tb02419.x}.
+
+\bibitem[Storey(2002)]{10.1111/1467-9868.00346}
+John~D. Storey.
+\newblock A direct approach to false discovery rates.
+\newblock \emph{Journal of the Royal Statistical Society Series B: Statistical
+  Methodology}, 64\penalty0 (3):\penalty0 479--498, 08 2002.
+\newblock ISSN 1369-7412.
+\newblock \doi{10.1111/1467-9868.00346}.
+\newblock URL \url{https://doi.org/10.1111/1467-9868.00346}.
 
 \bibitem[Vignat and Bhatnagar(2007)]{vignat2007extension}
 C.~Vignat and S.~Bhatnagar.

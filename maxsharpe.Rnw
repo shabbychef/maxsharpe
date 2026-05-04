@@ -102,7 +102,8 @@ opts_chunk$set(cache=TRUE,cache.path=file.path("cache",mybit))
 
 #opts_chunk$set(fig.path="figure/",dev=c("pdf","cairo_ps"))
 opts_chunk$set(fig.path=file.path("figure",mybit),dev=c("pdf"))
-opts_chunk$set(fig.width=5,fig.height=4,dpi=64)
+opts_chunk$set(fig.width=10,fig.height=5.5,dpi=300)
+opts_chunk$set(fig.pos='h')
 
 # doing this means that png files are made of figures;
 # the savings is small, and it looks like shit:
@@ -144,6 +145,41 @@ suppressMessages({
 	library(dplyr)
   library(ggplot2)
 })
+
+opts_chunk$set(fig.pos='h')
+
+out_func <- function(fig_siz, resol=10.0) {
+  sprintf('%.3f\\textwidth',0.975 * fig_siz / resol)
+}
+# resolution; for online, set to 10.0
+resol <- 10.0 
+aspr  <- 1.41  # aspect ratio
+opts_chunk$set(fig.width=resol,
+							 fig.height=resol / aspr,
+							 out.width=out_func(resol),
+							 out.height=out_func(resol / aspr),
+							 dpi=450)
+
+# a more compact figure use 
+# fig.width=cfg_width,fig.height=cfg_height,out.width=cot_width,out.height=cot_height,
+cfg_width <- resol
+cfg_height <- resol / 2
+cot_width <- out_func(cfg_width)
+cot_height <- out_func(cfg_height)
+
+# a wide figure use
+# fig.width=wfg_width,fig.height=wfg_height,out.width=wot_width,out.height=wot_height,
+wfg_width <- 1.2 * resol
+wfg_height <- 0.6 * resol
+wot_width <- out_func(wfg_width)
+wot_height <- out_func(wfg_height)
+
+# a tall figure, use this:
+# fig.width=tfg_width,fig.height=tfg_height,out.width=tot_width,out.height=tot_height,
+tfg_width <- resol
+tfg_height <- 0.7 * resol
+tot_width <- out_func(tfg_width)
+tot_height <- out_func(tfg_height)
 
 # set theme . again.
 theme_set(theme_minimal(base_size=12))
@@ -1666,7 +1702,7 @@ However, the plot suggests that the p-values are indeed uniformly distributed,
 and that the procedure has near nominal type I rate when selecting a cutoff
 near the selected $q$.
 
-<<'motherload_sims_hidden_plotz',dependson=c('motherload_sims_run','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'motherload_sims_hidden_plotz',dependson=c('motherload_sims_run','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.pos='h',fig.cap=fig_cap>>=
 alpha <- 0.05
 fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',nsim,
                   ' simulations are compared to a uniform law. ',
@@ -1728,7 +1764,7 @@ only requires us to estimate the standard error of the \txtSR of the
 asset with maximum \txtSR, and so does not greatly rely on the $\nstrat^2$
 elements of the estimate of \RMAT.
 
-<<'causal_sims_log_plotz',dependson=c('causal_sims','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'causal_sims_log_plotz',dependson=c('causal_sims','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.pos='h',fig.cap=fig_cap>>=
 alpha <- 0.05
 fig_cap <- paste0('The computed p-values from the conditional estimation procedure using sample estimates of the covariance matrix, \\RMAT, ',
                   'and the vector of \\txtSNRs, \\pvsnr are used in this sampled CDF plot. ',
@@ -1829,7 +1865,7 @@ we cannot claim to have definitively established where our procedure breaks down
 but warn users that the $\nstrat \gg \ssiz$ cases are likely to be problematic
 in the sense that nominal type I rates may not be maintained.
 
-<<'many_sims_plotz',dependson=c('many_sims', 'plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'many_sims_plotz',dependson=c('many_sims', 'plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0('Kolmogorov-Smirnov statistics summarizing uniformity of the test statistic $u$ are plotted versus $\\ssiz$ with facets for $\\rho$.  ',
                   'Broadly we see that the test statistic is less uniform in the regime where $\\ssiz$ is small, but this is muted by a large positive correlation $\\rho$.')
 # 460af323-8484-4187-8af1-68b25eff11cb 
@@ -1891,7 +1927,7 @@ We remain cautiously optimistic that for large \ssiz, one need not correct
 \eqnref{apx_srdist_gaussian} to account for non-normal returns.
 
 
-<<'causal_tfive_sims_plotz',dependson=c('causal_tfive_sims','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'causal_tfive_sims_plotz',dependson=c('causal_tfive_sims','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.pos='h',fig.cap=fig_cap>>=
 alpha <- 0.05
 fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',nsim,
                   ' simulations are plotted using our sampled CDF procedure. ',
@@ -2107,7 +2143,7 @@ plotresu <- resu %>%
 
 
 
-<<'power_plotz_old_one',dependson=c('proc_sims_vs','plot_funcs'),echo=FALSE,eval=FALSE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'power_plotz_old_one',dependson=c('proc_sims_vs','plot_funcs'),echo=FALSE,eval=FALSE,cache=TRUE,fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0("The empirical power of the conditional estimation, MHT corrected test, chi-bar-square test, Follman's test, Hansen's SPA and corrected chi-bar-square procedures ",
                   'are shown versus the \\txtSNR of the asset with maximum \\txtSR under different arrangements of the vector \\pvsnr. ',
                   "For the one-good case, the chi-bar-square and Follman's test have the same power, which is essentially zero under the alternative. ")
@@ -2139,7 +2175,7 @@ ph <- resu %>%
        title='power of tests')
 print(ph)
 @
-<<'power_plotz_one_a',dependson=c('proc_sims_vs','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'power_plotz_one_a',dependson=c('proc_sims_vs','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0("The empirical power of the conditional estimation test, ",
                   #"MHT corrected test, ",
                   "Follman's test, ",
@@ -2171,7 +2207,7 @@ ph <- plotresu %>%
        title='Rejection rate of tests')
 print(ph)
 @
-<<'power_plotz_one_b',dependson=c('proc_sims_vs','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'power_plotz_one_b',dependson=c('proc_sims_vs','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0("The empirical power of the ",
                   "MHT corrected test, ",
                   #"Follman's test, ",
@@ -2362,7 +2398,7 @@ Namely for the uniform case, the \pvsnr takes uniform values from $\Sexpr{min(un
 or in annualized units $\ccinterval{\Sexpr{signif(sqrt(252)*min(uni_sim$mu),2)}}{\Sexpr{signif(sqrt(252)*max(uni_sim$mu),2)}}\dayto{-\halff}$.
 Under the bell-shaped simulations, the \pvsnr takes the same range but with more mass around zero.
 
-<<'power_plotz_pvsnr_distribution',dependson=c('resu_two_summary','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'power_plotz_pvsnr_distribution',dependson=c('resu_two_summary','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0("The counts of the values of \\pvsnr are shown for the uniform and bell-shaped simulations under the alternative. ",
                   "The \\txtSNR is given in daily units, $\\dayto{-\\halff}$.")
                   #"The simulations set $\\nstrat=",mht_nstrat,"$ to achieve uniformity.")
@@ -2407,7 +2443,7 @@ Thus the likelihood of making this kind of conditional type I error when using M
 it is not zero.
 However, if a conditional type I error rate must be maintained, the MHT tests should be considered unacceptable.
 
-<<'power_plotz_two',dependson=c('sims_vs_mht_two','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'power_plotz_two',dependson=c('sims_vs_mht_two','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0("The empirical power of ",
                   "the conditional estimation, ",
                   #"MHT corrected test, ",
@@ -2462,7 +2498,7 @@ ph <- plotresu_two %>%
        title='power of tests')
 print(ph)
 @
-<<'power_plotz_two_sel_prob',dependson=c('sims_vs_mht_two','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'power_plotz_two_sel_prob',dependson=c('sims_vs_mht_two','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.pos='h',fig.cap=fig_cap>>=
 #fig_cap <- paste0('The probability that $\\psnr[1]$, the \\txtSNR of the asset selected for having the maximum \\txtSR, takes a given value in our simulations is shown. ',
 fig_cap <- paste0('The probability that $\\psnrone$, the \\txtSNR of the asset selected for having the maximum \\txtSR, takes a given value in our simulations is shown. ',
                   'The $y$ axis is in square root space to show detail.')
@@ -2521,10 +2557,10 @@ suppressMessages({
 
 #check_types <- c('onegood','halfgood','uniform','bellshaped')
 #check_types <- c('uniform','bellshaped')
-check_types <- c('onegood','uniform','bellshaped')
+check_types <- c('onegood','uniform','halfgood','bellshaped')
 
 # actual run the sims
-params <- data_frame(one_zeta=seq(0.0025,0.045,length.out=9)) %>%
+params <- data_frame(one_zeta=seq(0.0025,1.025/sqrt(ope),length.out=10)) %>%
   tidyr::crossing(data_frame(mutype=check_types))
 
 mht_fdr_nsim <- ceiling(2e4/max(1,RUNTIME_PARAM))
@@ -2532,7 +2568,7 @@ mht_nday <- ceiling(252 * (1 + (3/max(1,RUNTIME_PARAM))))
 mht_nstrat <- ceiling(25 + (80/max(1,RUNTIME_PARAM)))
 
 # for testing:
-mht_fdr_nsim <- 20000
+mht_fdr_nsim <- 100000
 
 registerDoFuture()
 plan(multicore)
@@ -2549,7 +2585,21 @@ plan(sequential)
 <<'collect_sims_fdr',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('sims_fdr')>>=
 # calculate FDR
 alpha <- 0.05
-fdr_data <- resu_fdr %>%
+lambda <- 0.50
+extras <- bind_rows(resu_fdr %>%
+                    filter(method=='mht') %>%
+                    mutate(method='coin_flip') %>%
+                    mutate(pvals=runif(n())),
+                  resu_fdr %>%
+                    filter(method=='mht') %>%
+                    mutate(method='accept_all') %>%
+                    mutate(pvals=0.0),
+                  resu_fdr %>%
+                    filter(method=='mht') %>%
+                    mutate(method='no_mht') %>%
+                    mutate(pvals=pvals / mht_nstrat))
+
+fdr_data <- bind_rows(resu_fdr,extras) %>%
   mutate(is_rej = pvals < alpha,
          is_null = popvals <= 0) %>%
   group_by(one_zeta, mutype, method) %>%
@@ -2557,7 +2607,8 @@ fdr_data <- resu_fdr %>%
             tp_count = sum(is_rej & !is_null),
             rej_count = sum(is_rej)) %>%
   ungroup() %>%
-  mutate(fdr = (fp_count + 0.5)/(rej_count + 1.0)) %>%
+  mutate(fdr = case_when(rej_count==0 ~ 0,
+                         TRUE ~ (fp_count + 0.5*lambda)/(rej_count + lambda))) %>%
   mutate(one_zeta_an = one_zeta * sqrt(252)) %>%
   mutate(method_lab=case_when(method=='condest'  ~ 'Cond. est.',
                               method=='mht'  ~ 'MHT',
@@ -2566,6 +2617,9 @@ fdr_data <- resu_fdr %>%
                               method=='loglog'  ~ 'Hansen chi-bar^2',
                               method=='spa'     ~ 'Hansen SPA',
                               method=='norho_mht' ~ 'Vanilla MHT',   # assumed independent.
+                              method=='coin_flip' ~ 'Coin Flip',   # ugh.
+                              method=='accept_all' ~ 'No Rejections',   # ugh.
+                              method=='no_mht' ~ 'No MHT',   # ugh.
                               TRUE ~ 'ERROR')) %>%
   mutate(mutype_lab=case_when(mutype=='equal'     ~ 'all-equal',
                           mutype=='halfgood'  ~ 'half-good',
@@ -2576,28 +2630,58 @@ fdr_data <- resu_fdr %>%
                           TRUE ~ 'ERROR'))
 @
 
-<<'plot_fdr',dependson=c('collect_sims_fdr','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
-fig_cap <- paste0("The empirical False Discovery Rate (FDR) of the ",
+% go.
+<<'plot_fdr',dependson=c('collect_sims_fdr','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=tfg_width,fig.height=tfg_height,out.width=tot_width,out.height=tot_height,fig.pos='h',fig.cap=fig_cap>>=
+fig_cap <- paste0("The empirical positive False Discovery Rate (pFDR) of the ",
                   "conditional estimation and MHT procedures ",
                   "are shown versus the maximum population \\txtSNR for various arrangements of the true \\txtSNR. ",
-                  "The FDR is defined as the probability that the asset with maximum \\txtSR is null ($\\zeta \\le 0$) ",
+                  "The pFDR is defined as the probability that the asset with maximum \\txtSR is null ($\\zeta \\le 0$) ",
                   "conditional on the test rejecting the null, ",
-                  "in other words, the false positive rate divided by the rejection rate. ",
+                  "in other words, the false positive rate divided by the rejection rate. \\cite{10.1111/1467-9868.00346} ",
                   "We perform ",scales::comma(mht_fdr_nsim)," simulations with $\\ssiz=",mht_nday,"$, $\\nstrat=",mht_nstrat,"$. ")
 
   #filter(method %in% c('condest','mht','loglog')) %>%
   #filter(method %in% c('condest','mht','follman','spa')) %>%
   #filter(method %in% c('condest','mht','norho_mht','chibarsquare')) %>%
   #geom_hline(yintercept=0.05,linetype=2,alpha=0.7) +
+  #filter(method %in% c('condest','mht','chibarsquare','coin_flip','accept_all')) %>%
 fdr_data %>%
-  filter(method %in% c('condest','mht','chibarsquare')) %>%
+  filter(method %in% c('condest','mht','chibarsquare','coin_flip','no_mht')) %>%
   ggplot(aes(x=one_zeta_an, y=fdr, color=method_lab, shape=method_lab)) +
   geom_line() + geom_point() +
-  facet_grid(.~mutype_lab) +
+  #facet_grid(.~mutype_lab) +
+  facet_wrap(~mutype_lab) +
   labs(x='maximum population signal noise ratio',
-       y='False Discovery Rate',
+       y='pFDR',
        color='method', shape='method',
-       title='False Discovery Rate of tests')
+       title='Positive False Discovery Rate of tests')
+@
+<<'plot_fdr_II',dependson=c('collect_sims_fdr','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=tfg_width,fig.height=tfg_height,out.width=tot_width,out.height=tot_height,fig.pos='h',fig.cap=fig_cap>>=
+fig_cap <- paste0("The empirical positive False Discovery Rate (pFDR) of the ",
+                  "conditional estimation and MHT procedures ",
+                  "are shown versus the maximum population \\txtSNR for various arrangements of the true \\txtSNR. ",
+                  "The pFDR is defined as the probability that the asset with maximum \\txtSR is null ($\\zeta \\le 0$) ",
+                  "conditional on the test rejecting the null, ",
+                  "in other words, the false positive rate divided by the rejection rate. \\cite{10.1111/1467-9868.00346} ",
+                  "We perform ",scales::comma(mht_fdr_nsim)," simulations with $\\ssiz=",mht_nday,"$, $\\nstrat=",mht_nstrat,"$. ")
+
+  #filter(method %in% c('condest','mht','loglog')) %>%
+  #filter(method %in% c('condest','mht','follman','spa')) %>%
+  #filter(method %in% c('condest','mht','norho_mht','chibarsquare')) %>%
+  #geom_hline(yintercept=0.05,linetype=2,alpha=0.7) +
+  #filter(method %in% c('condest','mht','chibarsquare','coin_flip','accept_all')) %>%
+fdr_data %>%
+  filter(method %in% c('condest','mht','chibarsquare','coin_flip','no_mht')) %>%
+  filter(mutype_lab=='bell-shaped') %>%
+  ggplot(aes(x=one_zeta_an, y=fdr, color=method_lab, shape=method_lab)) +
+  geom_line() + geom_point() +
+  #facet_grid(.~mutype_lab) +
+  #facet_wrap(~mutype_lab) +
+  scale_y_sqrt() + 
+  labs(x='maximum population signal noise ratio',
+       y='pFDR',
+       color='method', shape='method',
+       title='Positive False Discovery Rate of tests')
 @
 
 
@@ -2651,7 +2735,7 @@ yielding nominal rejection rates.
 %Intuitively, the number of `pseudo assets' is reduced when returns have higher correlation, and
 %the Bonferroni correction is too conservative.
 
-<<'rho_plotz_one',dependson=c('correlation_sims_vs_mht','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=10,fig.height=5.5,out.width="0.975\\textwidth",fig.pos='h',fig.cap=fig_cap>>=
+<<'rho_plotz_one',dependson=c('correlation_sims_vs_mht','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0('The empirical type I rate under the null hypothesis is plotted versus $\\rho$ ',
                   'for the case where $\\RMAT=\\makerho{\\rho}{\\wrapParens{1-\\rho}}$, ',
                   "for several testing procedures: the conditional estimation, the chi-bar square test, Follman's test, the vanilla Bonferroni correction, ",

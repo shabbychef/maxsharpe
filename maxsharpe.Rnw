@@ -2646,15 +2646,18 @@ fig_cap <- paste0("The empirical positive False Discovery Rate (pFDR) of the ",
   #geom_hline(yintercept=0.05,linetype=2,alpha=0.7) +
   #filter(method %in% c('condest','mht','chibarsquare','coin_flip','accept_all')) %>%
 fdr_data %>%
-  filter(method %in% c('condest','mht','chibarsquare','coin_flip','no_mht')) %>%
+  #filter(method %in% c('condest','mht','chibarsquare','coin_flip','no_mht')) %>%
+  filter(method %in% c('condest','mht','chibarsquare','no_mht','accept_all')) %>%
   ggplot(aes(x=one_zeta_an, y=fdr, color=method_lab, shape=method_lab)) +
   geom_line() + geom_point() +
   #facet_grid(.~mutype_lab) +
   facet_wrap(~mutype_lab) +
+  scale_y_sqrt() + 
   labs(x='maximum population signal noise ratio',
        y='pFDR',
        color='method', shape='method',
-       title='Positive False Discovery Rate of tests')
+       title='Positive False Discovery Rate of tests',
+       caption='Y axis in square root space to show detail.')
 @
 <<'plot_fdr_II',dependson=c('collect_sims_fdr','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=tfg_width,fig.height=tfg_height,out.width=tot_width,out.height=tot_height,fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0("The empirical positive False Discovery Rate (pFDR) of the ",
@@ -2671,7 +2674,8 @@ fig_cap <- paste0("The empirical positive False Discovery Rate (pFDR) of the ",
   #geom_hline(yintercept=0.05,linetype=2,alpha=0.7) +
   #filter(method %in% c('condest','mht','chibarsquare','coin_flip','accept_all')) %>%
 fdr_data %>%
-  filter(method %in% c('condest','mht','chibarsquare','coin_flip','no_mht')) %>%
+  filter(method %in% c('condest','mht','chibarsquare','no_mht','accept_all')) %>%
+  #filter(method %in% c('condest','mht','chibarsquare','coin_flip','no_mht')) %>%
   filter(mutype_lab=='bell-shaped') %>%
   ggplot(aes(x=one_zeta_an, y=fdr, color=method_lab, shape=method_lab)) +
   geom_line() + geom_point() +
@@ -2681,7 +2685,8 @@ fdr_data %>%
   labs(x='maximum population signal noise ratio',
        y='pFDR',
        color='method', shape='method',
-       title='Positive False Discovery Rate of tests')
+       title='Positive False Discovery Rate of tests',
+       caption='Y axis in square root space to show detail.')
 @
 
 

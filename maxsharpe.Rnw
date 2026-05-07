@@ -84,6 +84,9 @@
 %\providecommand{\logof}[1]{\funcit{\operatorname{log}}{#1}}  
 %\providecommand{\minof}[1]{\funcit{\operatorname{min}}{#1}}  
 
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
 % knitr setup%FOLDUP
 
 <<'preamble', include=FALSE, warning=FALSE, message=FALSE>>=
@@ -2313,7 +2316,7 @@ suppressMessages({
 params <- data_frame(one_zeta=0.07) %>%
   tidyr::crossing(data_frame(mutype=c('bellshaped','uniform'))) 
 
-mht_nsim <- ceiling(5e4/max(1,RUNTIME_PARAM))
+mht_nsim <- ceiling(1e5/max(1,RUNTIME_PARAM))
 mht_nday <- ceiling(252 * (1 + (3/max(1,RUNTIME_PARAM))))
 mht_nstrat <- ceiling(25 + (80/max(1,RUNTIME_PARAM)))
 
@@ -2543,8 +2546,110 @@ one dominates the others.
 \clearpage
 
 \subsection{Simulations of false discovery rate}
+\label{subsec:fdr_sims}
+% FDR section
 % 2FIX
 % HERE
+
+\begin{tikzpicture}[
+    node distance=1.0cm and 0.5cm,
+    process/.style={rectangle, draw, thick, minimum width=3.5cm, minimum height=0.8cm, align=center},
+    outcome/.style={rectangle, draw, thick, minimum width=3.0cm, minimum height=1.2cm, align=center},
+    arrow/.style={-Stealth, thick}
+]
+
+% Top Flow
+\node[process] (specify) {SPECIFY STRATEGIES};
+\node[process] (backtest) [below=of specify] {BACKTEST STRATEGIES};
+\node[process] (identify) [below=of backtest] {IDENTIFY BEST\\BACKTESTED STRATEGY};
+
+% Binary Split
+\node[process] (bad) [below left=1.05cm and -1.4cm of identify] {SELECTED STRATEGY\\IS BAD};
+\node[process] (good) [below right=1.05cm and -1.4cm of identify] {SELECTED STRATEGY\\IS GOOD};
+
+% Final Outcomes
+\node[outcome] (fail_bad) [below left=0.7cm and -1.0cm of bad] {TEST FAILS\\TO REJECT NULL};
+\node[outcome] (rej_bad) [below right=0.7cm and -2.5cm of bad] {TEST\\REJECTS NULL};
+
+\node[outcome] (fail_good) [below left=0.7cm and -2.5cm of good] {TEST FAILS\\TO REJECT NULL};
+\node[outcome] (rej_good) [below right=0.7cm and -1.0cm of good] {TEST\\REJECTS NULL};
+
+% Connecting Arrows with Labels
+\draw[arrow] (specify) -- (backtest);
+\draw[arrow] (backtest) -- (identify);
+
+\draw[arrow] (identify) -- node[left, xshift=-0.2cm] {$\pi_0$} (bad);
+\draw[arrow] (identify) -- node[right, xshift=0.2cm] {$\pi_1 = 1 - \pi_0$} (good);
+
+\draw[arrow] (bad) -- node[left] {$\gamma_1$} (fail_bad);
+\draw[arrow] (bad) -- node[right] {$\gamma_2$} (rej_bad);
+
+\draw[arrow] (good) -- node[left] {$\gamma_3$} (fail_good);
+\draw[arrow] (good) -- node[right] {$\gamma_4$} (rej_good);
+
+\end{tikzpicture}
+
+% % Math Section
+% \node[anchor=west, text width=6cm] at ([yshift=-4cm]fail_bad.south west) {
+%     \large
+%     \begin{tabular}{ll}
+%         TYPE I RATE : & $\displaystyle \frac{\gamma_2}{\pi_0}$ \\[10pt]
+%         POWER : & $\displaystyle \frac{\gamma_4}{\pi_1}$ \\[10pt]
+%         pFDR : & $\displaystyle \frac{\gamma_2}{\gamma_2 + \gamma_4}$ \\[10pt]
+%         Cost objective : & $w_1 \gamma_4 - w_2 \gamma_2$ \\[10pt]
+%         \textbf{Want} & $\gamma_2 \downarrow \quad \gamma_4 \uparrow$
+%     \end{tabular}
+% };
+% 
+
+\begin{tikzpicture}[
+    node distance=0.7cm and 0.25cm,
+    process/.style={rectangle, draw, thick, minimum width=3.0cm, minimum height=0.8cm, align=center},
+    outcome/.style={rectangle, draw, thick, minimum width=2.1cm, minimum height=1.0cm, align=center},
+    arrow/.style={-Stealth, thick}
+]
+
+% Top Flow
+\node[process] (specify) {SPECIFY STRATEGIES};
+\node[process] (all_bad) [below left=1.0cm and -0.5cm of specify] {ALL\\STRATEGIES\\ARE BAD};
+\node[process] (some_ok) [below right=1.0cm and -0.5cm of specify] {SOME\\STRATEGIES\\ARE GOOD};
+\node[process] (backtest_bad) [below=of all_bad] {BACKTEST STRATEGIES\\SELECT BEST};
+\node[process] (backtest_ok) [below=of some_ok] {BACKTEST STRATEGIES\\SELECT BEST};
+
+% Binary Split
+\node[process] (bad_bad) [below=of backtest_bad] {SELECTED\\STRATEGY\\IS BAD};
+\node[process] (bad_ok) [below left=0.7cm and -2.1cm of backtest_ok] {SELECTED\\STRATEGY\\IS BAD};
+\node[process] (good_ok) [below right=0.7cm and -1.9cm of backtest_ok] {SELECTED\\STRATEGY\\IS GOOD};
+
+% Final Outcomes
+\node[outcome] (fail_bad_bad) [below left=0.7cm and -1.0cm of bad_bad] {TEST FAILS\\TO REJECT\\NULL};
+\node[outcome] (rej_bad_bad) [below right=0.7cm and -1.95cm of bad_bad] {TEST\\REJECTS\\NULL};
+
+\node[outcome] (fail_bad_ok) [below left=0.7cm and -1.3cm of bad_ok] {TEST FAILS\\TO REJECT\\NULL};
+\node[outcome] (rej_bad_ok) [below right=0.7cm and -1.65cm of bad_ok] {TEST\\REJECTS\\NULL};
+\node[outcome] (fail_good_ok) [below left=0.7cm and -2.5cm of good_ok] {TEST FAILS\\TO REJECT\\NULL};
+\node[outcome] (rej_good_ok) [below right=0.7cm and -0.45cm of good_ok] {TEST\\REJECTS\\NULL};
+
+% Connecting Arrows with Labels
+\draw[arrow] (specify) -- node[right, xshift=0.2cm] {$\alpha_0$} (all_bad);
+\draw[arrow] (specify) -- node[right, xshift=0.2cm] {$\alpha_1=1-\alpha_0$} (some_ok);
+\draw[arrow] (all_bad) -- (backtest_bad);
+\draw[arrow] (some_ok) -- (backtest_ok);
+\draw[arrow] (backtest_bad) -- node[right, xshift=0.2cm] {$\beta_0=\alpha_0$} (bad_bad);
+\draw[arrow] (backtest_ok) -- node[right, xshift=0.2cm] {$\beta_1$} (bad_ok);
+\draw[arrow] (backtest_ok) -- node[right, xshift=0.2cm] {$\beta_2=1-\beta_0-\beta_1$} (good_ok);
+
+
+\draw[arrow] (bad_bad) -- node[left] {$\gamma_0$} (fail_bad_bad);
+\draw[arrow] (bad_bad) -- node[right] {$\gamma_1$} (rej_bad_bad);
+
+\draw[arrow] (bad_ok) -- node[left] {$\gamma_2$} (fail_bad_ok);
+\draw[arrow] (bad_ok) -- node[right] {$\gamma_3$} (rej_bad_ok);
+
+\draw[arrow] (good_ok) -- node[left] {$\gamma_4$} (fail_good_ok);
+\draw[arrow] (good_ok) -- node[right] {$\gamma_5=1-\gamma_0-\ldots-\gamma_4$} (rej_good_ok);
+
+\end{tikzpicture}
 
 Something something False Discovery Rate...
 
@@ -2560,15 +2665,13 @@ suppressMessages({
 check_types <- c('onegood','uniform','halfgood','bellshaped')
 
 # actual run the sims
-params <- data_frame(one_zeta=seq(0.0025,1.025/sqrt(ope),length.out=10)) %>%
+params <- data_frame(one_zeta=seq(0.0025,0.925/sqrt(ope),length.out=13)) %>%
   tidyr::crossing(data_frame(mutype=check_types))
 
-mht_fdr_nsim <- ceiling(2e4/max(1,RUNTIME_PARAM))
+mht_fdr_nsim <- ceiling(1e3/max(1,RUNTIME_PARAM))
 mht_nday <- ceiling(252 * (1 + (3/max(1,RUNTIME_PARAM))))
 mht_nstrat <- ceiling(25 + (80/max(1,RUNTIME_PARAM)))
-
-# for testing:
-mht_fdr_nsim <- 100000
+mht_fdr_nsim <- 10000
 
 registerDoFuture()
 plan(multicore)
@@ -2631,7 +2734,7 @@ fdr_data <- bind_rows(resu_fdr,extras) %>%
 @
 
 % go.
-<<'plot_fdr',dependson=c('collect_sims_fdr','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=tfg_width,fig.height=tfg_height,out.width=tot_width,out.height=tot_height,fig.pos='h',fig.cap=fig_cap>>=
+<<'plot_fdr',dependson=c('collect_sims_fdr','plot_funcs'),echo=FALSE,eval=TRUE,cache=FALSE,fig.width=tfg_width,fig.height=tfg_height,out.width=tot_width,out.height=tot_height,fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0("The empirical positive False Discovery Rate (pFDR) of the ",
                   "conditional estimation and MHT procedures ",
                   "are shown versus the maximum population \\txtSNR for various arrangements of the true \\txtSNR. ",
@@ -2659,7 +2762,7 @@ fdr_data %>%
        title='Positive False Discovery Rate of tests',
        caption='Y axis in square root space to show detail.')
 @
-<<'plot_fdr_II',dependson=c('collect_sims_fdr','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.width=tfg_width,fig.height=tfg_height,out.width=tot_width,out.height=tot_height,fig.pos='h',fig.cap=fig_cap>>=
+<<'plot_fdr_II',dependson=c('collect_sims_fdr','plot_funcs'),echo=FALSE,eval=TRUE,cache=FALSE,fig.width=tfg_width,fig.height=tfg_height,out.width=tot_width,out.height=tot_height,fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0("The empirical positive False Discovery Rate (pFDR) of the ",
                   "conditional estimation and MHT procedures ",
                   "are shown versus the maximum population \\txtSNR for various arrangements of the true \\txtSNR. ",

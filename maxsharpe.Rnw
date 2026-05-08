@@ -2695,7 +2695,7 @@ extras <- bind_rows(resu_fdr %>%
                     mutate(pvals=runif(n())),
                   resu_fdr %>%
                     filter(method=='mht') %>%
-                    mutate(method='accept_all') %>%
+                    mutate(method='reject_all') %>%
                     mutate(pvals=0.0),
                   resu_fdr %>%
                     filter(method=='mht') %>%
@@ -2721,7 +2721,7 @@ fdr_data <- bind_rows(resu_fdr,extras) %>%
                               method=='spa'     ~ 'Hansen SPA',
                               method=='norho_mht' ~ 'Vanilla MHT',   # assumed independent.
                               method=='coin_flip' ~ 'Coin Flip',   # ugh.
-                              method=='accept_all' ~ 'No Rejections',   # ugh.
+                              method=='reject_all' ~ 'Reject All',   # ugh.
                               method=='no_mht' ~ 'No MHT',   # ugh.
                               TRUE ~ 'ERROR')) %>%
   mutate(mutype_lab=case_when(mutype=='equal'     ~ 'all-equal',
@@ -2731,6 +2731,7 @@ fdr_data <- bind_rows(resu_fdr,extras) %>%
                           mutype=='uniform'   ~ 'uniform',
                           mutype=='bellshaped'   ~ 'bell-shaped',
                           TRUE ~ 'ERROR'))
+rm(resu_fdr)
 @
 
 % go.
@@ -2747,10 +2748,10 @@ fig_cap <- paste0("The empirical positive False Discovery Rate (pFDR) of the ",
   #filter(method %in% c('condest','mht','follman','spa')) %>%
   #filter(method %in% c('condest','mht','norho_mht','chibarsquare')) %>%
   #geom_hline(yintercept=0.05,linetype=2,alpha=0.7) +
-  #filter(method %in% c('condest','mht','chibarsquare','coin_flip','accept_all')) %>%
+  #filter(method %in% c('condest','mht','chibarsquare','coin_flip','reject_all')) %>%
 fdr_data %>%
   #filter(method %in% c('condest','mht','chibarsquare','coin_flip','no_mht')) %>%
-  filter(method %in% c('condest','mht','chibarsquare','no_mht','accept_all')) %>%
+  filter(method %in% c('condest','mht','chibarsquare','no_mht','reject_all')) %>%
   ggplot(aes(x=one_zeta_an, y=fdr, color=method_lab, shape=method_lab)) +
   geom_line() + geom_point() +
   #facet_grid(.~mutype_lab) +
@@ -2762,7 +2763,88 @@ fdr_data %>%
        title='Positive False Discovery Rate of tests',
        caption='Y axis in square root space to show detail.')
 @
-<<'plot_fdr_II',dependson=c('collect_sims_fdr','plot_funcs'),echo=FALSE,eval=TRUE,cache=FALSE,fig.width=tfg_width,fig.height=tfg_height,out.width=tot_width,out.height=tot_height,fig.pos='h',fig.cap=fig_cap>>=
+% run again, but bellshaped only.
+<<'sims_fdr_II',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('mhtsim_func','runtime')>>=
+suppressMessages({
+  library(tidyr)
+  library(dplyr)
+  library(doFuture)
+})
+
+#check_types <- c('onegood','halfgood','uniform','bellshaped')
+#check_types <- c('uniform','bellshaped')
+check_types <- c('bellshaped','uniform')
+
+# actual run the sims
+params <- data_frame(one_zeta=seq(0.0025,0.925/sqrt(ope),length.out=13)) %>%
+  tidyr::crossing(data_frame(mutype=check_types))
+
+mht_fdr_nsim <- ceiling(1e3/max(1,RUNTIME_PARAM))
+mht_nday <- ceiling(252 * (1 + (3/max(1,RUNTIME_PARAM))))
+mht_nstrat <- ceiling(25 + (80/max(1,RUNTIME_PARAM)))
+mht_fdr_nsim <- 100000
+
+registerDoFuture()
+plan(multicore)
+set.seed(12345)
+
+resu_fdr_2 <- params %>%
+  group_by(one_zeta,mutype) %>%
+    summarize(resu=list(bot_rawsim(nday=mht_nday,nstrat=mht_nstrat,one_zeta=one_zeta,nsim=mht_fdr_nsim,mutype=mutype))) %>%
+  ungroup() %>%
+  unnest()
+plan(sequential)
+@
+<<'collect_sims_fdr_II',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('sims_fdr_II')>>=
+# calculate FDR
+alpha <- 0.05
+lambda <- 0.50
+extras <- bind_rows(resu_fdr_2 %>%
+                    filter(method=='mht') %>%
+                    mutate(method='coin_flip') %>%
+                    mutate(pvals=runif(n())),
+                  resu_fdr_2 %>%
+                    filter(method=='mht') %>%
+                    mutate(method='reject_all') %>%
+                    mutate(pvals=0.0),
+                  resu_fdr_2 %>%
+                    filter(method=='mht') %>%
+                    mutate(method='no_mht') %>%
+                    mutate(pvals=pvals / mht_nstrat))
+
+fdr_data_2 <- bind_rows(resu_fdr_2,extras) %>%
+  mutate(is_rej = pvals < alpha,
+         is_null = popvals <= 0) %>%
+  group_by(one_zeta, mutype, method) %>%
+  summarize(fp_count = sum(is_rej & is_null),
+            tp_count = sum(is_rej & !is_null),
+            rej_count = sum(is_rej)) %>%
+  ungroup() %>%
+  mutate(fdr = case_when(rej_count==0 ~ 0,
+                         TRUE ~ (fp_count + 0.5*lambda)/(rej_count + lambda))) %>%
+  mutate(one_zeta_an = one_zeta * sqrt(252)) %>%
+  mutate(method_lab=case_when(method=='condest'  ~ 'Cond. est.',
+                              method=='mht'  ~ 'MHT',
+                              method=='chibarsquare'  ~ 'chi-bar^2',
+                              method=='follman' ~ 'Follman',
+                              method=='loglog'  ~ 'Hansen chi-bar^2',
+                              method=='spa'     ~ 'Hansen SPA',
+                              method=='norho_mht' ~ 'Vanilla MHT',   # assumed independent.
+                              method=='coin_flip' ~ 'Coin Flip',   # ugh.
+                              method=='reject_all' ~ 'Reject All',   # ugh.
+                              method=='no_mht' ~ 'No MHT',   # ugh.
+                              TRUE ~ 'ERROR')) %>%
+  mutate(mutype_lab=case_when(mutype=='equal'     ~ 'all-equal',
+                          mutype=='halfgood'  ~ 'half-good',
+                          mutype=='onegood'   ~ 'one-good',
+                          mutype=='twogood'   ~ 'two-good',
+                          mutype=='uniform'   ~ 'uniform',
+                          mutype=='bellshaped'   ~ 'bell-shaped',
+                          TRUE ~ 'ERROR'))
+rm(resu_fdr_2)
+@
+
+<<'plot_fdr_II',dependson=c('collect_sims_fdr_II','plot_funcs'),echo=FALSE,eval=TRUE,cache=FALSE,fig.width=tfg_width,fig.height=tfg_height,out.width=tot_width,out.height=tot_height,fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0("The empirical positive False Discovery Rate (pFDR) of the ",
                   "conditional estimation and MHT procedures ",
                   "are shown versus the maximum population \\txtSNR for various arrangements of the true \\txtSNR. ",
@@ -2775,14 +2857,15 @@ fig_cap <- paste0("The empirical positive False Discovery Rate (pFDR) of the ",
   #filter(method %in% c('condest','mht','follman','spa')) %>%
   #filter(method %in% c('condest','mht','norho_mht','chibarsquare')) %>%
   #geom_hline(yintercept=0.05,linetype=2,alpha=0.7) +
-  #filter(method %in% c('condest','mht','chibarsquare','coin_flip','accept_all')) %>%
-fdr_data %>%
-  filter(method %in% c('condest','mht','chibarsquare','no_mht','accept_all')) %>%
+  #filter(method %in% c('condest','mht','chibarsquare','coin_flip','reject_all')) %>%
+fdr_data_2 %>%
+  filter(method %in% c('condest','mht','chibarsquare','no_mht','reject_all')) %>%
   #filter(method %in% c('condest','mht','chibarsquare','coin_flip','no_mht')) %>%
-  filter(mutype_lab=='bell-shaped') %>%
+  #filter(mutype_lab=='bell-shaped') %>%
   ggplot(aes(x=one_zeta_an, y=fdr, color=method_lab, shape=method_lab)) +
   geom_line() + geom_point() +
   #facet_grid(.~mutype_lab) +
+  facet_grid(mutype_lab~.,scales='free') +
   #facet_wrap(~mutype_lab) +
   scale_y_sqrt() + 
   labs(x='maximum population signal noise ratio',

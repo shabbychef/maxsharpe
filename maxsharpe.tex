@@ -863,6 +863,210 @@ have inferior \txtSNR.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Alternative Approaches}%FOLDUP
 
+Before considering alternative approaches, it is worthwhile to step back and illustrate how they fundamentally differ from the conditional approach considered above.
+First, in \figref{quant_flowchart_I} we illustrate the observable flow chart of a practicing quantitative strategist.
+By some process the quant specifies a collection of strategies to test, then backtests them.
+We assume that the strategy with the highest observed \txtSR is then selected as a candidate for trading.
+Some kind of statistical test is performed on the whole collection of observed backtests.
+Depending on the outcome of that test, the selected strategy is either traded or not\footnote{Presumably if strategy does not pass the test, the quant starts all over again, or pursues a different career.}.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+    node distance=0.5cm and 0.5cm,
+    process/.style={rectangle, draw, thick, minimum width=3.5cm, minimum height=0.8cm, align=center},
+    outcome/.style={rectangle, draw, thick, minimum width=3.0cm, minimum height=1.2cm, align=center},
+    arrow/.style={-Stealth, thick}
+]
+
+% Top Flow
+\node[process] (specify) {SPECIFY STRATEGIES};
+\node[process] (backtest) [below=of specify] {BACKTEST STRATEGIES};
+\node[process] (identify) [below=of backtest] {IDENTIFY BEST\\BACKTESTED STRATEGY};
+\node[process] (test) [below=of identify] {PERFORM\\STATISTICAL TEST};
+
+% Final Outcomes
+\node[outcome] (fail) [below left=0.6cm and -1.0cm of test] {TEST FAILS\\TO REJECT NULL};
+\node[outcome] (rej) [below right=0.6cm and -1.0cm of test] {TEST\\REJECTS NULL};
+
+\node[outcome] (surrender) [below=of fail] {GIVE UP?};
+\node[outcome] (trade) [below=of rej] {TRADE STRATEGY.};
+
+% Connecting Arrows with Labels
+\draw[arrow] (specify) -- (backtest);
+\draw[arrow] (backtest) -- (identify);
+\draw[arrow] (identify) -- (test);
+
+\draw[arrow] (test) -- (fail);
+\draw[arrow] (test) -- (rej);
+\draw[arrow] (fail) -- (surrender);
+\draw[arrow] (rej) -- (trade);
+
+\end{tikzpicture}
+  \caption{A quant strategist's statistical workflow is illustrated.}
+  \label{fig:quant_flowchart_I}
+\end{figure}
+
+% \begin{tikzpicture}[
+%     node distance=1.0cm and 0.5cm,
+%     process/.style={rectangle, draw, thick, minimum width=3.5cm, minimum height=0.8cm, align=center},
+%     outcome/.style={rectangle, draw, thick, minimum width=3.0cm, minimum height=1.2cm, align=center},
+%     arrow/.style={-Stealth, thick}
+% ]
+% 
+% % Top Flow
+% \node[process] (specify) {SPECIFY STRATEGIES};
+% \node[process] (backtest) [below=of specify] {BACKTEST STRATEGIES};
+% \node[process] (identify) [below=of backtest] {IDENTIFY BEST\\BACKTESTED STRATEGY};
+% 
+% % Binary Split
+% \node[process] (bad) [below left=1.05cm and -1.4cm of identify] {SELECTED STRATEGY\\IS BAD};
+% \node[process] (good) [below right=1.05cm and -1.4cm of identify] {SELECTED STRATEGY\\IS GOOD};
+% 
+% % Final Outcomes
+% \node[outcome] (fail_bad) [below left=0.7cm and -1.0cm of bad] {TEST FAILS\\TO REJECT NULL};
+% \node[outcome] (rej_bad) [below right=0.7cm and -2.5cm of bad] {TEST\\REJECTS NULL};
+% 
+% \node[outcome] (fail_good) [below left=0.7cm and -2.5cm of good] {TEST FAILS\\TO REJECT NULL};
+% \node[outcome] (rej_good) [below right=0.7cm and -1.0cm of good] {TEST\\REJECTS NULL};
+% 
+% % Connecting Arrows with Labels
+% \draw[arrow] (specify) -- (backtest);
+% \draw[arrow] (backtest) -- (identify);
+% 
+% \draw[arrow] (identify) -- node[left, xshift=-0.2cm] {$\pi_0$} (bad);
+% \draw[arrow] (identify) -- node[right, xshift=0.2cm] {$\pi_1 = 1 - \pi_0$} (good);
+% 
+% \draw[arrow] (bad) -- node[left] {$\gamma_1$} (fail_bad);
+% \draw[arrow] (bad) -- node[right] {$\gamma_2$} (rej_bad);
+% 
+% \draw[arrow] (good) -- node[left] {$\gamma_3$} (fail_good);
+% \draw[arrow] (good) -- node[right] {$\gamma_4$} (rej_good);
+% 
+% \end{tikzpicture}
+% 
+% % % Math Section
+% % \node[anchor=west, text width=6cm] at ([yshift=-4cm]fail_bad.south west) {
+% %     \large
+% %     \begin{tabular}{ll}
+% %         TYPE I RATE : & $\displaystyle \frac{\gamma_2}{\pi_0}$ \\[10pt]
+% %         POWER : & $\displaystyle \frac{\gamma_4}{\pi_1}$ \\[10pt]
+% %         pFDR : & $\displaystyle \frac{\gamma_2}{\gamma_2 + \gamma_4}$ \\[10pt]
+% %         Cost objective : & $w_1 \gamma_4 - w_2 \gamma_2$ \\[10pt]
+% %         \textbf{Want} & $\gamma_2 \downarrow \quad \gamma_4 \uparrow$
+% %     \end{tabular}
+% % };
+% % 
+
+
+However, this flowchart illustrates only the outwardly observable parts of this workflow.
+In \figref{quant_flowchart_II} we include some of the latent states of this process
+and mark some of the unconditional probabilities of events.
+We treat the outcome of the strategy specification as potentially random, with
+some probability $\alpha_0$ of yielding only ``bad'' strategies (those with \txtSNR below the
+threshold value), and probability $\alpha_1 = 1-\alpha_0$ of yielding some ``good'' strategies.
+The quant then backtests all the strategies and selects the one with the best observed \txtSR.
+There is some probability that this may be a good or bad strategy. 
+The total unconditional probability that the selected strategy is bad is $\beta_0 + \beta_1$,
+while the probability of a good strategy is $\beta_2 = 1 - \beta_0 - \beta_1$.
+We then imagine the outcome of some statistical test, which may reject or fail to reject
+the null hypothesis.
+The probabilities of these events are illustrated in the figure and we denote their
+unconditional probabilities as $\gamma_0$ through $\gamma_5$.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+    node distance=0.5cm and 0.25cm,
+    process/.style={rectangle, draw, thick, minimum width=2.5cm, minimum height=0.8cm, align=center},
+    outcome/.style={rectangle, draw, thick, minimum width=1.7cm, minimum height=1.0cm, align=center},
+    arrow/.style={-Stealth, thick}
+]
+
+% Top Flow
+\node[process] (specify) {SPECIFY STRATEGIES};
+\node[process] (all_bad) [below left=1.0cm and -0.7cm of specify] {ALL\\STRATEGIES\\ARE BAD};
+\node[process] (some_ok) [below right=1.0cm and -0.7cm of specify] {SOME\\STRATEGIES\\ARE GOOD};
+\node[process] (backtest_bad) [below=of all_bad] {BACKTEST STRATEGIES\\SELECT BEST};
+\node[process] (backtest_ok) [below=of some_ok] {BACKTEST STRATEGIES\\SELECT BEST};
+
+% Binary Split
+\node[process] (bad_bad) [below=of backtest_bad] {SELECTED\\STRATEGY\\IS BAD};
+\node[process] (bad_ok) [below left=0.5cm and -2.1cm of backtest_ok] {SELECTED\\STRATEGY\\IS BAD};
+\node[process] (good_ok) [below right=0.5cm and -1.9cm of backtest_ok] {SELECTED\\STRATEGY\\IS GOOD};
+
+% Final Outcomes
+\node[outcome] (fail_bad_bad) [below left=0.7cm and -0.5cm of bad_bad] {TEST\\FAILS TO\\REJECT\\NULL};
+\node[outcome] (rej_bad_bad) [below right=0.7cm and -1.95cm of bad_bad] {TEST\\REJECTS\\NULL};
+
+\node[outcome] (fail_bad_ok) [below left=0.7cm and -0.6cm of bad_ok] {TEST\\FAILS TO\\REJECT\\NULL};
+\node[outcome] (rej_bad_ok) [below right=0.7cm and -1.85cm of bad_ok] {TEST\\REJECTS\\NULL};
+\node[outcome] (fail_good_ok) [below left=0.7cm and -1.4cm of good_ok] {TEST\\FAILS TO\\REJECT\\NULL};
+\node[outcome] (rej_good_ok) [below right=0.7cm and -1.05cm of good_ok] {TEST\\REJECTS\\NULL};
+
+% Connecting Arrows with Labels
+\draw[arrow] (specify) -- node[right, xshift=0.2cm] {$\alpha_0$} (all_bad);
+\draw[arrow] (specify) -- node[right, xshift=0.2cm] {$\alpha_1=1-\alpha_0$} (some_ok);
+\draw[arrow] (all_bad) -- (backtest_bad);
+\draw[arrow] (some_ok) -- (backtest_ok);
+\draw[arrow] (backtest_bad) -- node[right, xshift=0.2cm] {$\beta_0=\alpha_0$} (bad_bad);
+\draw[arrow] (backtest_ok) -- node[right, xshift=0.2cm] {$\beta_1$} (bad_ok);
+\draw[arrow] (backtest_ok) -- node[right, xshift=0.2cm] {$\beta_2=1-\beta_0-\beta_1$} (good_ok);
+
+
+\draw[arrow] (bad_bad) -- node[left] {$\gamma_0$} (fail_bad_bad);
+\draw[arrow] (bad_bad) -- node[right] {$\gamma_1$} (rej_bad_bad);
+
+\draw[arrow] (bad_ok) -- node[left] {$\gamma_2$} (fail_bad_ok);
+\draw[arrow] (bad_ok) -- node[right] {$\gamma_3$} (rej_bad_ok);
+
+\draw[arrow] (good_ok) -- node[left] {$\gamma_4$} (fail_good_ok);
+\draw[arrow] (good_ok) -- node[right] {$\gamma_5=1-\gamma_0-\ldots-\gamma_4$} (rej_good_ok);
+
+\end{tikzpicture}
+
+  \caption{A quant strategist's statistical workflow with latent states is illustrated.
+The unconditional probabilities in each row sum to $1.0$. The classical Bonferroni procedure
+defines the rate of type I errors as $\gamma_1 / \beta_0$, in contrast to the conditional test.}
+  \label{fig:quant_flowchart_II}
+\end{figure}
+
+The point of this figure is to illustrate the difference between the conditional procedure and the
+procedures below, which test a different null hypothesis than the conditional procedure.
+The conditional procedure approximately controls the rate of type I errors which can be written as
+$$
+\frac{\gamma_1 + \gamma_3}{\beta_0 + \beta_1}.
+$$
+The power of the conditional procedure is the ratio $\gamma_5 / \beta_2$.
+
+The Bonferroni procedure, and indeed all the procedures introduced in this section, only provide
+control over the type I rate $\gamma_1 / \beta_0$. 
+The power of these procedures is 
+$$
+\frac{\gamma_3 + \gamma_5}{\beta_1 + \beta_2}.
+$$
+There is considerable tension between the power and type I rate of this null versus that of the conditional procedure.
+Indeed in simulations we will find instances where $\gamma_3 / \beta_1 \approx 1.0$ for some tests,
+although $\beta_1$ will be small for these cases.
+
+Using this diagram we can also easily illustrate what \citeauthor{10.1111/1467-9868.00346} called the 
+\emph{positive False Discovery Rate} (pFDR).  \cite{10.1111/1467-9868.00346}
+The pFDR is the conditional probability of a false discovery conditional on the statistical test having rejected the null.
+In our diagram it is computed as
+$$
+pFDR = \frac{\gamma_1 + \gamma_3}{\gamma_1 + \gamma_3 + \gamma_5}.
+$$
+We would argue that pFDR is more important to control than the type I rate of a test.
+However, the pFDR depends strongly on the configuration of the population values, so
+it is hard to quantify it in a way that is relevant in all situations.
+Similarly it is hard to describe and test the null of the conditional procedure.
+The Bonferroni null, however, is easy to describe and test: simply set the \txtSNR of every strategy
+to the null value.
+That is, the population \pvsnr takes only one value under the Bonferroni null,
+but can have many different values under the conditional null.
+This will become more clear in the section on simulations under the null and alternative.
+
+
 \subsection{Bonferroni correction with simple correlation fix}%FOLDUP
 
 \label{subsec:fix_bonferroni}
@@ -1685,106 +1889,6 @@ one dominates the others.
 % 2FIX
 % HERE
 
-\begin{tikzpicture}[
-    node distance=1.0cm and 0.5cm,
-    process/.style={rectangle, draw, thick, minimum width=3.5cm, minimum height=0.8cm, align=center},
-    outcome/.style={rectangle, draw, thick, minimum width=3.0cm, minimum height=1.2cm, align=center},
-    arrow/.style={-Stealth, thick}
-]
-
-% Top Flow
-\node[process] (specify) {SPECIFY STRATEGIES};
-\node[process] (backtest) [below=of specify] {BACKTEST STRATEGIES};
-\node[process] (identify) [below=of backtest] {IDENTIFY BEST\\BACKTESTED STRATEGY};
-
-% Binary Split
-\node[process] (bad) [below left=1.05cm and -1.4cm of identify] {SELECTED STRATEGY\\IS BAD};
-\node[process] (good) [below right=1.05cm and -1.4cm of identify] {SELECTED STRATEGY\\IS GOOD};
-
-% Final Outcomes
-\node[outcome] (fail_bad) [below left=0.7cm and -1.0cm of bad] {TEST FAILS\\TO REJECT NULL};
-\node[outcome] (rej_bad) [below right=0.7cm and -2.5cm of bad] {TEST\\REJECTS NULL};
-
-\node[outcome] (fail_good) [below left=0.7cm and -2.5cm of good] {TEST FAILS\\TO REJECT NULL};
-\node[outcome] (rej_good) [below right=0.7cm and -1.0cm of good] {TEST\\REJECTS NULL};
-
-% Connecting Arrows with Labels
-\draw[arrow] (specify) -- (backtest);
-\draw[arrow] (backtest) -- (identify);
-
-\draw[arrow] (identify) -- node[left, xshift=-0.2cm] {$\pi_0$} (bad);
-\draw[arrow] (identify) -- node[right, xshift=0.2cm] {$\pi_1 = 1 - \pi_0$} (good);
-
-\draw[arrow] (bad) -- node[left] {$\gamma_1$} (fail_bad);
-\draw[arrow] (bad) -- node[right] {$\gamma_2$} (rej_bad);
-
-\draw[arrow] (good) -- node[left] {$\gamma_3$} (fail_good);
-\draw[arrow] (good) -- node[right] {$\gamma_4$} (rej_good);
-
-\end{tikzpicture}
-
-% % Math Section
-% \node[anchor=west, text width=6cm] at ([yshift=-4cm]fail_bad.south west) {
-%     \large
-%     \begin{tabular}{ll}
-%         TYPE I RATE : & $\displaystyle \frac{\gamma_2}{\pi_0}$ \\[10pt]
-%         POWER : & $\displaystyle \frac{\gamma_4}{\pi_1}$ \\[10pt]
-%         pFDR : & $\displaystyle \frac{\gamma_2}{\gamma_2 + \gamma_4}$ \\[10pt]
-%         Cost objective : & $w_1 \gamma_4 - w_2 \gamma_2$ \\[10pt]
-%         \textbf{Want} & $\gamma_2 \downarrow \quad \gamma_4 \uparrow$
-%     \end{tabular}
-% };
-% 
-
-\begin{tikzpicture}[
-    node distance=0.7cm and 0.25cm,
-    process/.style={rectangle, draw, thick, minimum width=3.0cm, minimum height=0.8cm, align=center},
-    outcome/.style={rectangle, draw, thick, minimum width=2.1cm, minimum height=1.0cm, align=center},
-    arrow/.style={-Stealth, thick}
-]
-
-% Top Flow
-\node[process] (specify) {SPECIFY STRATEGIES};
-\node[process] (all_bad) [below left=1.0cm and -0.5cm of specify] {ALL\\STRATEGIES\\ARE BAD};
-\node[process] (some_ok) [below right=1.0cm and -0.5cm of specify] {SOME\\STRATEGIES\\ARE GOOD};
-\node[process] (backtest_bad) [below=of all_bad] {BACKTEST STRATEGIES\\SELECT BEST};
-\node[process] (backtest_ok) [below=of some_ok] {BACKTEST STRATEGIES\\SELECT BEST};
-
-% Binary Split
-\node[process] (bad_bad) [below=of backtest_bad] {SELECTED\\STRATEGY\\IS BAD};
-\node[process] (bad_ok) [below left=0.7cm and -2.1cm of backtest_ok] {SELECTED\\STRATEGY\\IS BAD};
-\node[process] (good_ok) [below right=0.7cm and -1.9cm of backtest_ok] {SELECTED\\STRATEGY\\IS GOOD};
-
-% Final Outcomes
-\node[outcome] (fail_bad_bad) [below left=0.7cm and -1.0cm of bad_bad] {TEST FAILS\\TO REJECT\\NULL};
-\node[outcome] (rej_bad_bad) [below right=0.7cm and -1.95cm of bad_bad] {TEST\\REJECTS\\NULL};
-
-\node[outcome] (fail_bad_ok) [below left=0.7cm and -1.3cm of bad_ok] {TEST FAILS\\TO REJECT\\NULL};
-\node[outcome] (rej_bad_ok) [below right=0.7cm and -1.65cm of bad_ok] {TEST\\REJECTS\\NULL};
-\node[outcome] (fail_good_ok) [below left=0.7cm and -2.5cm of good_ok] {TEST FAILS\\TO REJECT\\NULL};
-\node[outcome] (rej_good_ok) [below right=0.7cm and -0.45cm of good_ok] {TEST\\REJECTS\\NULL};
-
-% Connecting Arrows with Labels
-\draw[arrow] (specify) -- node[right, xshift=0.2cm] {$\alpha_0$} (all_bad);
-\draw[arrow] (specify) -- node[right, xshift=0.2cm] {$\alpha_1=1-\alpha_0$} (some_ok);
-\draw[arrow] (all_bad) -- (backtest_bad);
-\draw[arrow] (some_ok) -- (backtest_ok);
-\draw[arrow] (backtest_bad) -- node[right, xshift=0.2cm] {$\beta_0=\alpha_0$} (bad_bad);
-\draw[arrow] (backtest_ok) -- node[right, xshift=0.2cm] {$\beta_1$} (bad_ok);
-\draw[arrow] (backtest_ok) -- node[right, xshift=0.2cm] {$\beta_2=1-\beta_0-\beta_1$} (good_ok);
-
-
-\draw[arrow] (bad_bad) -- node[left] {$\gamma_0$} (fail_bad_bad);
-\draw[arrow] (bad_bad) -- node[right] {$\gamma_1$} (rej_bad_bad);
-
-\draw[arrow] (bad_ok) -- node[left] {$\gamma_2$} (fail_bad_ok);
-\draw[arrow] (bad_ok) -- node[right] {$\gamma_3$} (rej_bad_ok);
-
-\draw[arrow] (good_ok) -- node[left] {$\gamma_4$} (fail_good_ok);
-\draw[arrow] (good_ok) -- node[right] {$\gamma_5=1-\gamma_0-\ldots-\gamma_4$} (rej_good_ok);
-
-\end{tikzpicture}
-
 Something something False Discovery Rate...
 
 
@@ -1805,6 +1909,12 @@ Something something False Discovery Rate...
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
 \includegraphics[width=0.975\textwidth,height=0.682\textwidth]{figure/maxsharpe_plot_fdr_II-1} \caption{The empirical positive False Discovery Rate (pFDR) of the conditional estimation and MHT procedures are shown versus the maximum population \txtSNR for various arrangements of the true \txtSNR. The pFDR is defined as the probability that the asset with maximum \txtSR is null ($\zeta \le 0$) conditional on the test rejecting the null, in other words, the false positive rate divided by the rejection rate. \cite{10.1111/1467-9868.00346} We perform 100,000 simulations with $\ssiz=1008$, $\nstrat=105$. }\label{fig:plot_fdr_II}
+\end{figure}
+
+\end{knitrout}
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
+\includegraphics[width=0.975\textwidth,height=0.682\textwidth]{figure/maxsharpe_plot_fdr_III-1} \caption{The empirical positive False Discovery Rate (pFDR) of the conditional estimation and MHT procedures are shown versus the maximum population \txtSNR for various arrangements of the true \txtSNR. The pFDR is defined as the probability that the asset with maximum \txtSR is null ($\zeta \le 0$) conditional on the test rejecting the null, in other words, the false positive rate divided by the rejection rate. \cite{10.1111/1467-9868.00346} We perform 100,000 simulations with $\ssiz=1008$, $\nstrat=105$. }\label{fig:plot_fdr_III}
 \end{figure}
 
 \end{knitrout}

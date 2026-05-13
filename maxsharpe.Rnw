@@ -81,6 +81,7 @@
 \providecommand{\stsr}[1][]{\stsrUL{}{#1}}
 \providecommand{\ssravg}[1][]{\mathUL{\bar{\prvSNR}}{}{#1}}
 \providecommand{\psnrone}{\psnr[1]}
+\providecommand{\psnrmax}{\psrUL{}{max}}
 %\providecommand{\logof}[1]{\funcit{\operatorname{log}}{#1}}  
 %\providecommand{\minof}[1]{\funcit{\operatorname{min}}{#1}}  
 
@@ -982,6 +983,7 @@ have inferior \txtSNR.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Alternative Approaches}%FOLDUP
+\label{sec:alternative_approaches}
 
 Before considering alternative approaches, it is worthwhile to step back and illustrate how they fundamentally differ from the conditional approach considered above.
 First, in \figref{quant_flowchart_I} we illustrate the observable flow chart of a practicing quantitative strategist.
@@ -2749,13 +2751,12 @@ one dominates the others.
 
 \clearpage
 
-\subsection{Simulations of false discovery rate}
+\subsection{Simulations of False Discovery Rate}
 \label{subsec:fdr_sims}
 % FDR section
 % 2FIX
 % HERE
 
-Something something False Discovery Rate...
 
 <<'sims_fdr',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('mhtsim_func','runtime')>>=
 suppressMessages({
@@ -2814,7 +2815,7 @@ fdr_data <- bind_rows(resu_fdr,extras) %>%
             tp_count = sum(is_rej & !is_null),
             rej_count = sum(is_rej)) %>%
   ungroup() %>%
-  mutate(fdr = case_when(rej_count==0 ~ 0,
+  mutate(fdr = case_when(rej_count==0 ~ NaN,
                          TRUE ~ (fp_count + 0.5*lambda)/(rej_count + lambda))) %>%
   mutate(one_zeta_an = one_zeta * sqrt(252)) %>%
   mutate(method_lab=case_when(method=='condest'  ~ 'Cond. est.',
@@ -2838,15 +2839,61 @@ fdr_data <- bind_rows(resu_fdr,extras) %>%
 rm(resu_fdr)
 @
 
+Recalling the discussion in \secref{alternative_approaches} we now perform simulations similar to the above
+but focus on the positive False Discovery Rate (pFDR). \cite{10.1111/1467-9868.00346}
+We define the pFDR as the conditional probability of making a false positive
+conditional on the statistical test rejecting the null.
+Recalling \figref{quant_flowchart_II}, this is the quantity
+\begin{equation}
+pFDR = \frac{\gamma_1 + \gamma_3}{\gamma_1 + \gamma_3 + \gamma_5}.
+\label{eqn:pFDR}
+\end{equation}
+
+Similar to the experiments above we consider a few different configurations for $\pvsnr$, though by no means do we consider an exhaustive collection.
+In each configuration we will perform a number of simulations of the different tests considered in this paper.
+We parametrize the configurations by the maximal \txtSNR, $\psnrmax$, then we will plot the results against that $\psnrmax$.
+As above we consider:
+\begin{compactenum}
+\item ``one-good,'' where 1 asset has \txtSNR of $\psnrmax$, and the remaining $\nstrat-1$ take value of $-\psnrmax$.
+\item ``half-good,'' where $\nstrat/2$ have \txtSNR of $\psnrmax$ and the remaining take value of $-\psnrmax$.
+\item ``uniform,'' where the \txtSNRs are uniformly distributed across 15 different values from $-\psnrmax$ to $\psnrmax$, 
+  as in \figref{power_plotz_pvsnr_distribution}.
+\item ``bell-shaped,'' where the \txtSNRs are distributed across a nearly normal distribution spanning from $-\psnrmax$ to $\psnrmax$, 
+  as in \figref{power_plotz_pvsnr_distribution}.
+\end{compactenum}
+%\begin{description}
+  %\item[one good] foo
+  %\item[half good] foo
+  %\item[uniform] foo
+  %\item[bell-shaped] foo
+%\end{description}
+
+In each configuration, except one-good, the mean \txtSNR across the different assets is zero.
+We perform simulations with $\nstrat=\Sexpr{mht_nstrat}$, and $\ssiz=\Sexpr{mht_nday}$.
+We let $\psnrmax$ vary from near zero to around $1\yrtomhalf$.
+For each setting we perform $\Sexpr{scales::comma(mht_fdr_nsim)}$ simulations, testing at the
+$\Sexpr{alpha}$ level.
+We compute the empirical pFDR of each technique.
+When a technique makes no rejections we ``nan out'' the value and do not plot a marker.
+This happens for the chi-bar-square test in the one-good configuration for some values of \psnrmax.
+
+We plot the results in \figref{plot_fdr}.
+In that plot we also plot the results of using the na\"{i}ve test for significance of the \txtSNR, which we denote as ``no MHT''. \cite{pav_the_book}
+We also plot the pFDR resulting from always rejecting the null hypothesis, which we plot as ``Reject All.''
+This line shows the background rate of bad strategies, which is $\beta_0 + \beta_1$ in the language of \figref{quant_flowchart_II}.
+The Reject All line is essentially the worst pFDR that a test could display without doing something perverse.
+
+
 % go.
 <<'plot_fdr',dependson=c('collect_sims_fdr','plot_funcs'),echo=FALSE,eval=TRUE,cache=FALSE,fig.width=tfg_width,fig.height=tfg_height,out.width=tot_width,out.height=tot_height,fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0("The empirical positive False Discovery Rate (pFDR) of the ",
-                  "conditional estimation and MHT procedures ",
-                  "are shown versus the maximum population \\txtSNR for various arrangements of the true \\txtSNR. ",
-                  "The pFDR is defined as the probability that the asset with maximum \\txtSR is null ($\\zeta \\le 0$) ",
-                  "conditional on the test rejecting the null, ",
-                  "in other words, the false positive rate divided by the rejection rate. \\cite{10.1111/1467-9868.00346} ",
-                  "We perform ",scales::comma(mht_fdr_nsim)," simulations with $\\ssiz=",mht_nday,"$, $\\nstrat=",mht_nstrat,"$. ")
+                  "various tests ",
+                  "are shown versus the maximum population \\txtSNR, \\psnrmax, for various configurations of the true \\txtSNR. ",
+                  "We perform ",scales::comma(mht_fdr_nsim)," simulations with $\\ssiz=",mht_nday,"$, $\\nstrat=",mht_nstrat,"$. ",
+                  "The chi-bar-square test has no rejections for most of the one-good case, and is not plotted there. ")
+                  #"The pFDR is defined as the probability that the asset with maximum \\txtSR is null ($\\zeta \\le 0$) ",
+                  #"conditional on the test rejecting the null, ",
+                  #"in other words, the false positive rate divided by the rejection rate. \\cite{10.1111/1467-9868.00346} ",
 
   #filter(method %in% c('condest','mht','loglog')) %>%
   #filter(method %in% c('condest','mht','follman','spa')) %>%
@@ -2902,7 +2949,7 @@ plan(sequential)
 <<'collect_sims_fdr_II',echo=FALSE,eval=TRUE,cache=TRUE,dependson=c('sims_fdr_II')>>=
 # calculate FDR
 alpha <- 0.05
-lambda <- 0.50
+lambda <- 0.25
 extras <- bind_rows(resu_fdr_2 %>%
                     filter(method=='mht') %>%
                     mutate(method='coin_flip') %>%
@@ -2961,6 +3008,12 @@ fdr_data_3 <- lapply(c(0.005,0.01,0.02,0.05,0.1,0.25),function(tgt_alpha) {
         bind_rows(resu_fdr_2 %>%
                 filter(method=='mht') %>%
                 mutate(method=paste0('mht_',name)),
+              #resu_fdr_2 %>%
+                #filter(method=='chibarsquare') %>%
+                #mutate(method=paste0('chibarsquare_',name)),
+              #resu_fdr_2 %>%
+                #filter(method=='loglog') %>%
+                #mutate(method=paste0('loglog_',name)),
               resu_fdr_2 %>%
                 filter(method=='condest') %>%
                 mutate(method=paste0('condest_',name))) %>%
@@ -2988,13 +3041,25 @@ fdr_data_3 <- lapply(c(0.005,0.01,0.02,0.05,0.1,0.25),function(tgt_alpha) {
 rm(resu_fdr_2)
 @
 
+We see that MHT and the conditional procedure generally have the lowest pFDR,
+generally lower than the chi-bar-square procedure, lower than the na\"{i}ve test, and lower than the Reject All benchmark.
+The MHT performs best in the one-good configuration.
+We perform some additional simulations under the uniform and bell-shaped configurations,
+since these seem more realistic thatn the one-good and half-good.
+We perform \Sexpr{scales::comma(mht_fdr_nsim)} simulations for these configurations,
+plotting the results in \figref{plot_fdr_II}.
+There we see that the conditional inference procedure has slightly lower pFDR than the MHT procedure
+when \psnrmax is sufficiently large.
+It is hard to imagine that this result scales to all sample sizes and configurations,
+but we are generally confident that the two procedures deliver similar pFDR.
+
 <<'plot_fdr_II',dependson=c('collect_sims_fdr_II','plot_funcs'),echo=FALSE,eval=TRUE,cache=FALSE,fig.width=tfg_width,fig.height=tfg_height,out.width=tot_width,out.height=tot_height,fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0("The empirical positive False Discovery Rate (pFDR) of the ",
-                  "conditional estimation and MHT procedures ",
+                  "various tests ",
                   "are shown versus the maximum population \\txtSNR for various arrangements of the true \\txtSNR. ",
-                  "The pFDR is defined as the probability that the asset with maximum \\txtSR is null ($\\zeta \\le 0$) ",
-                  "conditional on the test rejecting the null, ",
-                  "in other words, the false positive rate divided by the rejection rate. \\cite{10.1111/1467-9868.00346} ",
+                  #"The pFDR is defined as the probability that the asset with maximum \\txtSR is null ($\\zeta \\le 0$) ",
+                  #"conditional on the test rejecting the null, ",
+                  #"in other words, the false positive rate divided by the rejection rate. \\cite{10.1111/1467-9868.00346} ",
                   "We perform ",scales::comma(mht_fdr_nsim)," simulations with $\\ssiz=",mht_nday,"$, $\\nstrat=",mht_nstrat,"$. ")
 
   #filter(method %in% c('condest','mht','loglog')) %>%
@@ -3003,7 +3068,8 @@ fig_cap <- paste0("The empirical positive False Discovery Rate (pFDR) of the ",
   #geom_hline(yintercept=0.05,linetype=2,alpha=0.7) +
   #filter(method %in% c('condest','mht','chibarsquare','coin_flip','reject_all')) %>%
 fdr_data_2 %>%
-  filter(method %in% c('condest','mht','chibarsquare','no_mht','reject_all','mht_01','condest_01')) %>%
+  #filter(method %in% c('condest','mht','chibarsquare','no_mht','reject_all','mht_01','condest_01')) %>%
+  filter(method %in% c('condest','mht','chibarsquare','no_mht','reject_all')) %>%
   #filter(method %in% c('condest','mht','chibarsquare','coin_flip','no_mht')) %>%
   #filter(mutype_lab=='bell-shaped') %>%
   ggplot(aes(x=one_zeta_an, y=fdr, color=method_lab, shape=method_lab)) +
@@ -3018,13 +3084,68 @@ fdr_data_2 %>%
        title='Positive False Discovery Rate of tests',
        caption='Y axis in square root space to show detail.')
 @
+
+
+\subsubsection{Minimizing False Discovery Rate}
+\label{subsec:minimizing_fdr}
+
+As a thought experiment, let us consider how we might minimize the pFDR for a toy problem.
+Let $\pi$ be the probability that the selected strategy satisfies the null hypothesis,
+which we define to mean having \txtSNR of zero.
+We have $\pi = \beta_0 + \beta_1$ in the language of \figref{quant_flowchart_II}.
+Suppose that the type I rate under the null is $\alpha$.
+Under the alternative, which occurs with probability $1 - \pi$, the strategy is ``good''
+and has a \txtSNR of \psnrmax.
+Suppose the observed \txtSR is the \txtSNR plus a normal noise with unit variance.
+So our test consists of rejecting the null precisely when the \txtSR is greater than
+$\pinorm[1-\alpha]$, where \pnorm[x] is the cumulative density of the standard normal distribution.
+Under the alternative this occurs with probability $1 - \pnorm[\pinorm[1-\alpha] - \psnrmax]$.
+
+Then the pFDR is 
+\begin{align*}
+pFDR 
+  &= \frac{\pi \alpha}{\pi \alpha + \wrapParens{1 - \pi}\wrapParens{1 - \pnorm[\pinorm[1-\alpha] - \psnrmax]}},\\
+  &= \frac{1}{1 + \frac{\wrapParens{1 - \pi}\wrapParens{\pnorm[\psnrmax - \pinorm[1-\alpha]]}}{\pi\alpha}},\\
+  &= \frac{1}{1 + \frac{\wrapParens{1 - \pi}\wrapParens{\pnorm[\psnrmax + \pinorm[\alpha]]}}{\pi\pnorm[\pinorm[\alpha]]}}.\\
+\end{align*}
+Without asking the analyst to improve $\pi$ by testing only good strategies, to minimize the pFDR we should 
+maximize the quantity
+$$
+\frac{\pnorm[\psnrmax + \pinorm[\alpha]]}{\pnorm[\pinorm[\alpha]]}.
+$$
+Linearizing this with Taylor's theorem we want to approximately maximize the quantity
+$$
+\frac{\pnorm[\psnrmax + \pinorm[\alpha]]}{\pnorm[\pinorm[\alpha]]} 
+\approx 
+1 + \psnrmax \frac{\dnorm[\pinorm[\alpha]]}{\pnorm[\pinorm[\alpha]]}.
+$$
+Note that the quantity $\dnorm[x]/\pnorm[-x]$ is called the \emph{inverse Mills ratio}.
+It is well known that the inverse Mills ratio is unbounded and increasing as $x \to \infty$.
+The implication for our problem is that pFDR is minimized as we drive the type I rate to zero.
+
+While we cannot literally set $\alpha=0$, since we would never reject the null hypothesis,
+it is easy to reconsider the experiments above using different type I rates.
+That is exactly what we do: we take the MHT and conditional test results from the simulations
+above, wherein we computed their p-values, and compare them against different target type I rates,
+estimating the pFDR in each case.
+We plot these in \figref{plot_fdr_III}.
+To show detail in this plot, we have divided the pFDR by the ``worst case'' pFDR one gets from the
+Reject All test, which is to say the background rate of bad strategies.
+
+We indeed see in this plot that setting the type I rate to 0.005 yields the lowest pFDR,
+and that the pFDR values are generally monotonic in the targeted type I rate.
+We see that at the most extreme values of $\alpha$ that the conditional procedure has slightly lower pFDR
+than the MHT test, but again this is not an exhaustive study of the possible configurations.
+We would recommend, however, that if one seeks to minimize pFDR the choice of $\alpha$ is likely more important than which test you apply.
+
 <<'plot_fdr_III',dependson=c('collect_sims_fdr_II','plot_funcs'),echo=FALSE,eval=TRUE,cache=FALSE,fig.width=tfg_width,fig.height=tfg_height,out.width=tot_width,out.height=tot_height,fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0("The empirical positive False Discovery Rate (pFDR) of the ",
-                  "conditional estimation and MHT procedures ",
-                  "are shown versus the maximum population \\txtSNR for various arrangements of the true \\txtSNR. ",
-                  "The pFDR is defined as the probability that the asset with maximum \\txtSR is null ($\\zeta \\le 0$) ",
-                  "conditional on the test rejecting the null, ",
-                  "in other words, the false positive rate divided by the rejection rate. \\cite{10.1111/1467-9868.00346} ",
+                  "conditional estimation and MHT procedures, ",
+                  "divided by the Reject All pFDR ",
+                  "are plotted versus the maximum population \\txtSNR, \\psnrmax, for various configurations of the true \\txtSNR. ",
+                  #"The pFDR is defined as the probability that the asset with maximum \\txtSR is null ($\\zeta \\le 0$) ",
+                  #"conditional on the test rejecting the null, ",
+                  #"in other words, the false positive rate divided by the rejection rate. \\cite{10.1111/1467-9868.00346} ",
                   "We perform ",scales::comma(mht_fdr_nsim)," simulations with $\\ssiz=",mht_nday,"$, $\\nstrat=",mht_nstrat,"$. ")
 
 #fdr_data_3 %>%
@@ -3045,6 +3166,8 @@ fdr_data_3 %>%
     mutate(fdr_rel=fdr / worst) %>%
   mutate(meth_type=case_when(grepl('condest_', method_lab) ~ 'Cond. est.',
                              grepl('mht_', method_lab) ~ 'MHT',
+                             grepl('chibarsquare_', method_lab) ~ 'chi-bar^2',
+                             grepl('loglog_', method_lab) ~ 'Hansen chi-bar^2',
                              grepl('reject_all', method_lab) ~ 'Reject All',
                              TRUE ~ 'ERROR')) %>%
   #filter(method %in% c('condest','mht','chibarsquare','coin_flip','no_mht')) %>%
@@ -3058,7 +3181,7 @@ fdr_data_3 %>%
   #facet_wrap(~mutype_lab) +
   scale_y_sqrt() + 
   labs(x='maximum population signal noise ratio',
-       y='pFDR',
+       y='pFDR / Reject All',
        color='method', shape='method',
        title='Positive False Discovery Rate of tests',
        caption='Y axis in square root space to show detail.')
@@ -3364,6 +3487,12 @@ Perhaps its power can be increased using Hansen's $\log\log$ adjustment.
 %Finally, the fix for Bonferroni correction under rank-one updated
 %correlation \RMAT can potentially be generalized to deal
 %with more realistic correlation matrices.
+
+On the other hand, the conditional procedure appears to have low positive False Discovery Rates,
+and is competitive with the other tests on this metric.
+We suggest setting low target type I rates to minimize the pFDR.
+Perhaps the procedure of \citeauthor{10.1111/1467-9868.00346} can be adapted to this problem 
+to estimate the pFDR for a given type I rate.  \cite{10.1111/1467-9868.00346} 
 
 %Lastly we mention that when asset returns are well approximated
 %by a linear combination of $m$ `latent' returns, we can

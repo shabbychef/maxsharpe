@@ -51,7 +51,7 @@ STY_FILES    =
 #aspell
 ASPELL_FLAGS = 
 
-ARXIV_VERSION  			?= v8
+ARXIV_VERSION  			?= v9
 ARXIV_TAG 					 = $(PROJECT)_$(ARXIV_VERSION)
 # arxiv accepts tarfiles. this is great.
 ARXIV_TAR 					?= $(PROJECT)_$(ARXIV_VERSION).tar.gz
@@ -194,7 +194,7 @@ untag : ## advice on github untagging
 
 tarfile : $(ARXIV_TAR)  ## make tar file to upload to arxiv? experimental
 
-$(ARXIV_TAR) : $(TEX_SOURCE) $(BBLS) $(TEX_EXTRAS) $(R_DEPS) figure/ .git/gitHeadInfo.gin 
+$(ARXIV_TAR) : $(TEX_SOURCE) $(TEX_EXTRAS) $(R_DEPS) figure/ .git/gitHeadInfo.gin 
 	tar -czvf $@ $^
 
 #for vim modeline: (do not edit)

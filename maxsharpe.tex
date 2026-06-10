@@ -403,7 +403,7 @@ We also consider several alternative procedures, including
 the simple Bonferroni correction for multiple
 hypothesis testing, which we fix for the case of positive common
 correlation among assets, 
-the chi-bar square test against one-sided alternatives,
+the chi-bar-square test against one-sided alternatives,
 Follman's test, 
 and Hansen's asymptotic adjustments.  \cite{nla.cat-vn3800977,10.2307/2291680,Hansen2003Asymptotic}
 
@@ -1236,6 +1236,8 @@ plugging in $\rho$,
 and reject the null hypothesis when $z_1$ is bigger than 
 $\qnorm{1-\typeI/\nstrat},$ the $1-\typeI/\nstrat$ quantile of the normal distribution.
 This procedure has (approximate) type I rate \emph{no greater} than $\typeI$.
+
+
 %UNFOLD
 
 \subsection{Testing against one-sided alternatives}%FOLDUP
@@ -1287,7 +1289,7 @@ as
 \forall_i \ptsnr[i]\ge c \psnr[0]\,\,\mbox{and}\,\, \exists_j \ptsnr[j] > c \psnr[0].
 \end{equation*}
 
-We can then appeal to the simple chi-bar square test.  \cite{nla.cat-vn3800977,wolak1987exact}
+We can then appeal to the simple chi-bar-square test.  \cite{nla.cat-vn3800977,wolak1987exact}
 First transform the vector of \txtSRs to \stvsr via 
 \begin{equation}
   \label{eqn:xi_transform}
@@ -1300,13 +1302,13 @@ Then compute
   \bar{x}^2 = \ssiz \sum_i \pospsq{\wrapParens{\stsr[i] - c \psnr[0]}},
 \end{equation}
 where $\posp{y}$ is the positive part of $y$, \ie $\posp{y}=y$ if $y > 0$ and zero otherwise.
-Then compute the CDF of the corresponding chi-bar square distribution as
+Then compute the CDF of the corresponding chi-bar-square distribution as
 \begin{equation}
   \label{eqn:chibp}
   Q = \sum_{i=0}^{\nstrat} w_i {\chisqcdf{\bar{x}^2}{i}},
 \end{equation}
 where $\chisqcdf{x}{i}$ is the cumulative distribution of the $\chi^2$ distribution
-with $i$ degrees of freedom, and $w_i$ are the chi-bar square weights.
+with $i$ degrees of freedom, and $w_i$ are the chi-bar-square weights.
 In this case they are defined as
 $$
 w_i = {\nstrat \choose i}{2^{-\nstrat}}.
@@ -1451,7 +1453,35 @@ development.  \cite{pav_maxsharpe_two}
 
 %\cite{kubokawa1993estimation}
 %UNFOLD
+
+\subsection{Comparing Rejection Regions}
+
+
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
+\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_rejection_contours_plot-1} \caption[The 0.05 rejection regions for the vanilla Bonferroni adjusted test, the chi-bar-square test, and the conditional procedure are shown for the case of $\nstrat=2$ assets]{The 0.05 rejection regions for the vanilla Bonferroni adjusted test, the chi-bar-square test, and the conditional procedure are shown for the case of $\nstrat=2$ assets. Rejection regions are plotted for testing the null $\psnr[0] = 0$ based on 4 years of data at 252 days per year. The plot is conditional on $\ssr[2] \ge \ssr[1]$. }\label{fig:rejection_contours_plot}
+\end{figure}
+
+\end{knitrout}
+
+Later in simulation we will see different performance from the conditional procedure and the procedures based on multiple hypothesis testing.
+To give some sense of contrast between the tests we can look at the rejection regions for the simplest case, which is of two assets.
+In \figref{rejection_contours_plot} we plot the rejection regions for the Bonferroni correction, the chi-bar-square test, and the conditional test.
+Each test is against the null $\psnr[0]=0$ based on $\ssiz=1,008$ days of data.
+
+In that plot we see that the chi-bar-square test has slightly bigger rejection region than the Bonferroni procedure,
+though it does not mean we are more likely to observe \svsr in that region under the alternative, as it depends
+on the form of the alternative.
+We see that the conditional procedure does not reject when $\ssr[2] \approx \ssr[1]$.
+This is what we expect from first principles, as in this case the uniform variate that comes out of the polyhedral lemma
+should be close to zero and one would fail to reject.
+The tradeoff is that conditional procedure appears to have a a somewhat larger rejection region when $\ssr[1] < 0$.
+We will observe later that the conditional procedure does enjoy higher power when there are very few very good needles in the haystack of tested
+strategies, consistent with this plot.
+
+
 %UNFOLD
+\clearpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1539,7 +1569,7 @@ elements of the estimate of \RMAT.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_causal_sims_log_plotz-1} \caption[The computed p-values from the conditional estimation procedure using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr are used in this sampled CDF plot]{The computed p-values from the conditional estimation procedure using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr are used in this sampled CDF plot. P values are computed over 1e+05 simulations. For selected $q$, we compute the proportion of our putative p-values less than $q$. We then compute $\Delta = \wrapParens{\mbox{Prop }\le q} - q$ against $q$. Using the binomial law, we plot approximate error bars around the $x$ axis that indicate where the points should fall with approximately $95\%$ confidence. Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:causal_sims_log_plotz}
+\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_causal_sims_log_plotz-1} \caption[The computed p-values from the conditional estimation procedure using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr are used in this sampled CDF plot]{The computed p-values from the conditional estimation procedure using sample estimates of the covariance matrix, \RMAT, and the vector of \txtSNRs, \pvsnr are used in this sampled CDF plot. P values are computed over 100,000 simulations. For selected $q$, we compute the proportion of our putative p-values less than $q$. We then compute $\Delta = \wrapParens{\mbox{Prop }\le q} - q$ against $q$. Using the binomial law, we plot approximate error bars around the $x$ axis that indicate where the points should fall with approximately $95\%$ confidence. Simulations use the exact \RMAT and \pvsnr to compute the covariance matrix. The plot supports uniformity of the putative p-values. }\label{fig:causal_sims_log_plotz}
 \end{figure}
 
 \end{knitrout}
@@ -1628,7 +1658,7 @@ We remain cautiously optimistic that for large \ssiz, one need not correct
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 10000 simulations are plotted using our sampled CDF procedure]{The computed p-values from the conditional estimation procedure over 10000 simulations are plotted using our sampled CDF procedure. Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Without correcting for higher order moments, the procedure has higher than nominal type I rate; with the correction it has slightly smaller than the nominal rate. }\label{fig:causal_tfive_sims_plotz}
+\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_causal_tfive_sims_plotz-1} \caption[The computed p-values from the conditional estimation procedure over 10,000 simulations are plotted using our sampled CDF procedure]{The computed p-values from the conditional estimation procedure over 10,000 simulations are plotted using our sampled CDF procedure. Returns are drawn from a $\tstat{}\wrapParens{5}$ distribution.  Sample estimates are used to construct the variance-covariance matrix of \svsr.  The experiments are performed twice: first assuming that returns are Gaussian; then assuming returns are elliptical with unknown kurtosis factor that we estimate from the sample.  Both procedures give near-uniform p values. Without correcting for higher order moments, the procedure has higher than nominal type I rate; with the correction it has slightly smaller than the nominal rate. }\label{fig:causal_tfive_sims_plotz}
 \end{figure}
 
 \end{knitrout}
@@ -1667,7 +1697,7 @@ draw returns from a Gaussian distribution with diagonal covariance.
 Under this assumption, one can use the distribution of the \tstat{} statistic
 to perform inference on the \txtSNR. \cite{pav_ssc,pav_the_book}
 We then use the Bonferroni correction to account for the multiple tests performed.
-We also perform the one-sided test based on the chi-bar square statistic,
+We also perform the one-sided test based on the chi-bar-square statistic,
 Follman's test, and the chi-bar and MHT tests with Hansen's $\log\log$ adjustment.
 
 Note that in the all-equal case, since every asset has the same \txtSNR,
@@ -1681,7 +1711,7 @@ may have considerably negative \txtSNR, they are unlikely to exhibit the
 largest \txtSR, and so the MHT is merely testing a single asset, but
 at the $\typeI / \nstrat$ level instead of the $\typeI$ level, resulting
 in lower power. 
-The chi-bar square test and Follman's test are also unlikely to reject.
+The chi-bar-square test and Follman's test are also unlikely to reject.
 The conditional estimation procedure, however, should
 not suffer under this alternative.
 We also expect the $\log\log$ adjustment to have little effect
@@ -1708,7 +1738,7 @@ In \figref{power_plotz_one_a}, we plot the power of
 % the MHT Bonferroni test, 
 % the chi-bar square test, 
 Follman's test, 
-Hansen's chi-bar square and MHT (``SPA'') tests,
+Hansen's chi-bar-square and MHT (``SPA'') tests,
 and the conditional estimation procedure versus the \txtSNR
 of the selected asset. 
 We present facet columns for the configurations of \pvsnr,
@@ -1717,7 +1747,7 @@ A horizontal line at $0.05$ gives the nominal rate under the null,
 which occurs as $x=0$ in these plots.
 
 As expected from the above explanation, the
-chi-bar square (with Hansen's correction) has the highest power for the all-equal alternative,
+chi-bar-square (with Hansen's correction) has the highest power for the all-equal alternative,
 followed by Follman's test, 
 then the MHT, 
 then the conditional estimation test.
@@ -1729,10 +1759,10 @@ with the exception of Follman's test, which achieves a maximum power of $1/2$ in
 half-good case, as is to be expected since this is the probability that
 $\ssravg > 0$ in the half-good case.
 
-In \figref{power_plotz_one_b}, we plot the power of the MHT and chi-bar square procedures,
+In \figref{power_plotz_one_b}, we plot the power of the MHT and chi-bar-square procedures,
 with and without Hansen's log-log corrections.
 The correction has essentially no effect in the all-equal and half-good cases,
-but increases power considerably for the chi-bar square test in the two-good and one-good
+but increases power considerably for the chi-bar-square test in the two-good and one-good
 alternatives, and increases power modestly for the MHT test under those same alternatives.
 Thus we mostly consider using the log-log correction when possible.
 We note that this correction may result in slightly higher than nominal type I rate,
@@ -2061,7 +2091,7 @@ yielding nominal rejection rates.
 
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[h]
-\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for several testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for several testing procedures: the conditional estimation, the chi-bar square test, Follman's test, the vanilla Bonferroni correction, Hansen's corrected chi-bar-square and SPA tests, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 20 assets over 504 days. Tests were performed at the $0.05$ level, which appears to be maintained by all procedures except the regular Bonferroni procedure, and Hansen's chi-bar-square test, which has slightly higher than nominal rejection rates for this \ssiz. Empirical rates are over 10,000 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
+\includegraphics[width=0.975\textwidth,height=0.691\textwidth]{figure/maxsharpe_rho_plotz_one-1} \caption[The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for several testing procedures]{The empirical type I rate under the null hypothesis is plotted versus $\rho$ for the case where $\RMAT=\makerho{\rho}{\wrapParens{1-\rho}}$, for several testing procedures: the conditional estimation, the chi-bar-square test, Follman's test, the vanilla Bonferroni correction, Hansen's corrected chi-bar-square and SPA tests, and Bonferroni correction with fix for common correlation.  Tests are performed with Gaussian returns, for 20 assets over 504 days. Tests were performed at the $0.05$ level, which appears to be maintained by all procedures except the regular Bonferroni procedure, and Hansen's chi-bar-square test, which has slightly higher than nominal rejection rates for this \ssiz. Empirical rates are over 10,000 simulations. The $y$ axis is in log scale.}\label{fig:rho_plotz_one}
 \end{figure}
 
 \end{knitrout}
@@ -2069,6 +2099,7 @@ yielding nominal rejection rates.
 %UNFOLD
 
 \clearpage
+
 
 \subsection{Example: Five Industry Portfolios}%FOLDUP
 
@@ -2151,7 +2182,7 @@ $\qnorm{0.01}=-2.326$.
 This leads to the confidence interval 
 $\left[0.13\,\moto{-\halff}, \infty\right)$.
 
-We use this estimate of $\rho$ to compute the chi-bar square test.
+We use this estimate of $\rho$ to compute the chi-bar-square test.
 We invert the test to find the $95\%$ upper confidence interval
 $\left[0.146\,\moto{-\halff}, \infty\right)$.
 
@@ -2191,7 +2222,7 @@ However, it would seem that in so doing, one would lose the
 desireable property of testing the \txtSNR of the selected
 asset, instead of testing the more general hypothesis of (\ref{hyp:eq_test}). 
 Perhaps its power can be increased using Hansen's $\log\log$ adjustment.
-%Perhaps the power of the MHT, or the chi-bar square test for the case of equal \txtSNRs can
+%Perhaps the power of the MHT, or the chi-bar-square test for the case of equal \txtSNRs can
 %be somehow ported to the conditional estimation procedure, maybe
 %by testing multiple 
 %assets\footnote{Note that White's Reality Check and Hansen's SPA

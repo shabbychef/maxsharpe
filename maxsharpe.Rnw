@@ -523,7 +523,7 @@ We also consider several alternative procedures, including
 the simple Bonferroni correction for multiple
 hypothesis testing, which we fix for the case of positive common
 correlation among assets, 
-the chi-bar square test against one-sided alternatives,
+the chi-bar-square test against one-sided alternatives,
 Follman's test, 
 and Hansen's asymptotic adjustments.  \cite{nla.cat-vn3800977,10.2307/2291680,Hansen2003Asymptotic}
 
@@ -1366,6 +1366,8 @@ plugging in $\rho$,
 and reject the null hypothesis when $z_1$ is bigger than 
 $\qnorm{1-\typeI/\nstrat},$ the $1-\typeI/\nstrat$ quantile of the normal distribution.
 This procedure has (approximate) type I rate \emph{no greater} than $\typeI$.
+
+
 %UNFOLD
 
 \subsection{Testing against one-sided alternatives}%FOLDUP
@@ -1417,7 +1419,7 @@ as
 \forall_i \ptsnr[i]\ge c \psnr[0]\,\,\mbox{and}\,\, \exists_j \ptsnr[j] > c \psnr[0].
 \end{equation*}
 
-We can then appeal to the simple chi-bar square test.  \cite{nla.cat-vn3800977,wolak1987exact}
+We can then appeal to the simple chi-bar-square test.  \cite{nla.cat-vn3800977,wolak1987exact}
 First transform the vector of \txtSRs to \stvsr via 
 \begin{equation}
   \label{eqn:xi_transform}
@@ -1430,13 +1432,13 @@ Then compute
   \bar{x}^2 = \ssiz \sum_i \pospsq{\wrapParens{\stsr[i] - c \psnr[0]}},
 \end{equation}
 where $\posp{y}$ is the positive part of $y$, \ie $\posp{y}=y$ if $y > 0$ and zero otherwise.
-Then compute the CDF of the corresponding chi-bar square distribution as
+Then compute the CDF of the corresponding chi-bar-square distribution as
 \begin{equation}
   \label{eqn:chibp}
   Q = \sum_{i=0}^{\nstrat} w_i {\chisqcdf{\bar{x}^2}{i}},
 \end{equation}
 where $\chisqcdf{x}{i}$ is the cumulative distribution of the $\chi^2$ distribution
-with $i$ degrees of freedom, and $w_i$ are the chi-bar square weights.
+with $i$ degrees of freedom, and $w_i$ are the chi-bar-square weights.
 In this case they are defined as
 $$
 w_i = {\nstrat \choose i}{2^{-\nstrat}}.
@@ -1581,7 +1583,221 @@ development.  \cite{pav_maxsharpe_two}
 
 %\cite{kubokawa1993estimation}
 %UNFOLD
+
+\subsection{Comparing Rejection Regions}
+
+<<'rejection_contours_gen',echo=FALSE,eval=TRUE,cache=TRUE>>=
+suppressMessages({
+	library(dplyr)
+  library(SharpeR)
+  library(epsiwal)
+  library(mvtnorm)
+  library(tidyr)
+})
+
+#' Uncorrected Bonferroni test for the maximum Sharpe ratio
+#'
+#' @param ssrmax The maximum observed Sharpe ratio among nstrat strategies.
+#' @param nstrat The number of strategies tested.
+#' @param nday The number of observations (e.g. days or months) used to compute the Sharpe ratios.
+#' @param psnr0 The null hypothesis Sharpe ratio (per-period, default 0).
+#' @return The p-value.
+bonferroni_test <- function(ssrmax, nstrat, nday, psnr0=0) {
+  # SharpeR::psr computes the p-value for a single Sharpe ratio.
+  # We multiply by nstrat for the Bonferroni correction.
+  pval <- nstrat * SharpeR::psr(ssrmax, df=nday-1, zeta=psnr0, ope=1, lower.tail=FALSE)
+  return(min(1, pval))
+}
+
+#' Bonferroni test corrected for common correlation (rho)
+#'
+#' @param ssrmax The maximum observed Sharpe ratio.
+#' @param ssravg The average observed Sharpe ratio across all nstrat strategies.
+#' @param nstrat The number of strategies tested.
+#' @param nday The number of observations.
+#' @param rho The common correlation among strategy returns.
+#' @param psnr0 The null hypothesis Sharpe ratio (per-period, default 0).
+#' @return The p-value.
+bonferroni_corr_test <- function(ssrmax, ssravg, nstrat, nday, rho, psnr0=0) {
+  # Constants from Equation (11) in the paper
+  apart <- sqrt(nday) / sqrt(1 - rho)
+  bpart <- sqrt(nday) * ((1 / sqrt(1 - rho + nstrat * rho)) - (1 / sqrt(1 - rho)))
+  
+  # Statistic z1 (corrected for psnr0)
+  # Derived from the transformation of the multivariate normal approximation.
+  z1 <- apart * ssrmax + bpart * (ssravg - psnr0)
+  
+  pval <- nstrat * pnorm(z1, lower.tail=FALSE)
+  return(min(1, pval))
+}
+
+#' Conditional estimation test for the maximum Sharpe ratio
+#'
+#' @param srs A vector of observed Sharpe ratios for all nstrat strategies.
+#' @param nday The number of observations.
+#' @param R The correlation matrix of returns.
+#' @param testzeta The null hypothesis Sharpe ratio vector (or scalar).
+#' @param estimate_parms If TRUE, use the observed srs to estimate the covariance matrix Sigma.
+#' @return The p-value from the conditional normal distribution.
+conditional_estimation_test <- function(srs, nday, R, testzeta=0, estimate_parms=FALSE) {
+  p <- length(srs)
+  
+  # Null hypothesis zeta
+  if (length(testzeta) == 1) {
+    testzeta <- rep(testzeta, p)
+  }
+  
+  # Approximate covariance matrix of Sharpe ratios (Equation 4)
+  if (estimate_parms) {
+    # Using observed Sharpe ratios for the second term
+    mySigma <- (1/nday) * (R + (1/2) * diag(srs) %*% (R * R) %*% diag(srs))
+  } else {
+    # Using the null Sharpe ratios
+    mySigma <- (1/nday) * (R + (1/2) * diag(testzeta) %*% (R * R) %*% diag(testzeta))
+  }
+  
+  # Find the maximum
+  y <- srs
+  yord <- order(y, decreasing=TRUE)
+  imax <- yord[1]
+  
+  # Polyhedral constraints: A %*% y <= b
+  # We condition on y[imax] being the maximum: y[j] <= y[imax] for all j
+  A1 <- cbind(-1, diag(p - 1))
+  
+  # Reorder A1 columns to match the observed order such that A %*% y <= 0
+  # corresponds to y[imax] being the maximum.
+  revo <- seq_len(p)
+  revo[yord] <- revo
+  A <- A1[, revo]
+  
+  # Inference on the maximum element
+  nu <- rep(0, p)
+  nu[imax] <- 1
+  b <- rep(0, p - 1)
+  
+  # Compute conditional p-value using epsiwal package
+  pval <- epsiwal::pconnorm(y=y, A=A, b=b, eta=nu, mu=testzeta, Sigma=mySigma, lower.tail=FALSE)
+  
+  return(pval)
+}
+
+chibs_test <- function(srs, nday, testzeta=0) {
+  nstrat <- length(srs)
+  cwts <- exp(lchoose(nstrat,0:nstrat) - nstrat * log(2))
+  okwt <- (cwts > 1e-9)
+  sbdf <- which(okwt) - 1
+  sbwt <- cwts[okwt]
+  xi0 <- testzeta
+  xi <- srs
+  chibs <- (nday) * sum(pmax(xi - xi0,0)^2)
+  chibp <- sum(sbwt * pchisq(chibs,df=sbdf,lower.tail=FALSE))
+  return(chibp)
+}
+
+testit <- function(z1, z2, nday=252*4) {
+	nstrat <- 2
+	rho <- 0
+	R <- matrix(rho, nstrat, nstrat)
+	diag(R) <- 1
+	srs <- c(z1, z2)
+	ssrmax <- max(srs)
+	p_bonf <- bonferroni_test(ssrmax, nstrat, nday, psnr0=0)
+	p_cond <- conditional_estimation_test(srs, nday, R, testzeta=0)
+	p_chib <- chibs_test(srs, nday, testzeta=0)
+	data.frame(bonf=p_bonf, cond=p_cond, chib=p_chib)
+}
+
+ope <- 252
+nyr <- 4
+# zlim <- seq(-1.75, 1.75, length.out=451) / sqrt(ope)
+zlim <- c(seq(-1.75, 1.05, length.out=401), seq(1.05, 1.75, length.out=71)) / sqrt(ope)
+
+params <- tidyr::crossing(tibble(z1=zlim),tibble(z2=zlim)) %>%
+	filter(z1 <= z2) %>%
+  distinct(z1, z2) 
+
+blah <- params %>%
+	group_by(z1,z2) %>%
+		summarize(coco=list(testit(z1,z2, nday=ope*nyr))) %>%
+	ungroup() %>%
+	tidyr::unnest(coco)
+
+ph <- blah %>%
+	tidyr::gather(key=method, value=pvalue, -z1, -z2) %>%
+	mutate(reject=as.numeric(pvalue <= 0.05)) %>%
+	ggplot(aes(z1,z2,z=reject,
+						 color=method,fill=method)) + 
+	geom_contour(alpha=0.25) +
+	geom_abline(slope=1,intercept=0) 
+	#geom_point(alpha=0.25)
+no_ph <- blah %>%
+	tidyr::gather(key=method, value=pvalue, -z1, -z2) %>%
+	#mutate(reject=pvalue >= 0.95) %>%
+	mutate(reject=pvalue <= 0.05) %>%
+  filter(reject) %>%
+	ggplot(aes(z1,z2,color=method,fill=method)) + 
+	geom_jitter(alpha=0.25) + 
+	geom_abline(slope=1,intercept=0) 
+
+@
+<<'rejection_contours_plot',dependson=c('rejection_contours_gen','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.pos='h',fig.cap=fig_cap>>=
+fig_cap <- paste0('The 0.05 rejection regions for the vanilla Bonferroni adjusted test, the chi-bar-square test, and the conditional procedure are shown for the case of $\\nstrat=2$ assets. ',
+                  'Rejection regions are plotted for testing the null $\\psnr[0] = 0$ based on ',nyr,' years of data at ',ope,' days per year. ',
+                  'The plot is conditional on $\\ssr[2] \\ge \\ssr[1]$. ')
+
+suppressMessages({
+	library(dplyr)
+	library(ggplot2)
+  library(tidyr)
+  # wait, what if it isn't convex!!!!? don't make it convex!
+  # library(ggConvexHull)
+  library(ggforce)
+})
+
+ph <- blah %>%
+  rename(Bonferroni=bonf,`Conditional Procedure`=cond,`Chi-bar-square`=chib) %>%
+  tidyr::gather(key=method, value=pvalue, -z1, -z2) %>%
+  #mutate(reject=pvalue >= 0.95) %>%
+  mutate(reject=pvalue <= 0.05) %>%
+  filter(reject) %>%
+  mutate(z1=sqrt(ope)*z1,
+         z2=sqrt(ope)*z2) %>%
+  ggplot(aes(z1,z2,color=method,fill=method)) + 
+  # geom_jitter(alpha=0.25,width=0.01,height=0.01) + 
+  #geom_hex(alpha=0.125) + 
+  geom_mark_hull(concavity=10,alpha=0.25,expand=unit(0,"mm")) + 
+  # geom_convexhull(alpha=0.5) + 
+  geom_abline(slope=1,intercept=0,linetype='dashed') +
+  #scale_x_continuous(labels=scales::comma_format(accuracy=0.01)) + 
+  #scale_y_continuous(labels=scales::comma_format(accuracy=0.01)) + 
+  labs(x=expression(hat(zeta[1])/sqrt(yr)),
+       y=expression(hat(zeta[2])/sqrt(yr)),
+       title='Rejection Region of Three Tests',
+       color='Method',fill='Method',
+       caption=paste0('Testing the null of zero SNR at the 0.05 level. Based on ',nyr,' years of observations at ',ope,' days per year.'))
+
+print(ph)
+@
+
+Later in simulation we will see different performance from the conditional procedure and the procedures based on multiple hypothesis testing.
+To give some sense of contrast between the tests we can look at the rejection regions for the simplest case, which is of two assets.
+In \figref{rejection_contours_plot} we plot the rejection regions for the Bonferroni correction, the chi-bar-square test, and the conditional test.
+Each test is against the null $\psnr[0]=0$ based on $\ssiz=\Sexpr{scales::comma(nyr*ope)}$ days of data.
+
+In that plot we see that the chi-bar-square test has slightly bigger rejection region than the Bonferroni procedure,
+though it does not mean we are more likely to observe \svsr in that region under the alternative, as it depends
+on the form of the alternative.
+We see that the conditional procedure does not reject when $\ssr[2] \approx \ssr[1]$.
+This is what we expect from first principles, as in this case the uniform variate that comes out of the polyhedral lemma
+should be close to zero and one would fail to reject.
+The tradeoff is that conditional procedure appears to have a a somewhat larger rejection region when $\ssr[1] < 0$.
+We will observe later that the conditional procedure does enjoy higher power when there are very few very good needles in the haystack of tested
+strategies, consistent with this plot.
+
+
 %UNFOLD
+\clearpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1978,7 +2194,7 @@ elements of the estimate of \RMAT.
 alpha <- 0.05
 fig_cap <- paste0('The computed p-values from the conditional estimation procedure using sample estimates of the covariance matrix, \\RMAT, ',
                   'and the vector of \\txtSNRs, \\pvsnr are used in this sampled CDF plot. ',
-                  'P values are computed over ',nsim,' simulations. ',
+                  'P values are computed over ',scales::comma(nsim),' simulations. ',
                   'For selected $q$, we compute the proportion of our putative p-values less than $q$. ',
                   'We then compute $\\Delta = \\wrapParens{\\mbox{Prop }\\le q} - q$ against $q$. ',
                   'Using the binomial law, we plot approximate error bars around the $x$ axis that indicate where the points should fall with approximately $',100*(1-alpha),'\\%$ confidence. ',
@@ -2139,7 +2355,7 @@ We remain cautiously optimistic that for large \ssiz, one need not correct
 
 <<'causal_tfive_sims_plotz',dependson=c('causal_tfive_sims','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.pos='h',fig.cap=fig_cap>>=
 alpha <- 0.05
-fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',nsim,
+fig_cap <- paste0('The computed p-values from the conditional estimation procedure over ',scales::comma(nsim),
                   ' simulations are plotted using our sampled CDF procedure. ',
                   'Returns are drawn from a $\\tstat{}\\wrapParens{5}$ distribution.  ',
                   'Sample estimates are used to construct the variance-covariance matrix of \\svsr.  ',
@@ -2233,7 +2449,7 @@ draw returns from a Gaussian distribution with diagonal covariance.
 Under this assumption, one can use the distribution of the \tstat{} statistic
 to perform inference on the \txtSNR. \cite{pav_ssc,pav_the_book}
 We then use the Bonferroni correction to account for the multiple tests performed.
-We also perform the one-sided test based on the chi-bar square statistic,
+We also perform the one-sided test based on the chi-bar-square statistic,
 Follman's test, and the chi-bar and MHT tests with Hansen's $\log\log$ adjustment.
 
 Note that in the all-equal case, since every asset has the same \txtSNR,
@@ -2247,7 +2463,7 @@ may have considerably negative \txtSNR, they are unlikely to exhibit the
 largest \txtSR, and so the MHT is merely testing a single asset, but
 at the $\typeI / \nstrat$ level instead of the $\typeI$ level, resulting
 in lower power. 
-The chi-bar square test and Follman's test are also unlikely to reject.
+The chi-bar-square test and Follman's test are also unlikely to reject.
 The conditional estimation procedure, however, should
 not suffer under this alternative.
 We also expect the $\log\log$ adjustment to have little effect
@@ -2274,7 +2490,7 @@ In \figref{power_plotz_one_a}, we plot the power of
 % the MHT Bonferroni test, 
 % the chi-bar square test, 
 Follman's test, 
-Hansen's chi-bar square and MHT (``SPA'') tests,
+Hansen's chi-bar-square and MHT (``SPA'') tests,
 and the conditional estimation procedure versus the \txtSNR
 of the selected asset. 
 We present facet columns for the configurations of \pvsnr,
@@ -2283,7 +2499,7 @@ A horizontal line at $0.05$ gives the nominal rate under the null,
 which occurs as $x=0$ in these plots.
 
 As expected from the above explanation, the
-chi-bar square (with Hansen's correction) has the highest power for the all-equal alternative,
+chi-bar-square (with Hansen's correction) has the highest power for the all-equal alternative,
 followed by Follman's test, 
 then the MHT, 
 then the conditional estimation test.
@@ -2295,10 +2511,10 @@ with the exception of Follman's test, which achieves a maximum power of $1/2$ in
 half-good case, as is to be expected since this is the probability that
 $\ssravg > 0$ in the half-good case.
 
-In \figref{power_plotz_one_b}, we plot the power of the MHT and chi-bar square procedures,
+In \figref{power_plotz_one_b}, we plot the power of the MHT and chi-bar-square procedures,
 with and without Hansen's log-log corrections.
 The correction has essentially no effect in the all-equal and half-good cases,
-but increases power considerably for the chi-bar square test in the two-good and one-good
+but increases power considerably for the chi-bar-square test in the two-good and one-good
 alternatives, and increases power modestly for the MHT test under those same alternatives.
 Thus we mostly consider using the log-log correction when possible.
 We note that this correction may result in slightly higher than nominal type I rate,
@@ -3242,7 +3458,7 @@ yielding nominal rejection rates.
 <<'rho_plotz_one',dependson=c('correlation_sims_vs_mht','plot_funcs'),echo=FALSE,eval=TRUE,cache=TRUE,fig.pos='h',fig.cap=fig_cap>>=
 fig_cap <- paste0('The empirical type I rate under the null hypothesis is plotted versus $\\rho$ ',
                   'for the case where $\\RMAT=\\makerho{\\rho}{\\wrapParens{1-\\rho}}$, ',
-                  "for several testing procedures: the conditional estimation, the chi-bar square test, Follman's test, the vanilla Bonferroni correction, ",
+                  "for several testing procedures: the conditional estimation, the chi-bar-square test, Follman's test, the vanilla Bonferroni correction, ",
                   "Hansen's corrected chi-bar-square and SPA tests, ",
                   'and Bonferroni correction with fix for common correlation.  ',
                   'Tests are performed with Gaussian returns, for ',mht_nstrat,' assets over ',mht_nday,' days. ',
@@ -3275,6 +3491,7 @@ print(ph)
 %UNFOLD
 
 \clearpage
+
 
 \subsection{Example: Five Industry Portfolios}%FOLDUP
 
@@ -3438,7 +3655,7 @@ $\qnorm{\Sexpr{typeI/nstrat}}=\Sexpr{qnorm(typeI/nstrat)}$.
 This leads to the confidence interval 
 $\left[\Sexpr{bonf_two}\,\moto{-\halff}, \infty\right)$.
 
-We use this estimate of $\rho$ to compute the chi-bar square test.
+We use this estimate of $\rho$ to compute the chi-bar-square test.
 We invert the test to find the $\Sexpr{100 * (1-typeI)}\%$ upper confidence interval
 $\left[\Sexpr{os_cilo}\,\moto{-\halff}, \infty\right)$.
 
@@ -3478,7 +3695,7 @@ However, it would seem that in so doing, one would lose the
 desireable property of testing the \txtSNR of the selected
 asset, instead of testing the more general hypothesis of (\ref{hyp:eq_test}). 
 Perhaps its power can be increased using Hansen's $\log\log$ adjustment.
-%Perhaps the power of the MHT, or the chi-bar square test for the case of equal \txtSNRs can
+%Perhaps the power of the MHT, or the chi-bar-square test for the case of equal \txtSNRs can
 %be somehow ported to the conditional estimation procedure, maybe
 %by testing multiple 
 %assets\footnote{Note that White's Reality Check and Hansen's SPA

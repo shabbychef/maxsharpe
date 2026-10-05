@@ -1466,18 +1466,19 @@ development.  \cite{pav_maxsharpe_two}
 
 Later in simulation we will see different performance from the conditional procedure and the procedures based on multiple hypothesis testing.
 To give some sense of contrast between the tests we can look at the rejection regions for the simplest case, which is of two assets.
-In \figref{rejection_contours_plot} we plot the rejection regions for the Bonferroni correction, the chi-bar-square test, and the conditional test.
+In \figref{rejection_contours_plot} we plot the 0.05 rejection regions for the Bonferroni correction, the chi-bar-square test, and the conditional test.
 Each test is against the null $\psnr[0]=0$ based on $\ssiz=1,008$ days of data.
 
 In that plot we see that the chi-bar-square test has slightly bigger rejection region than the Bonferroni procedure,
 though it does not mean we are more likely to observe \svsr in that region under the alternative, as it depends
-on the form of the alternative.
+on the form of the alternative. 
+Under their common null hypothesis the rejection regions should be hit only 5\% of the time.
+
 We see that the conditional procedure does not reject when $\ssr[2] \approx \ssr[1]$.
-This is what we expect from first principles, as in this case the uniform variate that comes out of the polyhedral lemma
-should be close to zero and one would fail to reject.
-The tradeoff is that conditional procedure appears to have a a somewhat larger rejection region when $\ssr[1] < 0$.
-We will observe later that the conditional procedure does enjoy higher power when there are very few very good needles in the haystack of tested
-strategies, consistent with this plot.
+When the two are close, the uniform variate that comes out of the polyhedral lemma should be close to zero and one would fail to reject.
+The tradeoff is that conditional procedure appears to have a somewhat larger rejection region when $\ssr[1] < 0$.
+We will observe later that the conditional procedure does enjoy higher power when there are very few very good strategies among those tested,
+which is consistent with this plot.
 
 
 %UNFOLD
